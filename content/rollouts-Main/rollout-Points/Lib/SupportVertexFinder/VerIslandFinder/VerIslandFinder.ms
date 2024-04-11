@@ -2,8 +2,8 @@
 
 	1) Loop each layer
 	2) Get verts in each layer
+	3) Find how many mesh island exsits
 
-	3) Get face islands in each layer
 
 	4) Test if new or old island - in old, then faces exist in all island
 
@@ -16,10 +16,12 @@ struct VerIslandFinder_v
 	/* required */
 
 	/* properties */
-	face_islands	= #(), -- #( #{ faces_ids } ) array of bitarrays of faces sorted by island the occupy
-	verts_islands	= #(), -- #( #{ veret_ids } ) array of bitarrays of verts sorted by island the occupy
+	face_islands	= #(), -- #( #{ faces_ids } ) array of faces_definded_by_verts of faces sorted by island the occupy
+	verts_islands	= #(), -- #( #{ veret_ids } ) array of faces_definded_by_verts of verts sorted by island the occupy
 
+	whole_mesh = #(),
 
+	new_islands = #(),
 	/* private */
 	/* dependency */
 	/* reference */
@@ -28,17 +30,65 @@ struct VerIslandFinder_v
 
 	/** Analyze layers
 	 */
-	function analyzeLayers print_layers =
+	function analyzeLayers verts_used verts_layers =
 	(
-		format "\n"; print "SupportVertexFinder_v._analyzeLayers()"
-		format "print_layers: %\n" print_layers
+		--format "\n"; print "SupportVertexFinder_v._analyzeLayers()"
+		--format "verts_layers: %\n" verts_layers
+		fn isVertInLayerInIsland verts_in_layer verts_island = not ( verts_in_layer * verts_island ).isEmpty
 
-		for layer = 1 to print_layers.count where classOf ( verts_in_layer = print_layers[layer] ) == BitArray do
+		vert_color = blue
+		--format "VERTS_USED: %\n" verts_used
+
+		for layer = 1 to verts_layers.count where classOf ( all_verts_in_layer = verts_layers[layer] ) == BitArray do -- layer has not verts if item is integer ( layer number )
 		(
-			format "\n--------------\nlayer: %\n" layer
 
-			this._sortVertsByIslands (verts_in_layer)
-			format "verts_islands: %\n" verts_islands
+			--vert_color.hue = ( random 0 255 )
+			format "\n==============\nlayer: %\n" layer
+			format "all_verts_in_layer: %\n" all_verts_in_layer
+
+			format "new_islands: %\n" new_islands
+			this.new_islands	= #()
+
+			islands_in_layer = this._sortVertsByIslands (all_verts_in_layer)
+
+			format "islands_in_layer: %\n" islands_in_layer
+			--verts_in_layer = verts_used * all_verts_in_layer
+			format "verts_in_layer: %\n" verts_in_layer
+
+			verts_used_in_layer = all_verts_in_layer * verts_used
+
+			format "verts_used_in_layer: %\n" verts_used_in_layer
+
+			islands_in_layer_used = for i = 1 to islands_in_layer.count collect islands_in_layer[i] * verts_used_in_layer
+
+			format "islands_in_layer_used: %\n" islands_in_layer_used
+
+
+			whole_mesh_new = this._mergeBitArraysbySharedBits( whole_mesh )(islands_in_layer )
+
+			format "new_islands: %\n" this.new_islands
+
+			--if whole_mesh.count != whole_mesh_new.count then
+			for new_island in islands_in_layer_used do
+			(
+				--verts_for_vertex_color = id new_island.numberSet <= 4 then new_island else
+
+
+				polyop.setVertColor obj.baseobject 0 ( new_island ) vert_color
+			)
+
+
+			whole_mesh = whole_mesh_new
+
+			format "whole_mesh: %\n" whole_mesh
+			--format "whole_mesh: %\n" whole_mesh
+			--if verts_islands.count > last_islands_count then
+			--if this.new_islands then
+				--for island in verts_islands where isVertInLayerInIsland verts_in_layer island do
+			--for island in new_islands do
+				--polyop.setVertColor obj.baseobject 0 island vert_color
+
+
 		)
 	),
 
@@ -47,47 +97,52 @@ struct VerIslandFinder_v
 	  *
 	  * @return #( #{..} ) array of vertex ids, each array are verts of one island
 	 */
-	function _sortVertsByIslands verts =
+	function _sortVertsByIslands verts_in_layer =
 	(
 		--format "\n"; print "VertSelector_v._sortVertsByIslands()"
 
-		face_ids_of_verts = ( polyop.getFacesUsingVert obj verts ) as Array
+		face_ids_of_verts = ( polyop.getFacesUsingVert obj verts_in_layer ) as Array
 		--format "face_ids_of_verts: %\n" face_ids_of_verts
 
 		faces_definded_by_verts = for face_id in face_ids_of_verts collect polyop.getVertsUsingFace obj #{face_id} -- ( #{1..4}, #{2,4,5,6} ) -- faces definded by verts
 
 		--format "faces_definded_by_verts: %\n" faces_definded_by_verts
 
-		this._mergeBitArraysWithSharedBits(faces_definded_by_verts)
-
-		verts_islands --return
+		this._mergeBitArraysbySharedBits #() (faces_definded_by_verts)  --return islands_in_layer
 	),
 
 
 	private
 
-	/** Merge bit arrays with shared bits
+
+	/** Merge bit arrays wich shared bits
+	  *
+	  * @param #( #{} ) bitarrays Array of bittarays
 	 */
-	function _mergeBitArraysWithSharedBits bitarrays =
+	function _mergeBitArraysbySharedBits bitarrays_merged bitarrays =
 	(
-		--format "\n"; print ".mergeBitArraysWithSharedBits()"
+		format "\n"; print ".mergeBitArraysWithSharedBits()"
+		format "bitarrays_merged: %\n" bitarrays_merged
+		format "bitarrays: %\n" bitarrays
 
 		/** Merge bit arrays in bit array
 		 */
-		function mergeBitArraysInBitArray bit_array verts_islands matches =
+		function mergeBitArraysInBitArray bit_array bitarrays_merged matches =
 		(
 			--format "\n"; print ".mergeBitArraysInBitArray()"
 			for m = matches.count to 1 by -1 do
 			(
-				bit_array += verts_islands[matches[m]]
+				bit_array += bitarrays_merged[matches[m]]
 
-				deleteItem verts_islands matches[m]
+				deleteItem bitarrays_merged matches[m]
 			)
 
-			append verts_islands bit_array
+			append bitarrays_merged bit_array
 
-			verts_islands --return
+			bitarrays_merged --return
 		)
+
+		--bitarrays_merged	= #()
 
 
 		for bit_array in bitarrays do
@@ -95,22 +150,28 @@ struct VerIslandFinder_v
 			--format "\n--------------------\n"
 			--format "bit_array: %\n" bit_array
 
-			matches =  for i = 1 to verts_islands.count where not ( bit_array * verts_islands[i] ).isEmpty collect i
+			matches =  for i = 1 to bitarrays_merged.count where not ( bitarrays_merged[i] * bit_array ).isEmpty collect i
 
 			--format "matches: %\n" matches
 
 			case matches.count  of
 			(
 				/* ADD NEW BITARRAY */
-				(0):	append verts_islands bit_array
+				(0):	append bitarrays_merged bit_array
 
 				/* JOIN TO EXISTING BITARRAY */
-				(1): verts_islands[matches[1]] += bit_array
+				(1): bitarrays_merged[matches[1]] += bit_array
 
 				/*  (matches.count > 1)  MERGE MULTIPLE BITARRAYS if more than one amtch found */
-				default: verts_islands = mergeBitArraysInBitArray(bit_array)(verts_islands)(matches)
+				default: bitarrays_merged = mergeBitArraysInBitArray(bit_array)(bitarrays_merged)(matches)
 			)
+
+			if matches.count == 0 then
+				append this.new_islands bit_array
+
 		)
+
+		bitarrays_merged --return
 	),
 
 
