@@ -16,27 +16,20 @@ struct VerIslandFinder_v
 	/* required */
 
 	/* properties */
-	face_islands_in_layer	= #(), -- #( #{ faces_ids } ) array of faceverts of faces sorted by island the occupy
 	verts_islands	= #(), -- #( #{ veret_ids } ) array of faceverts of verts sorted by island the occupy
 
-	face_islands = #(),
-
 	new_islands = #(),
-
-	verts_processed = #{}, -- store verts in current layer and layers bellow
 
 	/* private */
 	/* dependency */
 	/* reference */
 	/* inhered */
 
-
 	/** Analyze layers
 	 */
 	function analyzeLayers verts_all verts_used verts_layers =
 	(
 		--format "\n"; print "SupportVertexFinder_v._analyzeLayers()"
-		--format "verts_layers: %\n" verts_layers
 		fn isVertInLayerInIsland verts_in_layer verts_island = not ( verts_in_layer * verts_island ).isEmpty
 
 		/** Is same bit array
@@ -49,30 +42,22 @@ struct VerIslandFinder_v
 			bitarray_1.count == compare.count and bitarray_1.numberSet == compare.numberSet --return
 		)
 
-		delete Helpers
+		verts_above  = copy verts_all	-- not yes processed layers
+		verts_bellow = #{}	-- store verts of layers processed already
 
-		islands_processed = #()
-
-		verts_above = copy verts_all
-		verts_bellow = #{}
-		--format "VERTS_USED: %\n" verts_used
 
 		counter = 1
 		for layer = 1 to verts_layers.count where classOf ( all_verts_in_layer = verts_layers[layer] ) == BitArray do -- layer has not verts if item is integer ( layer number )
 		(
 
 			--vert_color.hue = ( random 0 255 )
-			--format "\n==============\nlayer: %\n" layer
-			format "\n==============\nlayer: %\n" counter
+			format "\n==============\nlayer: %\n" layer
+			--format "\n==============\nlayer: %\n" counter
 			format "all_verts_in_layer: %\n" all_verts_in_layer
-
-			--format "new_islands: %\n" new_islands
-			this.new_islands	= #()
 
 			verts_above -= all_verts_in_layer
 
 			verts_other_layers = verts_all - all_verts_in_layer
-
 
 			/* GET FACES IN LAYER */
 			faces_in_layer = polyop.getFacesUsingVert obj all_verts_in_layer
@@ -81,7 +66,6 @@ struct VerIslandFinder_v
 			verts_of_faces_in_layer = polyop.getVertsUsingFace obj faces_in_layer
 			format "verts_of_faces_in_layer: %\n" verts_of_faces_in_layer
 
-
 			faceverts_in_layer = for face_id in faces_in_layer collect polyop.getVertsUsingFace obj #{face_id}   -- ( #{1..4}, #{2,4,5,6} ) -- faces definded by verts
 			format "faceverts_in_layer: %\n" faceverts_in_layer
 
@@ -89,33 +73,16 @@ struct VerIslandFinder_v
 			for i = 1 to faceverts_in_layer.count do
 				faceverts_in_layer[i] -= verts_above
 
-
 			format "faceverts_in_layer: %\n" faceverts_in_layer
 
 			vert_islands_in_layer = this._mergeBitArraysbySharedBits (faceverts_in_layer) #() --return vert_islands_in_layer
 			format "vert_islands_in_layer: %\n" vert_islands_in_layer
 
 
-			verts_islands =  this._mergeBitArraysbySharedBits (join verts_islands vert_islands_in_layer) #()
+			verts_islands = this._mergeBitArraysbySharedBits (vert_islands_in_layer) (verts_islands)
 
-			for verts_island in verts_islands where (verts_island * verts_bellow).isEmpty do
-			(
-				format "NEW ISLAND: %\n" verts_island
-
-				pos_center = point3 0 0 0
-
-				positions = in coordsys world meshop.getVerts obj.mesh verts_island node:obj
-
-				format "positions: %\n" positions
-				for pos in positions do pos_center += pos
-
-				pos_center /= positions.count
-
-				Point pos:pos_center size:1 wirecolor:green
-
-			)
-
-
+			for verts_island in verts_islands where (verts_island * verts_bellow).isEmpty do -- new island is if verts of that island has not been processed in layer bellow
+				append this.new_islands verts_island
 
 			format "verts_islands: %\n" verts_islands
 			format "verts_bellow: %\n" verts_bellow
@@ -123,50 +90,35 @@ struct VerIslandFinder_v
 			verts_bellow += all_verts_in_layer
 
 			counter += 1
-
-
 		)
+
+		--format "this.new_islands: %\n" this.new_islands
+
+		delete Helpers -- DEV
+
+		for new_island in this.new_islands do
+			this._getCenterOfIsland (new_island)
+
 	),
 
-	/** Sort faces by islands
+	/** Get center of island
 	 */
-	function _sortFacesByIslands faces_in_layer vert_islands_in_layer =
+	function _getCenterOfIsland verts =
 	(
-		--format "\n"; print "VerIslandFinder_v._sortFacesByIslands()"
-		--format "faces_in_layer: %\n" faces_in_layer
+		--format "\n"; print "VerIslandFinder_v.getCenterOfIsland()"
 
-		face_islands_in_layer = for island in vert_islands_in_layer collect #{}
+		pos_center = point3 0 0 0
 
-		faceverts = for face_id in faces_in_layer collect polyop.getVertsUsingFace obj #{face_id}
-		format "faceverts: %\n" faceverts
+		positions = in coordsys world meshop.getVerts obj.mesh verts node:obj
 
 
-		--for vert_island in vert_islands_in_layer do
-		for i = 1 to vert_islands_in_layer.count do
-		(
-			vert_island = vert_islands_in_layer[i]
+		for pos in positions do pos_center += pos
 
+		pos_center /= positions.count
 
-			for x = 1 to faceverts.count do
-			--for verts_of_face in faceverts do
-			(
-				face_id = faces_in_layer[x]
-
-				verts_of_face = faceverts[x]
-
-				shared_verts = vert_island * verts_of_face
-				--format "% shared_verts: %\n" faces_in_layer[x] shared_verts
-
-				if not shared_verts.isEmpty then
-					face_islands_in_layer[i][face_id] = true
-
-			)
-		)
-
-		face_islands_in_layer --return`
+		Point pos:pos_center size:1 wirecolor:green
 
 	),
-
 
 	/**
 	  * @param BitArray verts which faces will be sorted by islands
@@ -218,17 +170,12 @@ struct VerIslandFinder_v
 			bitarrays_merged --return
 		)
 
-		--bitarrays_merged	= #()
-
-
 		for bit_array in bitarrays do
 		(
 			--format "\n--------------------\n"
 			--format "bit_array: %\n" bit_array
 
 			matches =  for i = 1 to bitarrays_merged.count where not ( bitarrays_merged[i] * bit_array ).isEmpty collect i
-
-			--format "matches: %\n" matches
 
 			case matches.count  of
 			(
@@ -241,10 +188,6 @@ struct VerIslandFinder_v
 				/*  (matches.count > 1)  MERGE MULTIPLE BITARRAYS if more than one amtch found */
 				default: bitarrays_merged = mergeBitArraysInBitArray(bit_array)(bitarrays_merged)(matches)
 			)
-
-			if matches.count == 0 then
-				append this.new_islands bit_array
-
 		)
 
 		bitarrays_merged --return
