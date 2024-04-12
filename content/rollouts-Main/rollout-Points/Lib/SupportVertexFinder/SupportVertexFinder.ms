@@ -60,7 +60,7 @@ struct SupportVertexFinder_v
 
 		this._sortVertsToLayers()
 
-		VerIslandFinder.analyzeLayers(verts_process)(verts_layers)
+		VerIslandFinder.analyzeLayers(verts_all)(verts_process)(verts_layers)
 
 		--format "verts_process: %\n" verts_process
 
