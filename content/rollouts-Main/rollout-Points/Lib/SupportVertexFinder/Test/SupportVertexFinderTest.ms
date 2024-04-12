@@ -17,9 +17,10 @@ function createSourceMesh segments:8 radius:20 vertex_selection:#{} test_shifted
 
 	--obj = Sphere radius:radius pos:[0,0, 50 ] segments:segments --showVertexColors:true	vertexColorsShaded:true -- diameter 3 cm
 
-	obj = Plane width:20 length:20 pos:[ 50, 20, 50 ] widthsegs:segments lengthsegs:segments
+	--obj = Plane width:20 length:20 pos:[ 50, 20, 50 ] widthsegs:segments lengthsegs:segments
 
-	--obj = Plane width:60 length:30 pos:[ 50, 20, 50 ] widthsegs:10 lengthsegs:10
+	--obj = Plane width:30 length:30 pos:[ 50, 20, 50 ] widthsegs:5 lengthsegs:5
+	obj = Plane width:30 length:30 pos:[ 50, 20, 50 ] widthsegs:10 lengthsegs:10
 	--obj = Plane width:40 length:30 pos:[ 50, 20, 50 ] widthsegs:40 lengthsegs:30
 	--obj = Plane width:50 length:50 pos:[ 50, 20, 50 ] widthsegs:50 lengthsegs:50
 	--obj = Box width:50 length:50 height:50 pos:[ 0, 0, 0 ] widthsegs:5 lengthsegs:5 heightsegs:5
@@ -35,14 +36,16 @@ function createSourceMesh segments:8 radius:20 vertex_selection:#{} test_shifted
 
 	select obj
 
-	noise_val = radius / 20
+	--noise_val = radius / 20
+	--noise_val = radius / 10
+	noise_val = radius / 4
 
 
 
 	if classOf obj == plane then
 		Rotate obj ( AngleAxis 180 [1,0,0]) -- rotate object upside down
 
-	modPanel.addModToSelection (Noisemodifier scale:5 strength:[ noise_val, noise_val, noise_val] ) ui:on
+	--modPanel.addModToSelection (Noisemodifier scale:5 strength:[ noise_val, noise_val, noise_val] ) ui:on
 
 	--modPanel.addModToSelection (Wave amplitude1:0.5 amplitude2:0 wavelength:5 ) ui:on
 
@@ -50,6 +53,9 @@ function createSourceMesh segments:8 radius:20 vertex_selection:#{} test_shifted
 	--modPanel.addModToSelection (smooth ()) ui:on
 
 	macros.run "Modifier Stack" "Convert_to_Poly"
+
+	obj.showVertexColors	= true
+	obj.vertexColorsShaded	= true
 
 	--if vertex_selection.count > 0 then
 	--(
@@ -79,9 +85,9 @@ if selection.count == 0 then
 
 
 	--createSourceMesh segments:4
-	createSourceMesh segments:8
+	--createSourceMesh segments:8
 	--createSourceMesh vertex_color:orange segments:16
-	--createSourceMesh vertex_color:orange segments:32
+	createSourceMesh vertex_color:orange segments:32
 	--createSourceMesh vertex_color:orange segments:64
 
 	--createSourceMesh vertex_color:orange segments:128
