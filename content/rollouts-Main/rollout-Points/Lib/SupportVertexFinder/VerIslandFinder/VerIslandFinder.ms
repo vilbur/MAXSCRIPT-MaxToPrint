@@ -49,7 +49,8 @@ struct VerIslandFinder_v
 			bitarray_1.count == compare.count and bitarray_1.numberSet == compare.numberSet --return
 		)
 
-		vert_color = blue
+		delete Helpers
+
 		islands_processed = #()
 
 		verts_above = copy verts_all
@@ -96,7 +97,28 @@ struct VerIslandFinder_v
 
 
 			verts_islands =  this._mergeBitArraysbySharedBits (join verts_islands vert_islands_in_layer) #()
+
+			for verts_island in verts_islands where (verts_island * verts_bellow).isEmpty do
+			(
+				format "NEW ISLAND: %\n" verts_island
+
+				pos_center = point3 0 0 0
+
+				positions = in coordsys world meshop.getVerts obj.mesh verts_island node:obj
+
+				format "positions: %\n" positions
+				for pos in positions do pos_center += pos
+
+				pos_center /= positions.count
+
+				Point pos:pos_center size:1 wirecolor:green
+
+			)
+
+
+
 			format "verts_islands: %\n" verts_islands
+			format "verts_bellow: %\n" verts_bellow
 
 			verts_bellow += all_verts_in_layer
 
