@@ -32,76 +32,51 @@ struct VerIslandFinder_v
 		format "\n"; print "SupportVertexFinder_v._analyzeLayers()"
 		format "vertex count: %\n" verts_all.numberSet
 
-		--fn isVertInLayerInIsland verts_in_layer island = not ( verts_in_layer * island ).isEmpty
-		--
-		--/** Is same bit array
-		-- */
-		--function isSameBitArray bitarray_1 bitarray_2 =
-		--(
-		--	--format "\n"; print "VerIslandFinder_v.isSameBitArray()"
-		--	compare = bitarray_1 * bitarray_2
-		--
-		--	bitarray_1.count == compare.count and bitarray_1.numberSet == compare.numberSet --return
-		--)
-
-		verts_above  = copy verts_all	-- not yes processed layers
-		verts_bellow = #{}	-- store verts of layers processed already
-
 		layers_count = verts_layers.count
 
-		--max create mode
-		--counter = 1
+		max create mode
 
 		with redraw off
 		(
 			for layer = 1 to layers_count where classOf ( all_verts_in_layer = verts_layers[layer] ) == BitArray do -- layer has not verts if item is integer ( layer number )
 			(
 				----vert_color.hue = ( random 0 255 )
-				format "\n==============\nlayer: %\n" layer
-				----format "\n==============\nlayer: %\n" counter
-				--format "all_verts_in_layer: %\n" all_verts_in_layer
-				if mod layer 100 == 0 then
-				(
-					--gc()
-					format "layer: % of: %\n" layer layers_count
-				)
+				--format "\n==============\nlayer: %\n" layer
 
-				verts_above -= all_verts_in_layer
+				if mod layer 10 == 0 then
+					(format "layer: % of: %\n" layer layers_count)
 
 				verts_used_in_layer = all_verts_in_layer * verts_used
-				--verts_used_in_layer = (all_verts_in_layer * verts_used) - verts_above
-				--format "verts_used_in_layer: %\n" verts_used_in_layer
 
-				--if not verts_used_in_layer.isEmpty then
-				--(
+				--format "ISLANDS: %\n" islands
 
-					format "ISLANDS: %\n" islands
+				/* GET FACES IN LAYER */
+				faces_in_layer = polyop.getFacesUsingVert obj all_verts_in_layer
+				--format "faces_in_layer: %\n" faces_in_layer
 
-					/* GET FACES IN LAYER */
-					faces_in_layer = polyop.getFacesUsingVert obj all_verts_in_layer
+				face_islands_in_layer = this._detachMethod (faces_in_layer)
+				--format "face_islands_in_layer: %\n" face_islands_in_layer
 
-					format "faces_in_layer: %\n" faces_in_layer
+				for face_island_in_layer in face_islands_in_layer do
+				(
+					island = polyop.getVertsUsingFace obj face_island_in_layer
+					--format "\nisland: %\n" island
 
-					face_islands_in_layer = this._detachMethod (faces_in_layer)
-					format "face_islands_in_layer: %\n" face_islands_in_layer
+					island_used = island * verts_used_in_layer -- island only from used verts
+					--format "island_used: %\n" island_used
 
-					for face_island_in_layer in face_islands_in_layer do
+					if island_used.numberSet > 0 then
 					(
-						island = polyop.getVertsUsingFace obj face_island_in_layer
+						--intesections = for i = 1 to islands.count where (islands[i] * island_used).numberSet > 1 collect i
+						intesections = for i = 1 to islands.count where not (islands[i] * island_used).isEmpty collect i
+						--format "intesections: %\n" intesections
 
-						island_used = island * verts_used_in_layer
+						intesections_count = intesections.count
 
-						format "\nisland: %\n" island
-						format "island_used: %\n" island_used
+						if intesections_count == 0 then
+							append this.new_islands island_used
 
-						intesections = for i = 1 to islands.count where (islands[i] * island_used).numberSet > 1 collect i
-
-						format "intesections: %\n" intesections
-
-						--append islands island
-
-
-						case intesections.count of
+						case intesections_count of
 						(
 							/* JOIN TO EXISTING BITARRAY */
 							(1):	islands[intesections[1]] += island
@@ -112,55 +87,34 @@ struct VerIslandFinder_v
 							/* MERGE MULTIPLE BITARRAYS */
 							default:(
 
-								--merged_island = #{}
-
 								for i = intesections.count to 1 by -1 do
 								(
 									index = intesections[i]
 
-									island_used += islands[index]
+									island += islands[index]
 
 									deleteItem islands index
 								)
 
-								append islands island_used
-
+								append islands island
 							)
-
-								--for i = intesections.count to 2 by -1 do
-								--(
-								--	islands[intesections[1]] += island
-								--
-								--	deleteItem islands intesections[i]
-								--)
 						)
 					)
-
-				--	--
-				--	--
-				--	--for island in islands where (island * verts_bellow).isEmpty do -- new island is if verts of that island has not been processed in layer bellow
-				--	--(
-				--	--	--format "NEW ISLAND: %\n" island
-				--	--
-				--	--	append this.new_islands island
-				--	--)
-				--
-				--)
-
-				verts_bellow += all_verts_in_layer
-
-				--gc light:true
+				)
 
 			)
 
 			islands_final = this._mergeBitArraysbySharedBits (islands) #()
 
+			format "\n\nNEW ISLANDS: %\n" this.new_islands
+			format "\n\nNEW ISLANDS COUNT: %\n" this.new_islands.count
+
 			format "\n\nISLANDS FINAL: %\n" islands_final
 
-			--delete Helpers -- DEV
-			--
-			--for new_island in this.new_islands do
-			--	this._getCenterOfIsland (new_island)
+			delete Helpers -- DEV
+
+			for new_island in this.new_islands do
+				this._getCenterOfIsland (new_island)
 		)
 
 		redrawViews()
