@@ -2,10 +2,6 @@ clearListener(); print("Cleared in:\n"+getSourceFileName())
 
 
 
-
-
-
-
 /** Merge bit arrays with shared bits
  */
 function mergeBitArraysWithSharedBits bitarrays =
@@ -58,7 +54,7 @@ function mergeBitArraysWithSharedBits bitarrays =
 
 	bitarrays_merged --return
 )
-
+f
 
 
 bitarrays = #( #{1..3},  #{ 5..6, 8..9 },  #{3..5}, #{ 10..14 }, #{ 14..17 }, #{ 18..20 }  )
