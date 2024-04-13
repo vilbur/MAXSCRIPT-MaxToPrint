@@ -1,101 +1,54 @@
 clearListener(); print("Cleared in:\n"+getSourceFileName())
 
-
-
-
-/*------------------------------------------------------------------------------
-	PREPARE SCENE
---------------------------------------------------------------------------------*/
-
-delete objects
-
---segments = 10
-segments = 100
---segments = 200
---segments = 300
-
-obj	= Plane width:100 length:100 pos:[ 0, 0, 0 ]  widthsegs:segments lengthsegs:segments
-Plane_2	= Plane width:100 length:100 pos:[ 0, 0, 10 ] widthsegs:segments lengthsegs:segments
-
-select objects
-
-macros.run "Modifier Stack" "Convert_to_Poly"
-
-obj.EditablePoly.attach Plane_2 obj
-
-
-/*------------------------------------------------------------------------------
-	MERGE
---------------------------------------------------------------------------------*/
-test = timeStamp()
-
-islands = #()
-
-vertex_count = getNumVerts obj.mesh
-
-format "vertex_count: %\n" vertex_count
-
-all_verts = #{1..(vertex_count)}
-
-
-/*------ SPLIT TO ISLANDS ------*/
-
-verts = all_verts - #{23..44, 144..165}
-
-format "verts: %\n" verts
-faces_of_verts = polyop.getFacesUsingVert obj verts
-
-
-format "faces_of_verts: %\n" faces_of_verts
-
-
---_append = 0
---_join   = 0
---_merge = 0
-
-for face in faces_of_verts do
+/** Count which method is used more often - append, join or merge bitarrays
+ */
+function devMethodWithCounter faces_of_verts =
 (
-	face_verts = polyop.getVertsUsingFace obj face
+	--format "\n"; print ".devMethodWithCounter()"
+	_append = 0
+	_join   = 0
+	_merge = 0
 
-	intesections = for i = 1 to islands.count where not (islands[i] * face_verts).isEmpty collect i
+	for face in faces_of_verts do
+	(
+		face_verts = polyop.getVertsUsingFace obj face
 
-	--islands_merged = #()
+		intesections = for i = 1 to islands.count where not (islands[i] * face_verts).isEmpty collect i
 
-	--if intesections.count > 0 then
-	--	for i = intesections.count to 1 by -1 do
-	--	(
-	--		face_verts += islands[intesections[i]]
-	--
-	--		deleteItem islands intesections[i]
-	--	)
-	--
-	--append islands face_verts
+		if intesections.count > 1 then
+		(
+			_merge += 1
 
-	--if intesections.count > 1 then
-	--(
-	--	_merge += 1
-	--
-	--	for i = intesections.count to 2 by -1 do
-	--	(
-	--		islands[intesections[1]] += face_verts
-	--
-	--		deleteItem islands intesections[i]
-	--	)
-	--)
-	--else if intesections.count == 1 then
-	--(
-	--	_join += 1
-	--
-	--	islands[intesections[1]] += face_verts
-	--)
-	--else
-	--(
-	--	_append += 1
-	--	append islands face_verts
-	--)
+			for i = intesections.count to 2 by -1 do
+			(
+				islands[intesections[1]] += face_verts
 
+				deleteItem islands intesections[i]
+			)
+		)
+		else if intesections.count == 1 then
+		(
+			_join += 1
 
+			islands[intesections[1]] += face_verts
+		)
+		else
+		(
+			_append += 1
+			append islands face_verts
+		)
 
+	)
+	format "_append: %\n" _append
+	format "_join: %\n" _join
+	format "_merge: %\n" _merge
+)
+
+/** Case method
+ */
+function faceVertsMethod faces_of_verts =
+(
+	--format "\n"; print ".faceVertsMethod()"
 	case intesections.count of
 	(
 		/* JOIN TO EXISTING BITARRAY */
@@ -113,21 +66,101 @@ for face in faces_of_verts do
 				deleteItem islands intesections[i]
 			)
 	)
+)
 
-	--format "islands: %\n" islands
+/** Detach method
+ */
+function detachMethod obj faces_of_verts =
+(
+	--format "\n"; print ".detachMethod()"
+	polyop.detachFaces obj faces_of_verts delete:false asNode:true name:"TEMP_DETACH"
+
+	obj_detached = $TEMP_DETACH
+
+	--elements = polyop.getElementsUsingFace obj_detached #{1..(polyop.getNumFaces obj_detached)}
+
+	all_faces = #{1..( polyop.getNumFaces obj_detached)}
+
+	--getElement = polyop.getElementsUsingFace
+
+	--elements = for f in all_faces where obj_faces[f] == true collect
+	elements = for f in all_faces where all_faces[f] == true collect
+	(
+		element = polyop.getElementsUsingFace obj_detached f
+		all_faces -= element
+		element
+	)
+
+	delete obj_detached
+
+	format "elements: %\n" elements
+
 
 )
 
+/*------------------------------------------------------------------------------
+	PREPARE SCENE
+--------------------------------------------------------------------------------*/
+
+delete objects
+
+--segments = 10
+--segments = 20
+--segments = 100
+--segments = 200
+segments = 300
+
+obj	= Plane width:100 length:100 pos:[ 0, 0, 0 ]  widthsegs:segments lengthsegs:segments
+Plane_2	= Plane width:100 length:100 pos:[ 0, 0, 50 ] widthsegs:segments lengthsegs:segments
+
+select objects
+
+macros.run "Modifier Stack" "Convert_to_Poly"
+
+obj.EditablePoly.attach Plane_2 obj
+
+
+/*------------------------------------------------------------------------------
+	SET TEST DATA
+--------------------------------------------------------------------------------*/
+
+global islands = #()
+
+vertex_count = getNumVerts obj.mesh
+format "vertex_count: %\n" vertex_count
+
+all_verts = #{1..(vertex_count)}
+
+/*------ SPLIT TO ISLANDS ------*/
+
+verts = all_verts - #{23..44, 144..165}
+--format "verts: %\n" verts
+faces_of_verts = polyop.getFacesUsingVert obj verts
+--format "faces_of_verts: %\n" faces_of_verts
+
+
+/*------------------------------------------------------------------------------
+
+	RUN TESTT
+
+--------------------------------------------------------------------------------*/
+
+
+
+test = timeStamp()
+
+/* DEV */
+--devMethodWithCounter (faces_of_verts)
+
+/* SLOW ON HIGH VERTEX COUNT */
+--faceVertsMethod (faces_of_verts)
+
+/* DETACH FACES AND GET LEMENTS COUNT */
+detachMethod (obj) (faces_of_verts)
+
 format "\n test: % ms\n" (( timeStamp()) - test)
 
---
---format "_append: %\n" _append
---format "_join: %\n" _join
---format "_merge: %\n" _merge
-
 format "RESULT: %\n" islands
-
-
 
 
 
