@@ -49,6 +49,11 @@ function devMethodWithCounter faces_of_verts =
 function faceVertsMethod faces_of_verts =
 (
 	--format "\n"; print ".faceVertsMethod()"
+	face_verts = polyop.getVertsUsingFace obj face
+
+	intesections = for i = 1 to islands.count where not (islands[i] * face_verts).isEmpty collect i
+
+
 	case intesections.count of
 	(
 		/* JOIN TO EXISTING BITARRAY */
@@ -73,30 +78,33 @@ function faceVertsMethod faces_of_verts =
 function detachMethod obj faces_of_verts =
 (
 	--format "\n"; print ".detachMethod()"
-	polyop.detachFaces obj faces_of_verts delete:false asNode:true name:"TEMP_DETACH"
 
-	obj_detached = $TEMP_DETACH
+	obj_snap = snapshot obj
 
-	--elements = polyop.getElementsUsingFace obj_detached #{1..(polyop.getNumFaces obj_detached)}
+	convertTo obj_snap PolyMeshObject
 
-	all_faces = #{1..( polyop.getNumFaces obj_detached)}
+	polyop.detachFaces obj_snap faces_of_verts delete:true
 
-	--getElement = polyop.getElementsUsingFace
+	local poGetElementsUsingFace = polyop.getElementsUsingFace
 
-	--elements = for f in all_faces where obj_faces[f] == true collect
-	elements = for f in all_faces where all_faces[f] == true collect
-	(
-		element = polyop.getElementsUsingFace obj_detached f
-		all_faces -= element
-		element
+	elements = #()
+
+	while not faces_of_verts.isEmpty do
+																									(
+		face = (faces_of_verts as array)[1]
+
+		element = poGetElementsUsingFace obj_snap #(face)
+
+		append elements element
+
+		faces_of_verts -= element
 	)
 
-	delete obj_detached
+	delete obj_snap
 
 	format "elements: %\n" elements
-
-
 )
+
 
 /*------------------------------------------------------------------------------
 	PREPARE SCENE
@@ -104,11 +112,11 @@ function detachMethod obj faces_of_verts =
 
 delete objects
 
---segments = 10
+segments = 10
 --segments = 20
 --segments = 100
 --segments = 200
-segments = 300
+--segments = 300
 
 obj	= Plane width:100 length:100 pos:[ 0, 0, 0 ]  widthsegs:segments lengthsegs:segments
 Plane_2	= Plane width:100 length:100 pos:[ 0, 0, 50 ] widthsegs:segments lengthsegs:segments
@@ -158,6 +166,8 @@ test = timeStamp()
 /* DETACH FACES AND GET LEMENTS COUNT */
 detachMethod (obj) (faces_of_verts)
 
+--format "faces_of_verts: %\n" faces_of_verts
+
 format "\n test: % ms\n" (( timeStamp()) - test)
 
 format "RESULT: %\n" islands
@@ -165,30 +175,3 @@ format "RESULT: %\n" islands
 
 
 gc light:true
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -11,9 +11,10 @@ current_dir = getFilenamePath(getSourceFileName())
 ------------------------------------------------------------------------------*/
 try(
 
+
 	/** LOAD CONTENT */
-	ContentLoader	= ContentLoader_v path:(current_dir+"\\content") -- WITHOUT INI FILE --DEV
-	--ContentLoader	= ContentLoader_v path:(current_dir+content_dir)  ini:( getSourceFileName())
+	--ContentLoader	= ContentLoader_v path:(current_dir+"\\content") -- WITHOUT INI FILE --DEV
+	ContentLoader	= ContentLoader_v path:(current_dir+"\\content") ini:( getSourceFileName())
 
 
 

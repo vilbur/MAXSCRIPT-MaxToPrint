@@ -37,13 +37,13 @@ struct SupportVertexFinder_v
 		this.vertex_count = getNumVerts obj.mesh
 
 		verts_all = #{1..(vertex_count)}
-		--format "vertex_count: %\n" vertex_count
+		format "VERTEX_COUNT: %\n" vertex_count
 
 		/* GET VERTS WITH NORMAL POINTING DOWN */
-		bottom_verts = this._getBottomVerts()
+		bottom_verts = this.getBottom()
 
 		/* GET ONLY CONVEX VERTS */
-		convex_verts = this._getConvexPoints()
+		convex_verts = this.selectConvex()
 
 		visible_verts = -( polyop.getHiddenVerts obj)
 
@@ -58,79 +58,123 @@ struct SupportVertexFinder_v
 
 		verts_pos = this._getVertsPositions()
 
-		this._sortVertsToLayers()
+		--this._sortVertsToLayers()
 
-		VerIslandFinder.analyzeLayers(verts_all)(verts_process)(verts_layers)
+
+		--VerIslandFinder.analyzeLayersByDetach(verts_all)(verts_process)(verts_layers)
+		--VerIslandFinder.getNewIslandsPerLayer(verts_all)(verts_process)(verts_layers)
+
+		--gc()
+
+		--format "\n analyzeLayers: % seconds\n" ((( timeStamp()) - analyzeLayers) / 1000.0)
+		--format "\n analyzeLayers: % ms\n" (( timeStamp()) - analyzeLayers)
+
 
 		--format "verts_process: %\n" verts_process
 
 
+		--this.selectVerts(bottom_verts * convex_verts * visible_verts)
+
+
+		--this.selectVerts(bottom_verts)
+
 		--this.selectVerts(verts_process)
-		--this.selectVerts(verts_support)
+
+		--this.selectVerts(convex_verts)
+
 		--this.selectVerts( verts_layers[1]  )
 		--
 		--this.selectVerts( verts_layers[1] * verts_process )
 
 	),
 
-	private
-
-	/** Set verts to layers
-	 */
-	function setVertsToLayers =
-	(
-		--format "\n"; print "SupportVertexFinder_v.setVertsToLayers()"
-	),
+	--private
 
 	/** Select final selection
 	 */
-	function selectVerts verts =
+	function setSelection verts subobject:#VERTEX =
 	(
 		format "\n"; print "VertSelector_v.selectVerts()"
-		format "verts: %\n" verts
+		--format "verts: %\n" verts
 
 		max modify mode
 
-		subObjectLevel = 1
+		setSelectionLevel obj subobject
 
 		_mod = modPanel.getCurrentObject()
 
-		_mod.SetSelection #Vertex #{}
+		_mod.SetSelection subobject #{}
 
 		if classOf _mod == Edit_Poly then
-			_mod.Select #Vertex verts
+			_mod.Select subobject verts
 
 		else if classOf _mod  == Editable_Poly then
-			_mod.SetSelection #Vertex verts
+			_mod.SetSelection subobject verts
 	),
 
 	/** Get convex points
 	 */
-	function _getConvexPoints =
+	function selectConvex subobject:#VERTEX =
 	(
-		format "\n"; print "SupportVertexFinder_v._getConvexPoints()"
+		format "\n"; print "SupportVertexFinder_v.selectConvex()"
 
 		max modify mode
 
-		subObjectLevel = 1
+		setSelectionLevel obj subobject
 
-		PolyToolsSelect.ConvexConcave 0.1 2 -- select convex and convex-concave
+		sel_old = this._getSelection subobject
 
-		getVertSelection obj.mesh -- return
+		--PolyToolsSelect.ConvexConcave 0.1 2 -- select convex and convex-concave
+		PolyToolsSelect.ConvexConcave 0.001 2 -- select convex and convex-concave
+		--PolyToolsSelect.ConvexConcave 0.0001 2 -- select convex and convex-concave
+
+		sel_new = this._getSelection subobject
+		--format "not (sel_old * sel_new).isEmpty: %\n" (not (sel_old * sel_new).isEmpty)
+		--if not sel_old.isEmpty and not (sel_old - sel_new).isEmpty then
+		if not sel_old.isEmpty then
+			this.setSelection ( sel_new * sel_old) subobject:subobject
+
+
+
+		--if subobject == #FACE then getFaceSelection obj.mesh else  getVertSelection obj.mesh -- return
+		--if subobject == #FACE then polyop.getFaceSelection obj else polyop.getVertSelection obj -- return
+
 	),
+
+
 
 	/** Get bottom verts
 	 */
-	function _getBottomVerts =
+	function selectBottom subobject:#VERTEX  =
 	(
-		--format "\n"; print "SupportVertexFinder_v._getBottomVerts()"
+		--format "\n"; print "SupportVertexFinder_v.getBottom()"
 		max modify mode
 
-		subObjectLevel = 1
+		setSelectionLevel obj subobject
 
-		PolyToolsSelect.Normal 3 120 true
+		sel_old = this._getSelection subobject
 
-		getVertSelection obj.mesh -- return
+		--PolyToolsSelect.Normal 3 120 true
+		PolyToolsSelect.Normal 3 150 true
+		--PolyToolsSelect.Normal 3 170 true
+
+		sel_new = this._getSelection subobject
+		--format "not (sel_old * sel_new).isEmpty: %\n" (not (sel_old * sel_new).isEmpty)
+		if not sel_old.isEmpty then
+			this.setSelection ( sel_new * sel_old ) subobject:subobject
+
+
+		--if subobject == #FACE then getFaceSelection obj.mesh else  getVertSelection obj.mesh -- return
+		--if subobject == #FACE then polyop.getFaceSelection obj else polyop.getVertSelection obj -- return
+
+	),
+
+	/** Get selection
+	 */
+	function _getSelection subobject =
+	(
+		--format "\n"; print "SupportVertexFinder_v._getSelection()"
+		if subobject == #FACE then polyop.getFaceSelection obj else polyop.getVertSelection obj -- return
 	),
 
 	/** Set verts positions
@@ -155,6 +199,7 @@ struct SupportVertexFinder_v
 		layers_count = ceil (obj_height / layer_height)
 
 		this.verts_layers = #{1..(layers_count + 1)} as Array
+		--this.verts_layers = #()
 
 
 		--format "layers_count: %\n" layers_count

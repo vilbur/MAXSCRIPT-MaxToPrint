@@ -25,14 +25,90 @@ struct VerIslandFinder_v
 	/* reference */
 	/* inhered */
 
+
+	/** GET NEW ISLANDS PER LAYER
+	  *
+	  * Loop each print layer and search for new islands
+	  *
+	  * This method is usefel up to 100k vertex count, higher vertex count is slow
+	  * Use lots of RAM memory
+	  *
+	  * @return #( #{ verts of new islands } )
+	 */
+	function getNewIslandsPerLayer verts_all verts_used verts_layers =
+	(
+		--format "\n"; print "SupportVertexFinder_v.getNewIslandsPerLayer()"
+
+		verts_above  = copy verts_all	-- not yes processed layers
+		verts_bellow = #{}	-- store verts of layers processed already
+
+		layers_count = verts_layers.count
+
+		for layer = 1 to layers_count where classOf ( all_verts_in_layer = verts_layers[layer] ) == BitArray do -- layer has not verts if item is integer ( layer number )
+		(
+			format "\n==============\nlayer: %\n" layer
+
+			--if mod layer 100 == 0 then
+				--(format "layer: % of: %\n" layer layers_count)
+
+
+			verts_above -= all_verts_in_layer
+
+			verts_other_layers = verts_all - all_verts_in_layer
+
+			/* GET FACES IN LAYER */
+			faces_in_layer = polyop.getFacesUsingVert obj all_verts_in_layer
+			format "faces_in_layer: %\n" faces_in_layer
+
+
+			faceverts_in_layer = for face_id in faces_in_layer collect polyop.getVertsUsingFace obj face_id   -- ( #{1..4}, #{2,4,5,6} ) -- faces definded by verts
+			format "faceverts_in_layer: %\n" faceverts_in_layer
+
+
+			faceverts_in_layer_used = for facevert in faceverts_in_layer where ( used_verts = facevert * all_verts_in_layer ).numberSet > 0 collect used_verts
+			format "faceverts_in_layer_used: %\n" faceverts_in_layer_used
+
+			vert_islands_in_layer = this._mergeBitArraysbySharedBits (faceverts_in_layer_used) #() --return vert_islands_in_layer
+			format "vert_islands_in_layer: %\n" vert_islands_in_layer
+
+
+			islands = this._mergeBitArraysbySharedBits (vert_islands_in_layer) (islands)
+
+			for verts_island in islands where not (verts_island * verts_used).isEmpty do -- new island is if verts of that island has not been processed in layer bellow
+				append this.new_islands (verts_island * verts_used )
+				--append this.new_islands (verts_island)
+
+			--format "islands: %\n" islands
+			--format "verts_bellow: %\n" verts_bellow
+
+			verts_bellow += all_verts_in_layer
+
+			format "this.new_islands: %\n" this.new_islands
+		)
+
+		format "\n\nNEW_ISLANDS: %\n" this.new_islands
+
+		delete Helpers -- DEV
+
+		for new_island in this.new_islands do
+			this._getCenterOfIsland (new_island)
+
+		gc light:true
+
+		this.new_islands --return
+	),
+
 	/** Analyze layers
 	 */
-	function analyzeLayers verts_all verts_used verts_layers =
+	function analyzeLayersByDetach verts_all verts_used verts_layers =
 	(
-		format "\n"; print "SupportVertexFinder_v._analyzeLayers()"
+		format "\n"; print "SupportVertexFinder_v.analyzeLayersByDetach()"
 		format "vertex count: %\n" verts_all.numberSet
 
 		layers_count = verts_layers.count
+
+		--getFacesUsingVert = polyop.getFacesUsingVert
+		--getVertsUsingFace = polyop.getVertsUsingFace
 
 		max create mode
 
@@ -43,7 +119,7 @@ struct VerIslandFinder_v
 				----vert_color.hue = ( random 0 255 )
 				--format "\n==============\nlayer: %\n" layer
 
-				if mod layer 10 == 0 then
+				if mod layer 100 == 0 then
 					(format "layer: % of: %\n" layer layers_count)
 
 				verts_used_in_layer = all_verts_in_layer * verts_used
@@ -52,14 +128,16 @@ struct VerIslandFinder_v
 
 				/* GET FACES IN LAYER */
 				faces_in_layer = polyop.getFacesUsingVert obj all_verts_in_layer
+				--faces_in_layer = getFacesUsingVert obj all_verts_in_layer
 				--format "faces_in_layer: %\n" faces_in_layer
 
-				face_islands_in_layer = this._detachMethod (faces_in_layer)
+				face_islands_in_layer = this.getElementsOfFaces (faces_in_layer)
 				--format "face_islands_in_layer: %\n" face_islands_in_layer
 
 				for face_island_in_layer in face_islands_in_layer do
 				(
 					island = polyop.getVertsUsingFace obj face_island_in_layer
+					--island = getVertsUsingFace obj face_island_in_layer
 					--format "\nisland: %\n" island
 
 					island_used = island * verts_used_in_layer -- island only from used verts
@@ -102,6 +180,8 @@ struct VerIslandFinder_v
 					)
 				)
 
+			--gc light:true
+
 			)
 
 			islands_final = this._mergeBitArraysbySharedBits (islands) #()
@@ -119,13 +199,13 @@ struct VerIslandFinder_v
 
 		redrawViews()
 
-		gc light:true
+		--gc()
 	),
 
 
 	/** Detach method
 	 */
-	function _detachMethod faces_of_verts =
+	function getElementsOfFaces faces_of_verts =
 	(
 		--format "\n"; print ".detachMethod()"
 		--format "faces_of_verts: %\n" faces_of_verts
