@@ -1,3 +1,4 @@
+filein( getFilenamePath(getSourceFileName()) + "/Lib/SupportVertexFinder/SupportVertexFinder.ms" )	--"./Lib/SupportVertexFinder/SupportVertexFinder.ms"
 
 /**  Export format
   *
@@ -16,9 +17,35 @@ icon:	"MENU:false|id:#SPIN_grid_step|control:spinner|range:[1, 100, 10]|type:#in
 /**  Export format
   *
  */
-macroscript	_print_select_lowest_verts
+macroscript	_print_select_by_print_layer
 category:	"_Print-Points-Tools"
-buttonText:	"Lowest"
+buttonText:	"Select Layers"
+toolTip:	"Get only single vertex of each face island.\n\Vert with lowest position on Z axis is selected"
+icon:	"MENU:true|across:4|height:24"
+(
+	on execute do
+	if selection.count > 0 then
+	(
+		clearListener(); print("Cleared in:\n"+getSourceFileName())
+		filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-MaxToPrint\content\rollouts-Main\rollout-Points\SupportVertexFinder.mcr"
+		filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-viltools3\VilTools\rollouts-Tools\rollout-PRINT-3D\3-1-3-VERTEX SELECTION TOOLS.mcr"
+
+		obj	= selection[1]
+
+		SupportVertexFinder 	= SupportVertexFinder_v( obj  )
+
+
+		SupportVertexFinder.findVerts()
+
+	)
+)
+
+/**  Export format
+  *
+ */
+macroscript	_print_select_lowest_verts_in_grid
+category:	"_Print-Points-Tools"
+buttonText:	"Select Grid"
 toolTip:	"Get only single vertex of each face island.\n\Vert with lowest position on Z axis is selected"
 icon:	"MENU:true|across:4|height:24"
 (
@@ -30,13 +57,14 @@ icon:	"MENU:true|across:4|height:24"
 
 		obj	= selection[1]
 
-		VertSelector 	= VertSelector_v( obj ) resolution:ROLLOUT_print_3d.SPIN_grid_step.value
-		VertSelector.getLowestVerts()
+		VertSelector 	= VertSelector_v( obj )
+		VertSelector.getLowestVerts ROLLOUT_points.SPIN_grid_step.value
 		--VertSelector.selectVerts()
 
 		gc()
 	)
 )
+
 
 
 /**
@@ -83,9 +111,9 @@ icon:	"MENU:false|across:4|height:24"
 
 		obj	= selection[1]
 
-		VertSelector 	= VertSelector_v( obj ) resolution:ROLLOUT_print_3d.SPIN_grid_step.value
+		VertSelector 	= VertSelector_v( obj ) -- resolution:ROLLOUT_points.SPIN_grid_step.value
 
-		VertSelector.getCheckerSelection invert_sel:( keyboard.controlPressed )
+		VertSelector.getCheckerSelection  ROLLOUT_points.SPIN_grid_step.value invert_sel:( keyboard.controlPressed )
 
 		VertSelector.selectVerts()
 
@@ -117,11 +145,3 @@ icon:	"MENU:true|across:4|height:24"
 
 	)
 )
-
-
-
-
-
-
-
-

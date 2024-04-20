@@ -37,7 +37,7 @@ struct VerIslandFinder_v
 	 */
 	function getNewIslandsPerLayer verts_all verts_used verts_layers =
 	(
-		--format "\n"; print "SupportVertexFinder_v.getNewIslandsPerLayer()"
+		format "\n"; print "SupportVertexFinder_v.getNewIslandsPerLayer()"
 
 		verts_above  = copy verts_all	-- not yes processed layers
 		verts_bellow = #{}	-- store verts of layers processed already
@@ -46,10 +46,10 @@ struct VerIslandFinder_v
 
 		for layer = 1 to layers_count where classOf ( all_verts_in_layer = verts_layers[layer] ) == BitArray do -- layer has not verts if item is integer ( layer number )
 		(
-			format "\n==============\nlayer: %\n" layer
+			--format "\n==============\nlayer: %\n" layer
 
-			--if mod layer 100 == 0 then
-				--(format "layer: % of: %\n" layer layers_count)
+			if mod layer 100 == 0 then
+				(format "layer: % of: %\n" layer layers_count)
 
 
 			verts_above -= all_verts_in_layer
@@ -58,18 +58,18 @@ struct VerIslandFinder_v
 
 			/* GET FACES IN LAYER */
 			faces_in_layer = polyop.getFacesUsingVert obj all_verts_in_layer
-			format "faces_in_layer: %\n" faces_in_layer
+			--format "faces_in_layer: %\n" faces_in_layer
 
 
 			faceverts_in_layer = for face_id in faces_in_layer collect polyop.getVertsUsingFace obj face_id   -- ( #{1..4}, #{2,4,5,6} ) -- faces definded by verts
-			format "faceverts_in_layer: %\n" faceverts_in_layer
+			--format "faceverts_in_layer: %\n" faceverts_in_layer
 
 
 			faceverts_in_layer_used = for facevert in faceverts_in_layer where ( used_verts = facevert * all_verts_in_layer ).numberSet > 0 collect used_verts
-			format "faceverts_in_layer_used: %\n" faceverts_in_layer_used
+			--format "faceverts_in_layer_used: %\n" faceverts_in_layer_used
 
 			vert_islands_in_layer = this._mergeBitArraysbySharedBits (faceverts_in_layer_used) #() --return vert_islands_in_layer
-			format "vert_islands_in_layer: %\n" vert_islands_in_layer
+			--format "vert_islands_in_layer: %\n" vert_islands_in_layer
 
 
 			islands = this._mergeBitArraysbySharedBits (vert_islands_in_layer) (islands)
@@ -83,7 +83,7 @@ struct VerIslandFinder_v
 
 			verts_bellow += all_verts_in_layer
 
-			format "this.new_islands: %\n" this.new_islands
+			--format "this.new_islands: %\n" this.new_islands
 		)
 
 		format "\n\nNEW_ISLANDS: %\n" this.new_islands

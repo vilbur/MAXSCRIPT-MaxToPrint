@@ -1,0 +1,1 @@
+filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-MaxToPrint\MaxToPrint.ms"

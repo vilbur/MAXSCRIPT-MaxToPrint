@@ -27,8 +27,8 @@ try(
 	--MaxToPrint.register()
 
 )catch(
-	format "\n——————————————— ERROR IN FILE ———————————————\n\n%\n" (getSourceFileName())
-	format "\n————————————————— EXCEPTION —————————————————\n\n%\n" (getCurrentException())
-	format "\n——————————————————— TRACE ———————————————————\n%\n"   (getCurrentExceptionStackTrace())
-	format "\n——————————————————— STACK ———————————————————\n%\n"   (getCurrentExceptionCallStack())
+--	format "\n——————————————— ERROR IN FILE ———————————————\n\n%\n" (getSourceFileName())
+--	format "\n————————————————— EXCEPTION —————————————————\n\n%\n" (getCurrentException())
+--	format "\n——————————————————— TRACE ———————————————————\n%\n"   (getCurrentExceptionStackTrace())
+--	format "\n——————————————————— STACK ———————————————————\n%\n"   (getCurrentExceptionCallStack())
 )
