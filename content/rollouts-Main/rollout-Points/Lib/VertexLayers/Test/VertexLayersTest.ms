@@ -1,6 +1,6 @@
 clearListener(); print("Cleared in:\n"+getSourceFileName())
 
-filein( getFilenamePath(getSourceFileName()) + "/../SupportVertexFinder.ms" )	--"./../SupportVertexFinder.ms"
+filein( getFilenamePath(getSourceFileName()) + "/../VertexLayers.ms" )	--"./../VertexLayers.ms"
 
 
 
@@ -108,11 +108,11 @@ if selection.count == 0 then
 )
 
 
-SupportVertexFinder 	= SupportVertexFinder_v( selection[1]  )
+VertexLayers 	= VertexLayers_v( selection[1]  )
 
 analyzeLayers = timeStamp()
 
-SupportVertexFinder.findVerts()
+VertexLayers.findVerts()
 
 --format "\n analyzeLayers: % ms\n" (( timeStamp()) - analyzeLayers)
 format "\n analyzeLayers: % seconds\n" ((( timeStamp()) - analyzeLayers) / 1000.0)
