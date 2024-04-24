@@ -1,6 +1,7 @@
 filein( getFilenamePath(getSourceFileName()) + "/../MeshDataGetter/MeshDataGetter.ms" )	--"./../MeshDataGetter/MeshDataGetter.ms"
+filein( getFilenamePath(getSourceFileName()) + "/../VertexLayers/VertexLayers.ms" )	--"./../VertexLayers/VertexLayers.ms"
 filein( getFilenamePath(getSourceFileName()) + "/../VertexGrid/VertexGrid.ms" )	--"./../VertexGrid/VertexGrid.ms"
-
+filein( getFilenamePath(getSourceFileName()) + "/../VertexGridGetter/VertexGridGetter.ms" )	--"./../VertexGridGetter/VertexGridGetter.ms"
 
 /** Get lowest verts in grid
 
@@ -22,73 +23,97 @@ filein( getFilenamePath(getSourceFileName()) + "/../VertexGrid/VertexGrid.ms" )	
 struct VertSelector_v
 (
 	/* construct */
-	obj,
+	obj_original,	-- not collapesd original object
+	obj,	-- editable poly object used to process
 
 	/* properties */
 	sel_modified = #{},
+	face_elements = #(),
 
 	--resolution = 5,
 	--resolution = 10,
 
 	/* dependency */
-	VertexGrid,
 	MeshDataGetter,
+	VertexGridGetter,
+	VertexLayers,
 
 	/* reference */
 	/* inhered */
 
-
-	/** Select lowest
+	/** Get lowest verts in grid
 	 */
-	function getLowestVerts resolution: sel:true =
+	function selectLowestVertsInGrid resolution:10 =
 	(
-		format "\n"; print "VertSelector_v.getLowestVerts()"
+		--format "\n"; print "VertSelector_v.selectLowestVertsInGrid()"
+		VertexGridGetter.resolution = resolution
 
-		--MeshDataGetter.VertNormalLimits.z = [ 135, 180 ]
+		this.sel_modified = VertexGridGetter.getLowestVertsInGrid()
 
-		data_verts = MeshDataGetter.getVertexData verts:#ALL_OR_SELECTED positions:true --normals:true
+		this._selectVertsAndReturn(true) --return
 
-		VertexGrid._getVertsInGrid(data_verts)
-
-		--this.sel_modified = copy data_verts[#VERTS]
-		this.sel_modified = #{}
-		surrounding_points = #{}
-
-		round_grid = VertexGrid.round_grid
-
-		--for x = 1 to round_grid[1].count where (slice_x = round_grid[1][x]).count > 0 do
-		--	for y = 1 to round_grid[2].count where (slice_y = round_grid[2][y]).count > 0 do
-		--		this._filterOnlyMinZVerts ( slice_x * slice_y )
-
-		for x = 1 to round_grid[1].count where (slice_x = round_grid[1][x]).count > 0 do
-			for y = 1 to round_grid[2].count where (slice_y = round_grid[2][y]).count > 0 do
-				for z = 1 to round_grid[3].count where (slice_z = round_grid[3][z]) != undefined and slice_z.count > 0 do
-				(
-					verts_in_cell = slice_x * slice_y * slice_z
-					lowest_vert = this._filterOnlyMinZVerts ( verts_in_cell - surrounding_points )
-
-					if lowest_vert != undefined then
-					(
-						--format "surrounding_points: %\n" surrounding_points
-						faces_of_vert = polyop.getFacesUsingVert obj lowest_vert
-
-						surrounding_points +=  polyop.getVertsUsingFace obj faces_of_vert
-
-					)
-				)
-
-
-		this._selectVertsAndReturn(sel) --return
 	),
 
-
-
-	/** Get selection
+	/** Get lowest verts in grid
 	 */
-	function _getSelection subobject =
+	function selectChecker resolution:10 invert_sel:false =
 	(
-		--format "\n"; print "SupportVertexFinder_v._getSelection()"
-		if subobject == #FACE then polyop.getFaceSelection obj else polyop.getVertSelection obj -- return
+		format "\n"; print "VertSelector_v.selectChecker()"
+		format "RESOLUTION: %\n" resolution
+		VertexGridGetter.resolution = resolution
+
+		this.sel_modified = VertexGridGetter.getCheckerPattern invert_sel:invert_sel
+
+		this._selectVertsAndReturn(true) --return
+
+	),
+
+	/** Find islands per layer
+	 */
+	function findIslandsPerLayer =
+	(
+		--format "\n"; print "VertSelector_v.findIlandsPerLayer()"
+
+		new_islands = VertexLayers.findVerts()
+		format "new_islands: %\n" new_islands
+
+		--for new_island in new_islands do
+		--format "new_island: %\n" new_island
+			--this.sel_modified += new_island
+		--format "this.sel_modified: %\n" this.sel_modified
+		--this._selectVertsAndReturn(true) --return
+
+	),
+
+	/** Select sinlge vert per face island
+
+		Point with lowest position on Z
+	 */
+	function getSingleVertPerFaceIsland sel:true =
+	(
+		format "\n"; print "VertSelector_v.getSingleVertPerFaceIsland()"
+
+		data_verts = MeshDataGetter.getVertexData verts:#SELECTED positions:true
+
+		hidden_verts = polyop.getHiddenVerts obj
+
+		------if  data_verts[#VERTS].numberSet == 0 then
+		------	return false
+
+		this.sel_modified = #{}
+
+		--this.sel_modified = copy data_verts[#VERTS]
+
+		/* LOOP EACH ISLAND OF VERTS */
+		for verts_island in (verts_islands = this._sortVertsByIslands()) do
+		(
+			--format "VERTS_ISLAND: %\n" verts_island
+
+			this._filterOnlyMinZVerts (verts_island *  data_verts[#VERTS])
+		)
+		--gc()
+
+		this._selectVertsAndReturn(sel) --return
 	),
 
 	--/** Select final selection
@@ -138,51 +163,35 @@ struct VertSelector_v
 
 	private
 
-
-	/** Get vert with min z pos
-	  *
-	  * @param BitArray verts
+	/** Detach method
 	 */
-	function _getLowestVertOnZaxis verts =
+	function setFaceElements faces_of_verts =
 	(
-		--format "\n"; print "VertSelector_v._getLowestVertOnZaxis()"
-		verts_arr = verts as Array
+		--format "\n"; print ".detachMethod()"
+		--format "faces_of_verts: %\n" faces_of_verts
+		obj_snap = snapshot obj
 
-		/* GET LOWEST POINT IN CELL */
-		if verts_arr.count > 1 then
-		(
-			z_positions = for vert in verts_arr collect MeshDataGetter.getPosition(vert) axis:#Z
-			--z_positions = for pos in (meshop.getVerts obj.mesh verts node:obj) collect pos.z
+		convertTo obj_snap PolyMeshObject
 
-			if ( index = findItem z_positions (amin z_positions) ) > 0 then
-				verts_arr[index] --return
+		polyop.detachFaces obj_snap faces_of_verts delete:true
+
+		local poGetElementsUsingFace = polyop.getElementsUsingFace
+
+		while not faces_of_verts.isEmpty do
+        (
+			face = (faces_of_verts as array)[1]
+
+			element = poGetElementsUsingFace obj_snap #(face)
+
+			append face_elements element
+
+			faces_of_verts -= element
 		)
-		else
-			verts_arr[1] --return
 
-			--verts_arr[1] --return
+		delete obj_snap
+
+		--face_elements --return
 	),
-
-
-	/**  Left only single lowest vert of verts
-	  *   Verts above are removed from selection
-	 */
-	function _filterOnlyMinZVerts verts =
-	(
-		--format "\n"; print "VertSelector_v._SelectOnlyMinZVerts()"
-		--format "verts: %\n" verts
-
-		/* VERTS CAN BE UNDEFINED IF CELL IS EMPTY */
-		if verts.numberSet > 0 and ( lowest_vert = this._getLowestVertOnZaxis(verts) ) != undefined then
-			this.sel_modified[lowest_vert] = true
-
-		lowest_vert --return
-
-		/* REMOVE OTHER VERTS FROM SELECTION */
-		--for vert in verts_to_remove do
-			--this.sel_modified[vert] = false
-	),
-
 
 	/** Select and return mofified selection
 	 */
@@ -194,14 +203,33 @@ struct VertSelector_v
 		this.sel_modified  --return
 	),
 
+	/** Set object
+	 */
+	function _setObject =
+	(
+		--format "\n"; print "GridLayerManager_v.setObject()"
+
+		this.obj = this.obj_original -- DEV
+
+		--this.obj  = snapshot this.obj_original
+
+		--convertTo this.obj PolyMeshObject
+	),
 
 	/**
 	 */
 	on create do
 	(
 		--format "\n"; print "VertSelector.onCreate()"
+		this._setObject()
+
 		VertexGrid 	= VertexGrid_v( obj )
 		MeshDataGetter 	= MeshDataGetter_v( obj )
+		VertexGridGetter 	= VertexGridGetter_v( obj )
+		VertexLayers 	= VertexLayers_v( obj )
 
 	)
+
+
+
 )

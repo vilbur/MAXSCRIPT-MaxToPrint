@@ -1,6 +1,7 @@
 --filein( getFilenamePath(getSourceFileName()) + "/Lib/VertexLayers/VertexLayers.ms" )	--"./Lib/VertexLayers/VertexLayers.ms"
-filein( getFilenamePath(getSourceFileName()) + "/Lib/VertexLayers/VertexLayers.ms" )	--"./Lib/VertexLayers/VertexLayers.ms"
-filein( getFilenamePath(getSourceFileName()) + "/Lib/VertexGrid/VertexGrid.ms" )	--"./Lib/VertexGrid/VertexGrid.ms"
+--filein( getFilenamePath(getSourceFileName()) + "/Lib/VertexLayers/VertexLayers.ms" )	--"./Lib/VertexLayers/VertexLayers.ms"
+--filein( getFilenamePath(getSourceFileName()) + "/Lib/VertexGrid/VertexGrid.ms" )	--"./Lib/VertexGrid/VertexGrid.ms"
+filein( getFilenamePath(getSourceFileName()) + "/Lib/VertSelector/VertSelector.ms" )	--"./Lib/VertSelector/VertSelector.ms"
 
 /**  Export format
   *
@@ -29,14 +30,14 @@ icon:	"MENU:true|across:4|height:24"
 	if selection.count > 0 then
 	(
 		clearListener(); print("Cleared in:\n"+getSourceFileName())
-		filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-MaxToPrint\content\rollouts-Main\rollout-Points\VertexLayers.mcr"
-		filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-viltools3\VilTools\rollouts-Tools\rollout-PRINT-3D\3-1-3-VERTEX SELECTION TOOLS.mcr"
+		--filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-viltools3\VilTools\rollouts-Tools\rollout-PRINT-3D\3-1-3-VERTEX SELECTION TOOLS.mcr"
+		filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-MaxToPrint\content\rollouts-Main\rollout-Points\Lib\VertSelector\VertSelector.ms"
 
-		obj	= selection[1]
+		--obj	= selection[1]
 
-		VertexLayers 	= VertexLayers_v( obj  )
+		VertSelector 	= VertSelector_v( selection[1]  )
 
-		VertexLayers.findVerts()
+		VertSelector.findIslandsPerLayer()
 
 	)
 )
@@ -47,7 +48,7 @@ icon:	"MENU:true|across:4|height:24"
 macroscript	_print_select_lowest_verts_in_grid
 category:	"_Print-Points-Tools"
 buttonText:	"Select Grid"
-toolTip:	"Get only single vertex of each face island.\n\Vert with lowest position on Z axis is selected"
+toolTip:	"SELECT LOWEST SINGLE VERTEX of each face island.\n\Vert with lowest position on Z axis is selected"
 icon:	"MENU:true|across:4|height:24"
 (
 	on execute do
@@ -58,9 +59,10 @@ icon:	"MENU:true|across:4|height:24"
 
 		obj	= selection[1]
 
-		VertSelector 	= VertSelector_v( obj )
-		VertSelector.getLowestVerts resolution:ROLLOUT_points.SPIN_grid_step.value
-		--VertSelector.selectVerts()
+		VertSelector 	= VertSelector_v( selection[1]  )
+
+		VertSelector.selectLowestVertsInGrid resolution:ROLLOUT_points.SPIN_grid_step.value
+		--VertexGridSelector.selectVerts()
 
 		gc()
 	)
@@ -82,7 +84,7 @@ icon:	"MENU:true|across:4|height:24"
 	undo "Filter 1 vert per face" on
 	(
 		clearListener(); print("Cleared in:\n"+getSourceFileName())
-		--filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-viltools3\VilTools\rollouts-Tools\rollout-PRINT-3D\3-1-3-VERTEX SELECTION TOOLS.mcr"
+		filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-viltools3\VilTools\rollouts-Tools\rollout-PRINT-3D\3-1-3-VERTEX SELECTION TOOLS.mcr"
 
 		VertSelector 	= VertSelector_v( selection[1] )
 
@@ -114,9 +116,9 @@ icon:	"MENU:false|across:4|height:24"
 
 		VertSelector 	= VertSelector_v( obj ) -- resolution:ROLLOUT_points.SPIN_grid_step.value
 
-		VertSelector.getCheckerSelection  ROLLOUT_points.SPIN_grid_step.value invert_sel:( keyboard.controlPressed )
+		VertSelector.selectChecker resolution:ROLLOUT_points.SPIN_grid_step.value invert_sel:( keyboard.controlPressed )
 
-		VertSelector.selectVerts()
+		--VertSelector.selectVerts()
 
 	)
 )

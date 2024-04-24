@@ -1,4 +1,4 @@
-filein( getFilenamePath(getSourceFileName()) + "/VerIslandFinder/VerIslandFinder.ms" )	--"./VerIslandFinder/VerIslandFinder.ms"
+filein( getFilenamePath(getSourceFileName()) + "/VertIslandFinder/VertIslandFinder.ms" )	--"./VertIslandFinder/VertIslandFinder.ms"
 
 /**
  */
@@ -21,6 +21,8 @@ struct VertexLayers_v
 	bbox,
 	layer_height = 0.05, -- height of print layer in mm
 
+	/* dependency */
+	VertIslandFinder,
 
 	/* reference */
 	/* inhered */
@@ -59,10 +61,13 @@ struct VertexLayers_v
 		this._sortVertsToLayers()
 
 
-		VerIslandFinder.analyzeLayersByDetach(verts_all)(verts_process)(verts_layers)
-		--VerIslandFinder.getNewIslandsPerLayer(verts_all)(verts_process)(verts_layers)
+		GET_ISLANDS = timeStamp()
 
-		--gc()
+		--VertIslandFinder.analyzeLayersByDetach(verts_all)(verts_process)(verts_layers)
+		VertIslandFinder.getNewIslandsPerLayer(verts_all)(verts_process)(verts_layers)
+
+		format "\n GET_ISLANDS: % ms\n" (( timeStamp()) - GET_ISLANDS)
+		--format "\n GET_ISLANDS: % seconds\n" ((( timeStamp()) - GET_ISLANDS) / 1000.0)
 
 		--format "\n analyzeLayers: % seconds\n" ((( timeStamp()) - analyzeLayers) / 1000.0)
 		--format "\n analyzeLayers: % ms\n" (( timeStamp()) - analyzeLayers)
@@ -83,41 +88,8 @@ struct VertexLayers_v
 		--this.selectVerts( verts_layers[1]  )
 		--
 		--this.selectVerts( verts_layers[1] * verts_process )
+		VertIslandFinder.new_islands --return
 
-	),
-
-
-
-
-
-
-
-
-
-
-
-	--private
-
-	/** Select final selection
-	 */
-	function setSelection verts subobject:#VERTEX =
-	(
-		format "\n"; print "VertSelector_v.selectVerts()"
-		--format "verts: %\n" verts
-
-		max modify mode
-
-		setSelectionLevel obj subobject
-
-		_mod = modPanel.getCurrentObject()
-
-		_mod.SetSelection subobject #{}
-
-		if classOf _mod == Edit_Poly then
-			_mod.Select subobject verts
-
-		else if classOf _mod  == Editable_Poly then
-			_mod.SetSelection subobject verts
 	),
 
 
@@ -168,7 +140,7 @@ struct VertexLayers_v
 	on create do
 	(
 		--format "\n"; print "VertexLayers.onCreate()"
-		VerIslandFinder.obj = obj
+		VertIslandFinder = VertIslandFinder_v(obj)
 	)
 
 )

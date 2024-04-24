@@ -8,7 +8,7 @@
 	4) Test if new or old island - in old, then faces exist in all island
 
  */
-struct VerIslandFinder_v
+struct VertIslandFinder_v
 (
 	/* construct */
 	obj,
@@ -48,9 +48,9 @@ struct VerIslandFinder_v
 		(
 			--format "\n==============\nlayer: %\n" layer
 
-			if mod layer 100 == 0 then
-				(format "layer: % of: %\n" layer layers_count)
-
+			--if mod layer 100 == 0 then
+				--(format "layer: % of: %\n" layer layers_count)
+			getLayer = timeStamp()
 
 			verts_above -= all_verts_in_layer
 
@@ -60,7 +60,6 @@ struct VerIslandFinder_v
 			faces_in_layer = polyop.getFacesUsingVert obj all_verts_in_layer
 			--format "faces_in_layer: %\n" faces_in_layer
 
-
 			faceverts_in_layer = for face_id in faces_in_layer collect polyop.getVertsUsingFace obj face_id   -- ( #{1..4}, #{2,4,5,6} ) -- faces definded by verts
 			--format "faceverts_in_layer: %\n" faceverts_in_layer
 
@@ -68,11 +67,13 @@ struct VerIslandFinder_v
 			faceverts_in_layer_used = for facevert in faceverts_in_layer where ( used_verts = facevert * all_verts_in_layer ).numberSet > 0 collect used_verts
 			--format "faceverts_in_layer_used: %\n" faceverts_in_layer_used
 
-			vert_islands_in_layer = this._mergeBitArraysbySharedBits (faceverts_in_layer_used) #() --return vert_islands_in_layer
+			vert_islands_in_layer = this._mergeBitArraysbySharedBits (faceverts_in_layer) #() --return vert_islands_in_layer
+			--vert_islands_in_layer = this._mergeBitArraysbySharedBits (faceverts_in_layer_used) #() --return vert_islands_in_layer
 			--format "vert_islands_in_layer: %\n" vert_islands_in_layer
 
 
 			islands = this._mergeBitArraysbySharedBits (vert_islands_in_layer) (islands)
+			--format "islands: %\n" islands
 
 			for verts_island in islands where not (verts_island * verts_used).isEmpty do -- new island is if verts of that island has not been processed in layer bellow
 				append this.new_islands (verts_island * verts_used )
@@ -83,17 +84,19 @@ struct VerIslandFinder_v
 
 			verts_bellow += all_verts_in_layer
 
+			--format "\ngetLayer: %ms 	verts count: % islands count: % verts in layer: %" (( timeStamp()) - getLayer) all_verts_in_layer.numberSet islands.count all_verts_in_layer
+			--format "getLayer: % seconds\n" ((( timeStamp()) - getLayer) / 1000.0)
 			--format "this.new_islands: %\n" this.new_islands
 		)
 
-		format "\n\nNEW_ISLANDS: %\n" this.new_islands
+		--format "\n\nNEW_ISLANDS: %\n" this.new_islands
 
 		delete Helpers -- DEV
 
 		for new_island in this.new_islands do
 			this._getCenterOfIsland (new_island)
 
-		gc light:true
+		--gc light:true
 
 		this.new_islands --return
 	),
@@ -239,7 +242,7 @@ struct VerIslandFinder_v
 	 */
 	function _getCenterOfIsland verts =
 	(
-		--format "\n"; print "VerIslandFinder_v.getCenterOfIsland()"
+		--format "\n"; print "VertIslandFinder_v.getCenterOfIsland()"
 
 		pos_center = point3 0 0 0
 
@@ -332,7 +335,7 @@ struct VerIslandFinder_v
 	 */
 	function _getSharedIslands vert =
 	(
-		--format "\n"; print "VerIslandFinder_v._getSharedIslands()"
+		--format "\n"; print "VertIslandFinder_v._getSharedIslands()"
 
 		function facesShareVerts verts1 verts2 = not ( verts1 * verts2 ).isEmpty
 
@@ -344,7 +347,7 @@ struct VerIslandFinder_v
 	 */
 	function _mergeIslands islands_to_merge vert =
 	(
-		--format "\n"; print "VerIslandFinder_v._mergeIslands()"
+		--format "\n"; print "VertIslandFinder_v._mergeIslands()"
 
 		merged_island = #{vert}
 
@@ -362,7 +365,7 @@ struct VerIslandFinder_v
 	 */
 	on create do
 	(
-		--format "\n"; print "VerIslandFinder.onCreate()"
+		--format "\n"; print "VertIslandFinder.onCreate()"
 		--for prop in #(  ) where getProperty this prop == undefined do -- CHECK CONSTRUCT PROPERTIES -- Array of this struct properties necessary to run
 		--	throw ("\n\n\nUNDEFINED CONSTRUCT PROPERTY\n\n\nSTRUCT:\n\n"+ ((filterString( classof this as string )"(:")[2]) +"\n\n\nPROPERTY:\n\n"+ prop )
 	)
