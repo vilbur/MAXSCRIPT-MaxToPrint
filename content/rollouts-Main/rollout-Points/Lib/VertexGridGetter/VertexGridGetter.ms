@@ -60,9 +60,14 @@ struct VertexGridGetter_v
 		--	for y = 1 to round_grid[2].count where (slice_y = round_grid[2][y]).count > 0 do
 		--		this._filterOnlyMinZVerts ( slice_x * slice_y )
 
-		for x = 1 to round_grid[1].count where (slice_x = round_grid[1][x]).count > 0 do
-			for y = 1 to round_grid[2].count where (slice_y = round_grid[2][y]).count > 0 do
-				for z = 1 to round_grid[3].count where (slice_z = round_grid[3][z]) != undefined and slice_z.count > 0 do
+		for x = 1 to round_grid[1].count where (slice_x = round_grid[1][x]) != undefined do
+		--for x = 1 to round_grid[1].count where (slice_x = round_grid[1][x]).count > 0 do
+		
+			for y = 1 to round_grid[2].count where (slice_y = round_grid[2][y]) != undefined do
+			--for y = 1 to round_grid[2].count where (slice_y = round_grid[2][y]).count > 0 do
+
+				for z = 1 to round_grid[3].count where (slice_z = round_grid[3][z])  != undefined do
+		--		for z = 1 to round_grid[3].count where (slice_z = round_grid[3][z]).count > 0 do
 				(
 					verts_in_cell = slice_x * slice_y * slice_z
 					lowest_vert = this._filterOnlyMinZVerts ( verts_in_cell - surrounding_points )
@@ -189,6 +194,26 @@ struct VertexGridGetter_v
 	),
 
 
+
+	/**  Left only single lowest vert of verts
+	  *   Verts above are removed from selection
+	 */
+	function _filterOnlyMinZVerts verts =
+	(
+		--format "\n"; print "VertexGridGetter_v._SelectOnlyMinZVerts()"
+		--format "verts: %\n" verts
+
+		/* VERTS CAN BE UNDEFINED IF CELL IS EMPTY */
+		if verts.numberSet > 0 and ( lowest_vert = this._getLowestVertOnZaxis(verts) ) != undefined then
+			this.sel_modified[lowest_vert] = true
+
+		lowest_vert --return
+
+		/* REMOVE OTHER VERTS FROM SELECTION */
+		--for vert in verts_to_remove do
+			--this.sel_modified[vert] = false
+	),
+
 	/** Get vert with min z pos
 	  *
 	  * @param BitArray verts
@@ -211,26 +236,6 @@ struct VertexGridGetter_v
 			verts_arr[1] --return
 
 			--verts_arr[1] --return
-	),
-
-
-	/**  Left only single lowest vert of verts
-	  *   Verts above are removed from selection
-	 */
-	function _filterOnlyMinZVerts verts =
-	(
-		--format "\n"; print "VertexGridGetter_v._SelectOnlyMinZVerts()"
-		--format "verts: %\n" verts
-
-		/* VERTS CAN BE UNDEFINED IF CELL IS EMPTY */
-		if verts.numberSet > 0 and ( lowest_vert = this._getLowestVertOnZaxis(verts) ) != undefined then
-			this.sel_modified[lowest_vert] = true
-
-		lowest_vert --return
-
-		/* REMOVE OTHER VERTS FROM SELECTION */
-		--for vert in verts_to_remove do
-			--this.sel_modified[vert] = false
 	),
 
 

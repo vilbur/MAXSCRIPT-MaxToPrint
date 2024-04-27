@@ -77,8 +77,8 @@ function selectConcexOrBottomFacesOrVers mode subobject:#VERTEX =
 		else
 		(
 			--PolyToolsSelect.ConvexConcave 0.1 2 -- select convex and convex-concave
-			PolyToolsSelect.ConvexConcave 0.001 2 -- select convex and convex-concave
-			--PolyToolsSelect.ConvexConcave 0.0001 2 -- select convex and convex-concave
+			--PolyToolsSelect.ConvexConcave 0.001 2 -- select convex and convex-concave
+			PolyToolsSelect.ConvexConcave 0.0001 2 -- select convex and convex-concave
 
 			sel_new = _getSelection obj subobject
 			--format "not (sel_old * sel_new).isEmpty: %\n" (not (sel_old * sel_new).isEmpty)

@@ -28,9 +28,9 @@ struct VertexLayers_v
 	/* inhered */
 	/** Find points
 	 */
-	function findVerts =
+	function findVertsOfNewIslands =
 	(
-		format "\n"; print "VertexLayers_v.findVerts()"
+		format "\n"; print "VertexLayers_v.findVertsOfNewIslands()"
 		this.vertex_count = getNumVerts obj.mesh
 
 		verts_all = #{1..(vertex_count)}

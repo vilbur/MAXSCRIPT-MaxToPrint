@@ -314,7 +314,7 @@ struct ConvexVertFinder_v
 	 */
 	on create do
 	(
-		format "\n"; print "ConvexVertFinder.onCreate()"
+		--format "\n"; print "ConvexVertFinder.onCreate()"
 
 		/* PREFILL DICTIONARIES WITH KEYS AND EMPTY VALUES */
 		for vert_type in verts_types do verts_by_type[vert_type]   = #{}

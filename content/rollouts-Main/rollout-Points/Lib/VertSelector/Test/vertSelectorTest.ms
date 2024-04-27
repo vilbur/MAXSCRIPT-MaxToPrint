@@ -95,13 +95,13 @@ if selection.count == 0 then
 /*------------------------------------------------------------------------------
 	SET CLASS INSTANCE
 --------------------------------------------------------------------------------*/
-VertSelector 	= VertSelector_v( selection[1] ) resolution:10
+VertSelector 	= VertSelector_v( selection[1] ) --resolution:10
 
 
 --VertSelector.resolution = 3
 --VertSelector.resolution = 5
 --VertSelector.resolution = 8
-VertSelector.resolution = 10
+--VertSelector.resolution = 10
 --VertSelector.resolution = 20
 
 --for points_in_square in VertSelector.points_grid do
@@ -111,7 +111,7 @@ VertSelector.resolution = 10
 
 
 --/* LOWEST VERTS - SELECT */
-VertSelector.getLowestVerts()
+VertSelector.findIslandsPerLayer()
 
 
 /* SINGLE VERTICAL PER ISLAND - SELECT */

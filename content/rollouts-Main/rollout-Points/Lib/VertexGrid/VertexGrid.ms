@@ -108,58 +108,6 @@ struct VertexGrid_v
 
 
 
-	/** Get ace islands by verts
-	  *
-	  * @param BitArray verts which faces will be sorted by islands
-	  *
-	  * @return #( #{..} ) array of vertex ids, each array are verts of one island
-	 */
-	function _sortVertsByIslands =
-	(
-		format "\n"; print "VertSelector_v._sortVertsByIslands()"
-
-		function facesShareVerts verts1 verts2 = not ( verts1 * verts2 ).isEmpty
-
-		tested_pairs	= #{} -- store stringified array of face id used in loop already
-		verts_islands	= #() -- #( #{ veret_ids } ) array of bitarrays of verts sorted by island the occupy
-		--face_islands	= #() -- #( #{ faces_ids } ) array of bitarrays of faces sorted by island the occupy
-		verts_per_faces	= #()
-
-
-		faces_by_verts = ( polyop.getFacesUsingVert obj  verts_data[#VERTS]) as Array
-
-		verts_per_faces = for face_id in faces_by_verts collect polyop.getVertsUsingFace obj #{face_id}
-
-		timer_start = timeStamp()
-
-		for f = 1 to faces_by_verts.count do
-		(
-			face_joined = true
-
-			for i = 1 to verts_islands.count do
-				if facesShareVerts (verts_islands[i]) (verts_per_faces[f]) then
-				(
-					verts_islands[i] +=  verts_per_faces[f]
-
-					/* CURENTLY NOT NEEDED, GET FACE IDS BY ISLAND */
-					--append face_islands[i] faces_by_verts[f]
-
-					face_joined = false
-				)
-
-			if face_joined then
-			(
-					/* CURENTLY NOT NEEDED, GET FACE IDS BY ISLAND */
-				--append face_islands #(faces_by_verts[f])
-
-				append verts_islands verts_per_faces[f]
-			)
-
-		)
-
-		verts_islands --return
-	),
-
 
 	/** Check selection ingerity
 	 */
