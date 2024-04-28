@@ -52,7 +52,8 @@ struct VertexLayers_v
 		--format "bottom_verts: %\n" bottom_verts
 
 		--verts_process = bottom_verts * convex_verts * visible_verts
-		verts_process = polyop.getVertSelection obj
+		--verts_process = polyop.getVertSelection obj
+		verts_process = if (verts_sel = polyop.getVertSelection obj ).numberSet > 0 then verts_sel else verts_all
 
 		verts_process *= visible_verts
 

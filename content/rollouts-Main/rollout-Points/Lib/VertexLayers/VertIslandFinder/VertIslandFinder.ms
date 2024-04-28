@@ -1,14 +1,8 @@
-/** Ver island finder
+filein( getFilenamePath(getSourceFileName()) + "/VertIslandFinder/VertIslandFinder.ms" )	--"./VertIslandFinder/VertIslandFinder.ms"
 
-	1) Loop each layer
-	2) Get verts in each layer
-	3) Find how many mesh island exsits
-
-
-	4) Test if new or old island - in old, then faces exist in all island
-
+/**
  */
-struct VertIslandFinder_v
+struct VertexLayers_v
 (
 	/* construct */
 	obj,
@@ -16,361 +10,154 @@ struct VertIslandFinder_v
 	/* required */
 
 	/* properties */
-	islands_all	= #(), -- #( #{ veret_ids } ) array of faceverts of verts sorted by island the occupy
+	vertex_count,
+	verts_all,
+	verts_process, -- canditate for supports
+	verts_pos,
+	verts_layers, -- #( #{3..8}, 2 ) vertex numbers in layer, if layer is empty, then layer index is stored
 
-	new_islands = #(),
+	verts_support = #{},	-- final verts used for supports
 
-	/* private */
+	bbox,
+	layer_height = 0.05, -- height of print layer in mm
+
 	/* dependency */
+	VertIslandFinder,
+
 	/* reference */
 	/* inhered */
-
-
-	/** GET NEW ISLANDS PER LAYER
-	  *
-	  * Loop each print layer and search for new islands_all
-	  *
-	  * This method is usefel up to 100k vertex count, higher vertex count is slow
-	  * Use lots of RAM memory
-	  *
-	  * @return #( #{ verts of new islands_all } )
+	/** Find points
 	 */
-	function getNewIslandsPerLayer verts_all verts_used verts_layers =
+	function findVertsOfNewIslands =
 	(
-		format "\n"; print "SupportVertexFinder_v.getNewIslandsPerLayer()"
+		format "\n"; print "VertexLayers_v.findVertsOfNewIslands()"
+		this.vertex_count = getNumVerts obj.mesh
 
-		layers_count = verts_layers.count
+		verts_all = #{1..(vertex_count)}
+		format "VERTEX_COUNT: %\n" vertex_count
 
-		verts_processed = #{}
+		/* GET VERTS WITH NORMAL POINTING DOWN */
+		--bottom_verts = this.getBottom()
 
-		verts_above = copy verts_all
+		/* GET ONLY CONVEX VERTS */
+		--convex_verts = this.selectConvex()
 
-		for layer = 1 to layers_count where classOf ( all_verts_in_layer = verts_layers[layer] ) == BitArray do -- layer has not verts if item is integer ( layer number )
+		visible_verts = -( polyop.getHiddenVerts obj)
+
+
+		polyop.setVertColor obj.baseobject 0 verts_all white
+
+
+		--format "convex_verts: %\n" convex_verts
+		--format "bottom_verts: %\n" bottom_verts
+--
+		--verts_process = bottom_verts * convex_verts * visible_verts
+		verts_process = if (verts_sel = polyop.getVertSelection obj ).numberSet > 0 then verts_sel else verts_all
+
+		verts_process *= visible_verts
+
+		verts_layers = this._sortVertsToLayers(verts_process)
+		format "verts_layers: %\n" verts_layers
+
+		GET_ISLANDS = timeStamp()
+
+		--VertIslandFinder.analyzeLayersByDetach(verts_all)(verts_process)(verts_layers)
+		VertIslandFinder.getNewIslandsPerLayer(verts_all)(verts_process)(verts_layers)
+
+		--format "\n GET_ISLANDS: % ms\n" (( timeStamp()) - GET_ISLANDS)
+		--format "\n GET_ISLANDS: % seconds\n" ((( timeStamp()) - GET_ISLANDS) / 1000.0)
+
+		--format "\n analyzeLayers: % seconds\n" ((( timeStamp()) - analyzeLayers) / 1000.0)
+		--format "\n analyzeLayers: % ms\n" (( timeStamp()) - analyzeLayers)
+
+
+		--format "verts_process: %\n" verts_process
+
+
+		--this.selectVerts(bottom_verts * convex_verts * visible_verts)
+
+
+		--this.selectVerts(bottom_verts)
+
+		--this.selectVerts(verts_process)
+
+		--this.selectVerts(convex_verts)
+
+		--this.selectVerts( verts_layers[1]  )
+		--
+		--this.selectVerts( verts_layers[1] * verts_process )
+		VertIslandFinder.new_islands --return
+
+	),
+
+
+	/** Set verts positions
+	 */
+	function _getVertsPositions =
+	(
+		format "\n"; print "VertDataGetter_v._getVertsPositions()"
+		in coordsys world meshop.getVerts obj.mesh verts_all node:obj
+	),
+
+	/** Sort verts to layers
+	 */
+	function _sortVertsToLayers verts_process =
+	(
+		format "\n"; print "VertexLayers_v._sortVertsToLayers()"
+		--fn compareZpos pos1 pos2 = if pos1.z < pos2.z then -1 else 1
+		verts_in_layers = #{}
+
+		verts_pos = this._getVertsPositions()
+
+		if verts_process.numberSet == verts_all.numberSet then
 		(
-			--format "\n==============\nlayer: %\n" layer
-			if mod layer 100 == 0 then
-				(format "layer: % of: %\n" layer layers_count)
-			vert_islands_in_layer = #()
+			bbox = nodeGetBoundingBox obj ( Matrix3 1)
 
-			verts_above -= all_verts_in_layer
-			/* GET FACES IN LAYER */
-			faces_in_layer = polyop.getFacesUsingVert obj all_verts_in_layer
+			pos_z_min = bbox[1].z
 
-			/* GET VERTS PER FACE */
-			--faceverts_in_layer = for face_id in faces_in_layer collect polyop.getVertsUsingFace obj face_id   -- ( #{1..4}, #{2,4,5,6} ) -- faces definded by verts
-			faceverts_in_layer = for face_id in faces_in_layer collect ( polyop.getVertsUsingFace obj face_id ) - verts_above -- ( #{1..4}, #{2,4,5,6} ) -- faces definded by verts
+			mesh_height = bbox[2].z - pos_z_min
 
-			this._mergeBitArraysbySharedBits (faceverts_in_layer) &vert_islands_in_layer
-
-			--faceverts_in_layer_used = for facevert in faceverts_in_layer where ( used_verts = facevert * verts_used ).numberSet > 0 collect used_verts
-			--faceverts_in_layer_only = for facevert in faceverts_in_layer where ( facevert_in_layer = facevert * all_verts_in_layer ).numberSet > 0 collect facevert_in_layer
-
-			--this._mergeBitArraysbySharedBits (faceverts_in_layer) &vert_islands_in_layer --return vert_islands_in_layer
-			--format "\n"
-			--format "vert_islands_in_layer: %\n" vert_islands_in_layer
-			--format "faceverts_in_layer_only: %\n" faceverts_in_layer_only
-			--format "islands_all: %\n" islands_all
-
-			/* ADD LAYER TO ALL LAYERS */
-			this._mergeBitArraysbySharedBits (vert_islands_in_layer) (&islands_all)
-			--format "islands_all: %\n" islands_all
-			--format "verts_processed: %\n" verts_processed
-
-			for verts_island in islands_all where (verts_island * verts_processed ).isEmpty do
-				append this.new_islands (verts_island * all_verts_in_layer)
-
-
-			--format "this.new_islands: %\n" this.new_islands
-			verts_processed += all_verts_in_layer
-
-			--format "\ngetLayer: %ms 	verts count: % islands_all count: % verts in layer: %" (( timeStamp()) - getLayer) all_verts_in_layer.numberSet islands_all.count all_verts_in_layer
-			--format "getLayer: % seconds\n" ((( timeStamp()) - getLayer) / 1000.0)
-			--format "this.new_islands: %\n" this.new_islands
+			verts_in_layers = copy verts_all
 		)
-
-		--format "\n\nNEW_ISLANDS: %\n" this.new_islands
-
-		delete Helpers -- DEV
-
-		for new_island in this.new_islands do
-			this._getCenterOfIsland (new_island)
-
-		gc light:true
-
-		this.new_islands --return
-	),
-
-	/** Analyze layers
-	 */
-	function analyzeLayersByDetach verts_all verts_used verts_layers =
-	(
-		format "\n"; print "SupportVertexFinder_v.analyzeLayersByDetach()"
-		format "vertex count: %\n" verts_all.numberSet
-
-		layers_count = verts_layers.count
-
-		--getFacesUsingVert = polyop.getFacesUsingVert
-		--getVertsUsingFace = polyop.getVertsUsingFace
-
-		max create mode
-
-		with redraw off
+		else
 		(
-			for layer = 1 to layers_count where classOf ( all_verts_in_layer = verts_layers[layer] ) == BitArray do -- layer has not verts if item is integer ( layer number )
-			(
-				----vert_color.hue = ( random 0 255 )
-				--format "\n==============\nlayer: %\n" layer
+			verts_pos_z = for pos in verts_pos collect pos.z
 
-				if mod layer 100 == 0 then
-					(format "layer: % of: %\n" layer layers_count)
+			pos_z_min = amin verts_pos_z
+			pos_z_max = amax verts_pos_z
 
-				verts_used_in_layer = all_verts_in_layer * verts_used
+			mesh_height = pos_z_max - pos_z_min
 
-				--format "ISLANDS: %\n" islands_all
-
-				/* GET FACES IN LAYER */
-				faces_in_layer = polyop.getFacesUsingVert obj all_verts_in_layer
-				--faces_in_layer = getFacesUsingVert obj all_verts_in_layer
-				--format "faces_in_layer: %\n" faces_in_layer
-
-				face_islands_in_layer = this.getElementsOfFaces (faces_in_layer)
-				--format "face_islands_in_layer: %\n" face_islands_in_layer
-
-				for face_island_in_layer in face_islands_in_layer do
-				(
-					island = polyop.getVertsUsingFace obj face_island_in_layer
-					--island = getVertsUsingFace obj face_island_in_layer
-					--format "\nisland: %\n" island
-
-					island_used = island * verts_used_in_layer -- island only from used verts
-					--format "island_used: %\n" island_used
-
-					if island_used.numberSet > 0 then
-					(
-						--intesections = for i = 1 to islands_all.count where (islands_all[i] * island_used).numberSet > 1 collect i
-						intesections = for i = 1 to islands_all.count where not (islands[i] * island_used).isEmpty collect i
-						--format "intesections: %\n" intesections
-
-						intesections_count = intesections.count
-
-						if intesections_count == 0 then
-							append this.new_islands island_used
-
-						case intesections_count of
-						(
-							/* JOIN TO EXISTING BITARRAY */
-							(1):	islands[intesections[1]] += island
-
-							/* ADD NEW BITARRAY */
-							(0): append islands island
-
-							/* MERGE MULTIPLE BITARRAYS */
-							default:(
-
-								for i = intesections.count to 1 by -1 do
-								(
-									index = intesections[i]
-
-									island += islands[index]
-
-									deleteItem islands index
-								)
-
-								append islands island
-							)
-						)
-					)
-				)
-
-			--gc light:true
-
-			)
-
-
-			islands_final = #()
-
-			this._mergeBitArraysbySharedBits (islands) &islands_final
-
-			format "\n\nNEW ISLANDS: %\n" this.new_islands
-			format "\n\nNEW ISLANDS COUNT: %\n" this.new_islands.count
-
-			format "\n\nISLANDS FINAL: %\n" islands_final
-
-			delete Helpers -- DEV
-
-			for new_island in this.new_islands do
-				this._getCenterOfIsland (new_island)
+			for vert in verts_process where ( vert_pos_z = verts_pos[vert].z ) >= pos_z_min and vert_pos_z <= pos_z_max do verts_in_layers[vert] = true
 		)
 
-		redrawViews()
+		layers_count = ceil ( mesh_height / layer_height)
 
-		--gc()
-	),
+		this.verts_layers = #{1..(layers_count + 1)} as Array
 
-
-	/** Detach method
-	 */
-	function getElementsOfFaces faces_of_verts =
-	(
-		--format "\n"; print ".detachMethod()"
-		--format "faces_of_verts: %\n" faces_of_verts
-		obj_snap = snapshot obj
-
-		convertTo obj_snap PolyMeshObject
-
-		polyop.detachFaces obj_snap faces_of_verts delete:true
-
-		local poGetElementsUsingFace = polyop.getElementsUsingFace
-
-		elements = #()
-
-		while not faces_of_verts.isEmpty do
-																										(
-			face = (faces_of_verts as array)[1]
-
-			element = poGetElementsUsingFace obj_snap #(face)
-
-			append elements element
-
-			faces_of_verts -= element
-		)
-
-		delete obj_snap
-
-		elements --return
-	),
-
-	/** Get center of island
-	 */
-	function _getCenterOfIsland verts =
-	(
-		--format "\n"; print "VertIslandFinder_v.getCenterOfIsland()"
-
-		pos_center = point3 0 0 0
-
-		positions = in coordsys world meshop.getVerts obj.mesh verts node:obj
-
-
-		for pos in positions do pos_center += pos
-
-		pos_center /= positions.count
-
-		Point pos:pos_center size:5 wirecolor:red
-
-	),
-
-	/**
-	  * @param BitArray verts which faces will be sorted by islands
-	  *
-	  * @return #( #{..} ) array of vertex ids, each array are verts of one island
-	 */
-	function _sortVertsByIslands face_ids_of_verts =
-	(
-		--format "\n"; print "VertSelector_v._sortVertsByIslands()"
-
-		--face_ids_of_verts = ( polyop.getFacesUsingVert obj verts_in_layer ) as Array
-		--format "face_ids_of_verts: %\n" face_ids_of_verts
-
-		faceverts = for face_id in face_ids_of_verts collect polyop.getVertsUsingFace obj #{face_id} -- ( #{1..4}, #{2,4,5,6} ) -- faces definded by verts
-
-		--format "faceverts: %\n" faceverts
-
-		this._mergeBitArraysbySharedBits #() (&faceverts)   --return vert_islands_in_layer
-	),
-
-
-	private
-
-
-	/** Merge bit arrays wich shared bits
-	  *
-	  * @param #( #{} ) bitarrays Array of bittarays
-	 */
-	function _mergeBitArraysbySharedBits bitarrays &bitarrays_merged =
-	(
-		--format "\n"; print ".mergeBitArraysWithSharedBits()"
-		--format "bitarrays_merged: %\n" bitarrays_merged
-		--format "bitarrays: %\n" bitarrays
-
-		/** Merge bit arrays in bit array
-		 */
-		function mergeBitArraysInBitArray bit_array matches &bitarrays_merged =
+		for vert in verts_in_layers do
+		--for v = 1 to verts_pos.count do
 		(
-			--format "\n"; print ".mergeBitArraysInBitArray()"
-			for m = matches.count to 1 by -1 do
-			(
-				bit_array += bitarrays_merged[matches[m]]
+			layer = floor ( (verts_pos[vert].z - pos_z_min) / layer_height) + 1
 
-				deleteItem bitarrays_merged matches[m]
-			)
+			if superClassOf this.verts_layers[layer] == Number then
+				this.verts_layers[layer] = #{vert} -- get first ert in layer
 
-			append bitarrays_merged bit_array
-
-			bitarrays_merged --return
+			else
+				this.verts_layers[layer][vert] = true
 		)
 
-		for bit_array in bitarrays do
-		(
-			--format "\n--------------------\n"
-			--format "bit_array: %\n" bit_array
-
-			matches =  for i = 1 to bitarrays_merged.count where not ( bitarrays_merged[i] * bit_array ).isEmpty collect i
-			--format "matches: %\n" matches
-
-			case matches.count  of
-			(
-				/* ADD NEW BITARRAY */
-				(0):	append bitarrays_merged bit_array
-
-				/* JOIN TO EXISTING BITARRAY */
-				(1): bitarrays_merged[matches[1]] += bit_array
-
-				/*  (matches.count > 1)  MERGE MULTIPLE BITARRAYS if more than one amtch found */
-				default: mergeBitArraysInBitArray(bit_array)(matches)(&bitarrays_merged)
-			)
-		)
-
-		bitarrays_merged --return
-	),
-
-
-	/** Search vert in islands
-	 */
-	function _getSharedIslands vert =
-	(
-		--format "\n"; print "VertIslandFinder_v._getSharedIslands()"
-
-		function facesShareVerts verts1 verts2 = not ( verts1 * verts2 ).isEmpty
-
-		for i = 1 to islands.count where islands[i][vert] collect i
-
-	),
-
-	/** Merge islands
-	 */
-	function _mergeIslands islands_to_merge vert =
-	(
-		--format "\n"; print "VertIslandFinder_v._mergeIslands()"
-
-		merged_island = #{vert}
-
-		for i = islands_to_merge.count to 1 by -1 do
-		(
-			merged_island += islands[i]
-
-			deleteItem islands i
-		)
-
-		 append islands merged_island
+		--format "VERTS_LAYERS: %\n" verts_layers
+		--format "VERTS_LAYERS: %\n" verts_layers.count
+		verts_layers --return
 	),
 
 	/**
 	 */
 	on create do
 	(
-		--format "\n"; print "VertIslandFinder.onCreate()"
-		--for prop in #(  ) where getProperty this prop == undefined do -- CHECK CONSTRUCT PROPERTIES -- Array of this struct properties necessary to run
-		--	throw ("\n\n\nUNDEFINED CONSTRUCT PROPERTY\n\n\nSTRUCT:\n\n"+ ((filterString( classof this as string )"(:")[2]) +"\n\n\nPROPERTY:\n\n"+ prop )
+		--format "\n"; print "VertexLayers.onCreate()"
+		VertIslandFinder = VertIslandFinder_v(obj)
 	)
 
 )
