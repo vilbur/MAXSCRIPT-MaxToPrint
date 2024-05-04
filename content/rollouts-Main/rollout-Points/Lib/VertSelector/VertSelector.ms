@@ -73,15 +73,19 @@ struct VertSelector_v
 	 */
 	function findIslandsPerLayer =
 	(
-		format "\n"; print "VertSelector_v.findIlandsPerLayer()"
+		--format "\n"; print "VertSelector_v.findIlandsPerLayer()"
 
+		findIlandsPerLayer = timeStamp()
+		--format "findIlandsPerLayer: % ms\n" (( timeStamp()) - findIlandsPerLayer)
 		new_islands = VertexLayers.findVertsOfNewIslands()
-		format "new_islands: %\n" new_islands
+		format "findIlandsPerLayer: % seconds\n" ((( timeStamp()) - findIlandsPerLayer) / 1000.0)
+		VertexLayers 	= VertexLayers_v( obj )
 
-		for new_island in new_islands do
-			this.sel_modified += new_island
-		format "this.sel_modified: %\n" this.sel_modified
-		this._selectVertsAndReturn(true) --return
+		format "new_islands: %\n" new_islands
+		--for new_island in new_islands do
+			--this.sel_modified += new_island
+		--format "this.sel_modified: %\n" this.sel_modified
+		--this._selectVertsAndReturn(true) --return
 
 	),
 

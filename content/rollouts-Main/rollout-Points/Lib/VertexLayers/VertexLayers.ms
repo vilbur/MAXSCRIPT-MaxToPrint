@@ -30,11 +30,16 @@ struct VertexLayers_v
 	 */
 	function findVertsOfNewIslands =
 	(
-		format "\n"; print "VertexLayers_v.findVertsOfNewIslands()"
+		--format "\n"; print "VertexLayers_v.findVertsOfNewIslands()"
+
+		/* ========= DEV  ========= */
+		obj.EditablePoly.SetSelection #Vertex #{}
+
+
 		this.vertex_count = getNumVerts obj.mesh
 
 		verts_all = #{1..(vertex_count)}
-		format "VERTEX_COUNT: %\n" vertex_count
+		--format "VERTEX_COUNT: %\n" vertex_count
 
 		/* GET VERTS WITH NORMAL POINTING DOWN */
 		--bottom_verts = this.getBottom()
@@ -64,10 +69,16 @@ struct VertexLayers_v
 
 		GET_ISLANDS = timeStamp()
 
-		--VertIslandFinder.analyzeLayersByDetach(verts_all)(verts_process)(verts_layers)
-		VertIslandFinder.getNewIslandsPerLayer(verts_all)(verts_process)(verts_layers)
+		VertIslandFinder.layer_height	= layer_height
+		VertIslandFinder.verts_all	= verts_all
+		VertIslandFinder.verts_process	= verts_process
+		VertIslandFinder.verts_layers	= verts_layers
 
-		format "\n GET_ISLANDS: % ms\n" (( timeStamp()) - GET_ISLANDS)
+
+		--VertIslandFinder.analyzeLayersByDetach(verts_all)(verts_process)(verts_layers)
+		VertIslandFinder.getNewIslandsPerLayer()
+
+
 		--format "\n GET_ISLANDS: % seconds\n" ((( timeStamp()) - GET_ISLANDS) / 1000.0)
 
 		--format "\n analyzeLayers: % seconds\n" ((( timeStamp()) - analyzeLayers) / 1000.0)
@@ -111,7 +122,8 @@ struct VertexLayers_v
 
 		min_z = bbox[1].z
 
-		obj_height = bbox[2].z - min_z
+		--obj_height = bbox[2].z - min_z
+		obj_height = bbox[2].z
 
 		layers_count = ceil (obj_height / layer_height)
 
@@ -123,7 +135,8 @@ struct VertexLayers_v
 		--format "layers_count: %\n" layers_count
 		for v = 1 to verts_pos.count do
 		(
-			layer = floor ( (verts_pos[v].z - min_z) / layer_height) + 1
+			--layer = floor ( (verts_pos[v].z - min_z) / layer_height) + 1
+			layer = floor ( verts_pos[v].z / layer_height) + 1
 
 			if superClassOf this.verts_layers[layer] == Number then
 				this.verts_layers[layer] = #{v} -- get first ert in layer
