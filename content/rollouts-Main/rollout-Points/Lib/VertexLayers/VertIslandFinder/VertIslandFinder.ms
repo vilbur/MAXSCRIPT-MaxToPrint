@@ -47,76 +47,80 @@ struct VertIslandFinder_v
 	(
 		format "\n"; print "SupportVertexFinder_v.getNewIslandsPerLayer()"
 
-
-
 		layers_count = verts_layers.count
 		format "layers_count: %\n" layers_count
 		--verts_processed = #{}
 
 		verts_above = copy verts_all
 
-		--first_layer = this._getFirstLayerIslands()
 		layers_with_verts = for layer = 1 to layers_count where classOf ( all_verts_in_layer = verts_layers[layer] ) == BitArray and not ( all_verts_in_layer * verts_process ).isEmpty  collect layer -- layer has not verts if item is integer ( layer number )
 
-		--format "layers_with_verts: %\n" layers_with_verts
-		--format "layers_with_verts.count: %\n" layers_with_verts.count
-		--format "islands_all: %\n" islands_all
-		--format "faces_processed: %\n" faces_processed
-		--for layer = 1 to layers_count where classOf ( all_verts_in_layer = verts_layers[layer] ) == BitArray do -- layer has not verts if item is integer ( layer number )
-		--if not ( all_verts_in_layer * verts_process ).isEmpty then
-		--for layer = first_layer + 1 to layers_count where classOf ( all_verts_in_layer = verts_layers[layer] ) == BitArray and not ( all_verts_in_layer * verts_process ).isEmpty  do -- layer has not verts if item is integer ( layer number )
-
-		--elements_count_changed = this._sliceLayers(layers_with_verts)
-		--format "elements_count_changed: %\n" elements_count_changed
-		--format "elements_count_changed.count: %\n" elements_count_changed.count
-
-		verts_islands_layers = #{}
+		faces_buffer     = Dictionary #integer
 
 		for layer in layers_with_verts do -- layer has not verts if item is integer ( layer number )
 		(
-
-			--verts_islands_layers += verts_layers[layer]
+			--format "layer: %\n" layer
 			format "\n==============================\nlayer: %\n" layer
 			--if mod layer 100 == 0 then
 				--(format "layer: % of: %\n" layer layers_count)
 
+			faces_complete = #{}
 
 			all_verts_in_layer = verts_layers[layer]
 
 			verts_above -= all_verts_in_layer
 
 			--vert_islands_in_layer = this.getVertexIslands (all_verts_in_layer)
-			--format "faces_processed: %\n" faces_processed
+			format "all_verts_in_layer: %\n" all_verts_in_layer
+			/* GET ALL FACES IN LAYER */
 			faces_in_layer = polyop.getFacesUsingVert obj all_verts_in_layer
-			--format "faces_in_layer: %\n" faces_in_layer
+			format "faces_in_layer: %\n" faces_in_layer
 
-			faceverts_in_layer = for face_id in faces_in_layer collect polyop.getVertsUsingFace obj face_id   -- ( #{1..4}, #{2,4,5,6} ) -- faces definded by verts
-			--format "faceverts_in_layer: %\n" faceverts_in_layer
+			/* GET ONLY NEW FACES IN LAYER - avoid repetion of faces across layers */
+			new_faces_in_layer = faces_in_layer - faces_processed
+			--format "new_faces_in_layer: %\n" new_faces_in_layer
 
-			for i = 1 to faceverts_in_layer.count do faceverts_in_layer[i] -= verts_above
-			--format "faceverts_in_layer: %\n" faceverts_in_layer
+			--faceverts_new = for face_id in new_faces_in_layer collect polyop.getVertsUsingFace obj face_id   -- ( #{1..4}, #{2,4,5,6} ) -- faces definded by verts
 
-			this._mergeBitArraysbySharedBits (faceverts_in_layer)
-			format "faceverts_in_layer: %\n" faceverts_in_layer
+			/* ADD FACES BUFFER */
+			for face_id in new_faces_in_layer do
+				faces_buffer[face_id] = polyop.getVertsUsingFace obj face_id
+
+			format "faces_buffer.keys: %\n" faces_buffer.keys
+			/* REMOVE VERTS IN LAYERS ABOVE - (slice of object by current layer happens here ) */
+			faceverts = for face_id in faces_in_layer collect
+			(
+				vets_of_face = faces_buffer[face_id]
+
+				vets_of_face_used = faces_buffer[face_id] - verts_above
+
+				/* GET FACE FOR REWMOVE FROM BUFFER, IF ALL VERTS OF THAT FACE HAS BEEN PROCESSED */
+				if vets_of_face.numberSet == vets_of_face_used.numberSet then
+					faces_complete[face_id] = true
+
+				vets_of_face_used --return
+			)
+
+			this._mergeBitArraysbySharedBits (faceverts)
+			--format "faceverts: %\n" faceverts
+			--format "faceverts.count: %\n" faceverts.count
 
 			--format "islands_all: %\n" islands_all
-			join islands_all faceverts_in_layer
+			join islands_all faceverts
 
 			this._mergeBitArraysbySharedBits (islands_all)
-			format "islands_all: %\n" islands_all
+		--	format "islands_all: %\n" islands_all
 
+			/* REMOVE FULLY PROCESSED FACES FROM BUFFER */
 
-			--new_faces_in_layer = faces_in_layer - faces_processed
-			--format "new_faces_in_layer: %\n" new_faces_in_layer
-			--format "faces_processed: %\n" faces_processed
+			for face_to_remove in faces_complete do
+				removeDictValue faces_buffer face_to_remove
 
-			--faces_processed += faces_in_layer
+			faces_processed += faces_in_layer
 
 			for verts_island in islands_all where (verts_island * verts_processed ).isEmpty do
 				append this.new_islands verts_island
-				--append this.new_islands (verts_island * verts_process)
 
-			format "this.new_islands: %\n" this.new_islands
 			verts_processed += all_verts_in_layer
 
 		)
@@ -128,7 +132,7 @@ struct VertIslandFinder_v
 		for new_island in this.new_islands do
 			this._getCenterOfIsland (new_island)
 
-		----gc light:true
+		gc light:true
 		--gc delayed:true
 
 		this.new_islands --return
