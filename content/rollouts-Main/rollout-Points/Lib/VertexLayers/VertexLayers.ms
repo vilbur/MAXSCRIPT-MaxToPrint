@@ -32,8 +32,8 @@ struct VertexLayers_v
 	(
 		--format "\n"; print "VertexLayers_v.findVertsOfNewIslands()"
 
-		/* ========= DEV  ========= */
-		obj.EditablePoly.SetSelection #Vertex #{}
+		/* ========= DEV DESELECT ALL VERTS ========= */
+		--obj.EditablePoly.SetSelection #Vertex #{}
 
 
 		this.vertex_count = getNumVerts obj.mesh
@@ -50,8 +50,9 @@ struct VertexLayers_v
 		visible_verts = -( polyop.getHiddenVerts obj)
 
 
-		polyop.setVertColor obj.baseobject 0 verts_all white
+		--polyop.setVertColor obj.baseobject 0 verts_all white
 
+		verts_sel = polyop.getVertSelection obj
 
 		--format "convex_verts: %\n" convex_verts
 		--format "bottom_verts: %\n" bottom_verts
@@ -60,6 +61,9 @@ struct VertexLayers_v
 		--verts_process = polyop.getVertSelection obj
 		verts_process = if (verts_sel = polyop.getVertSelection obj ).numberSet > 0 then verts_sel else verts_all
 
+		--format "verts_all: %\n" verts_all
+		--format "verts_sel: %\n" verts_sel
+		--format "verts_process: %\n" verts_process
 		verts_process *= visible_verts
 
 		verts_pos = this._getVertsPositions()
@@ -69,9 +73,8 @@ struct VertexLayers_v
 
 		GET_ISLANDS = timeStamp()
 
-		VertIslandFinder.layer_height	= layer_height
 		VertIslandFinder.verts_all	= verts_all
-		VertIslandFinder.verts_process	= verts_process
+		VertIslandFinder.layer_height	= layer_height
 		VertIslandFinder.verts_layers	= verts_layers
 
 
@@ -116,6 +119,91 @@ struct VertexLayers_v
 	/** Sort verts to layers
 	 */
 	function _sortVertsToLayers =
+	(
+		format "\n"; print "VertexLayers_v._sortVertsToLayers()"
+
+		/* SET ALL VERTS TO LAYERS */
+		if verts_process.numberSet == verts_all.numberSet then
+		(
+			print "SET ALL VERTS TO LAYERS"
+			bbox = nodeGetBoundingBox obj ( Matrix3 1)
+
+			pos_z_min = bbox[1].z
+
+			mesh_height = bbox[2].z - pos_z_min
+
+			VertIslandFinder.verts_process	= verts_process
+
+			verts_fit = copy verts_all
+		)
+		/* SET ONLY SELECTED VERTS TO LAYERS */
+		else
+		(
+			print "SET ONLY SELECTED VERTS TO LAYERS"
+			verts_above	= #{}
+			verts_fit	= #{}
+			verts_bellow	= #{}
+
+			verts_pos_z = for vert in verts_process collect verts_pos[vert].z
+
+			pos_z_min = amin verts_pos_z
+			pos_z_max = amax verts_pos_z
+
+			mesh_height = pos_z_max - pos_z_min
+			--for vert in verts_process where ( vert_pos_z = verts_pos[vert].z ) >= pos_z_min and vert_pos_z <= pos_z_max do verts_in_layers[vert] = true
+
+			for vert in verts_all do
+			(
+				vert_pos_z = verts_pos[vert].z
+
+				case of
+				(
+					(vert_pos_z > pos_z_max ):	verts_above[vert]	= true
+					(vert_pos_z < pos_z_min ):	verts_bellow[vert]	= true
+					default:	verts_fit[vert]	= true
+				)
+			)
+
+			VertIslandFinder.verts_above = verts_above
+
+			VertIslandFinder.setVertsProcessed(verts_bellow)
+		)
+
+		layers_count = ceil ( mesh_height / layer_height)
+		format "LAYERS_COUNT: %\n" layers_count
+
+		this.verts_layers  = #{1..(layers_count + 1)} as Array
+
+		for vert in verts_fit do
+		--for v = 1 to verts_pos.count do
+		(
+			layer = floor ( (verts_pos[vert].z - pos_z_min) / layer_height) + 1
+
+			if superClassOf this.verts_layers [layer] == Number then
+				this.verts_layers [layer] = #{vert} -- get first vert in layer
+
+			else
+				this.verts_layers [layer][vert] = true
+		)
+
+		format "verts_above: %\n" verts_above
+		format "verts_fit: %\n" verts_fit
+		format "verts_bellow: %\n" verts_bellow
+
+		--VertIslandFinder.verts_above = verts_above
+
+			--verts_above	= #{}
+			--verts_fit	= #{}
+			--verts_bellow	= #{}
+
+		--format "VERTS_LAYERS: %\n" verts_layers
+		--format "VERTS_LAYERS: %\n" verts_layers.count
+		--VertIslandFinder.verts_layers = verts_layers --return
+	),
+
+	/** Sort verts to layers
+	 */
+	function _sortVertsToLayersOld =
 	(
 		format "\n"; print "VertexLayers_v._sortVertsToLayers()"
 		bbox = nodeGetBoundingBox obj ( Matrix3 1)
