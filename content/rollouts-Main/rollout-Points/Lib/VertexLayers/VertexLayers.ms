@@ -74,7 +74,8 @@ struct VertexLayers_v
 		GET_ISLANDS = timeStamp()
 
 		VertIslandFinder.verts_all	= verts_all
-		VertIslandFinder.layer_height	= layer_height
+		VertIslandFinder.verts_process	= verts_process
+		--VertIslandFinder.layer_height	= layer_height
 		VertIslandFinder.verts_layers	= verts_layers
 
 
@@ -130,9 +131,8 @@ struct VertexLayers_v
 
 			pos_z_min = bbox[1].z
 
-			mesh_height = bbox[2].z - pos_z_min
-
-			VertIslandFinder.verts_process	= verts_process
+			--mesh_height = bbox[2].z - pos_z_min
+			mesh_height = bbox[2].z
 
 			verts_fit = copy verts_all
 		)
@@ -149,7 +149,8 @@ struct VertexLayers_v
 			pos_z_min = amin verts_pos_z
 			pos_z_max = amax verts_pos_z
 
-			mesh_height = pos_z_max - pos_z_min
+			--mesh_height = pos_z_max - pos_z_min
+			mesh_height = pos_z_max
 			--for vert in verts_process where ( vert_pos_z = verts_pos[vert].z ) >= pos_z_min and vert_pos_z <= pos_z_max do verts_in_layers[vert] = true
 
 			for vert in verts_all do
@@ -169,73 +170,31 @@ struct VertexLayers_v
 			VertIslandFinder.setVertsProcessed(verts_bellow)
 		)
 
+
 		layers_count = ceil ( mesh_height / layer_height)
 		format "LAYERS_COUNT: %\n" layers_count
 
-		this.verts_layers  = #{1..(layers_count + 1)} as Array
+		this.verts_layers  = #{1..(layers_count + 1)} as Array -- create with
 
 		for vert in verts_fit do
 		--for v = 1 to verts_pos.count do
 		(
-			layer = floor ( (verts_pos[vert].z - pos_z_min) / layer_height) + 1
+			--layer = floor ( (verts_pos[vert].z - pos_z_min) / layer_height) + 1
+			layer = ceil ( (verts_pos[vert].z ) / layer_height) + 1
 
-			if superClassOf this.verts_layers [layer] == Number then
-				this.verts_layers [layer] = #{vert} -- get first vert in layer
+			if classOf this.verts_layers [layer] == BitArray then
+				this.verts_layers [layer][vert] = true
 
 			else
-				this.verts_layers [layer][vert] = true
+				this.verts_layers [layer] = #{vert} -- set first vert in layer
 		)
 
 		format "verts_above: %\n" verts_above
 		format "verts_fit: %\n" verts_fit
 		format "verts_bellow: %\n" verts_bellow
 
-		--VertIslandFinder.verts_above = verts_above
-
-			--verts_above	= #{}
-			--verts_fit	= #{}
-			--verts_bellow	= #{}
-
-		--format "VERTS_LAYERS: %\n" verts_layers
-		--format "VERTS_LAYERS: %\n" verts_layers.count
-		--VertIslandFinder.verts_layers = verts_layers --return
 	),
 
-	/** Sort verts to layers
-	 */
-	function _sortVertsToLayersOld =
-	(
-		format "\n"; print "VertexLayers_v._sortVertsToLayers()"
-		bbox = nodeGetBoundingBox obj ( Matrix3 1)
-
-		min_z = bbox[1].z
-
-		--obj_height = bbox[2].z - min_z
-		obj_height = bbox[2].z
-
-		layers_count = ceil (obj_height / layer_height)
-
-		this.verts_layers = #{1..(layers_count + 1)} as Array
-		----this.verts_layers = #()
-		--format "VERTS_LAYERS: %\n" verts_layers
-
-
-		--format "layers_count: %\n" layers_count
-		for v = 1 to verts_pos.count do
-		(
-			--layer = floor ( (verts_pos[v].z - min_z) / layer_height) + 1
-			layer = floor ( verts_pos[v].z / layer_height) + 1
-
-			if superClassOf this.verts_layers[layer] == Number then
-				this.verts_layers[layer] = #{v} -- get first ert in layer
-
-			else
-				this.verts_layers[layer][v] = true
-		)
-
-		format "VERTS_LAYERS: %\n" verts_layers
-		format "VERTS_LAYERS: %\n" verts_layers.count
-	),
 
 	/**
 	 */
