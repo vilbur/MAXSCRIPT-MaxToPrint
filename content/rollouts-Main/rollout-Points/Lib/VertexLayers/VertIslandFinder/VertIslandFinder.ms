@@ -22,7 +22,7 @@ struct VertIslandFinder_v
 	face_islands	= #(),
 	verts_layers	= #(),	-- each item is BitArray of verts in layer
 	verts_above	= #{},	-- store verts above last layer, or not yet iterated layers
-	verts_bellow	= #{},
+	--verts_bellow	= #{},
 	verts_processed	= #{},
 
 	faces_processed	= #{},
@@ -54,12 +54,10 @@ struct VertIslandFinder_v
 
 		verts_above = copy verts_all
 
-
 		layers_with_verts = for layer = 1 to verts_layers.count where classOf ( all_verts_in_layer = verts_layers[layer] ) == BitArray and not ( all_verts_in_layer * verts_process ).isEmpty  collect layer -- layer has not verts if item is integer ( layer number )
 
-		faces_buffer     = Dictionary #integer
-
 		used_layers_count = layers_with_verts.count
+
 
 		for layer in layers_with_verts do -- layer has not verts if item is integer ( layer number )
 		(
@@ -67,135 +65,49 @@ struct VertIslandFinder_v
 			--format "\n==============================\nlayer: %\n" layer
 			if mod layer 50 == 0 then (format "layer: % of: %\n" layer used_layers_count)
 
-			faces_complete = #{}
+			layer_verts_processed = #{}
 
 			all_verts_in_layer = verts_layers[layer]
 
 			verts_above  -= all_verts_in_layer
-			verts_bellow += all_verts_in_layer
 
-			--vert_islands_in_layer = this.getVertexIslands (all_verts_in_layer)
-		--	format "all_verts_in_layer: %\n" all_verts_in_layer
-			/* GET ALL FACES IN LAYER */
-			--faces_in_layer = polyop.getFacesUsingVert obj all_verts_in_layer
-		--	format "faces_in_layer: %\n" faces_in_layer
+			layer_verts_process = copy all_verts_in_layer
 
-			/* GET ONLY NEW FACES IN LAYER - avoid repetion of faces across layers */
-			--new_faces_in_layer = faces_in_layer - faces_processed
-			--format "new_faces_in_layer: %\n" new_faces_in_layer
 
-			--faceverts_new = for face_id in new_faces_in_layer collect polyop.getVertsUsingFace obj face_id   -- ( #{1..4}, #{2,4,5,6} ) -- faces definded by verts
-		--
-		--	/* ADD FACES BUFFER */
-		--	for face_id in new_faces_in_layer do
-		--		faces_buffer[face_id] = polyop.getVertsUsingFace obj face_id
-		--
-		--	--islands_in_layer	= #()
-		----	format "faces_buffer.keys: %\n" faces_buffer.keys
-		--	/* REMOVE VERTS IN LAYERS ABOVE - (slice of object by current layer happens here ) */
-		--	--faceverts = for face_id in faces_in_layer collect
-		--	for face_id in faces_in_layer do
-		--	(
-		--		vets_of_face = faces_buffer[face_id]
-		--
-		--		vets_of_face_used = ( vets_of_face  * verts_process ) - verts_above
-		--		--vets_of_face_used = vets_of_face  - verts_above
-		--
-		--		/* GET FACE FOR REWMOVE FROM BUFFER, IF ALL VERTS OF THAT FACE HAS BEEN PROCESSED */
-		--		if vets_of_face.numberSet == vets_of_face_used.numberSet then
-		--			faces_complete[face_id] = true
-		--
-		--		append islands_all vets_of_face_used
-		--
-		--		islands_all = this._mergeBitArraysbySharedBits (islands_all)
-		--
-		--		--vets_of_face_used --return
-		--	)
-		--		format "islands_all.count: %\n" islands_all.count
-		--
-		--	/* REMOVE FULLY PROCESSED FACES FROM BUFFER */
-		--
-		--	for face_to_remove in faces_complete do
-		--		removeDictValue faces_buffer face_to_remove
-		--
-		--
-			--format "all_verts_in_layer: %\n" all_verts_in_layer
+			vert = ( layer_verts_process as Array )[1]
 
-			--process_verts_in_layer = all_verts_in_layer * verts_process
-			--process_verts_in_layer = copy all_verts_in_layer
 
-			verts_process_in_layer = copy all_verts_in_layer
-
-			vert = ( verts_process_in_layer as Array )[1]
-
-			while not verts_process_in_layer.isEmpty do
-			--while vert != undefined do
+			while not layer_verts_process.isEmpty do
 			(
-			--	format "vert: %\n" vert
+				faces_of_vert	= polyop.getFacesUsingVert obj vert
+				verts_of_faces	= polyop.getVertsUsingFace obj faces_of_vert
 
-				faces_of_vert = polyop.getFacesUsingVert obj vert
+				verts_of_faces -= verts_above
 
-				verts_of_faces = polyop.getVertsUsingFace obj faces_of_vert
+				if ( verts_of_faces - layer_verts_processed ).numberSet > 0 then
+				(
+					append islands_all verts_of_faces
 
-				--verts_of_faces *= verts_process
-				verts_of_faces *= verts_bellow
+					this._mergeBitArraysbySharedBits (islands_all)
 
+					layer_verts_process	-= verts_of_faces
+					layer_verts_processed	+= verts_of_faces
 
-			--	format "verts_of_faces: %\n" verts_of_faces
+					next_verts = verts_of_faces - layer_verts_processed
 
-				append islands_all verts_of_faces
+					vert = (next_verts as Array )[1]
+				)
 
-				this._mergeBitArraysbySharedBits (islands_all)
-
-
-				verts_process_in_layer[vert] = false
-				--verts_processed_in_layer[vert] = false
-
-
-				next_verts = verts_of_faces * verts_process_in_layer
-				--format "verts_process_in_layer: %\n" verts_process_in_layer
-			--	format "next_verts: %\n" next_verts
-
-
-				vert =  if ( next_vert = (next_verts as Array )[1] ) != undefined then next_vert else (verts_process_in_layer as Array )[1]
-				--vert =   (all_verts_in_layer as Array )[1]
-
-
+				if vert == undefined then
+					vert = (layer_verts_process as Array )[1]
 			)
-
-
-			--format "islands_all: %\n" islands_all
-
-
-
-
-
-
-
-
-		--	this._mergeBitArraysbySharedBits (faceverts)
-		--	--format "faceverts: %\n" faceverts
-			--format "islands_in_layer.count: %\n" islands_in_layer.count
-		--
-		--	--format "islands_all: %\n" islands_all
-		--	islands_in_layer = this._mergeBitArraysbySharedBits (faceverts)
-		--
-		--
-		--	join islands_all islands_in_layer
-		--
-		--	--format "islands_all.count: %\n" islands_all.count
-		--	this._mergeBitArraysbySharedBits (islands_all)
-		--	--format "islands_all.count: %\n" islands_all.count
-		----	format "islands_all: %\n" islands_all
-		--
 
 
 			for verts_island in islands_all where (verts_island * verts_processed ).isEmpty do
 				append this.new_islands verts_island
 
-			--faces_processed += faces_in_layer
 			verts_processed	+= all_verts_in_layer
-			verts_process	-= verts_processed
+
 		)
 
 		format "\n------\n\n"
@@ -203,9 +115,18 @@ struct VertIslandFinder_v
 
 		delete Helpers -- DEV
 
+		obj.showVertexColors	= true
+		obj.vertexColorsShaded	= true
+
+		polyop.setVertColor obj.baseobject 0 verts_all white
+
 		for new_island in this.new_islands do
+		(
+			polyop.setVertColor obj.baseobject 0 (new_island) red
+
 			this._getCenterOfIsland (new_island)
 
+		)
 		--gc light:true
 		gc()
 		--gc delayed:true
@@ -531,7 +452,9 @@ struct VertIslandFinder_v
 
 		pos_center /= positions.count
 
-		Point pos:pos_center size:5 wirecolor:red
+		_Point = Point pos:pos_center size:5 wirecolor:red
+
+		_Point.parent = obj
 
 	),
 
