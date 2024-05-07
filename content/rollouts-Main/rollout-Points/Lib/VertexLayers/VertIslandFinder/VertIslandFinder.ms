@@ -48,11 +48,12 @@ struct VertIslandFinder_v
 	(
 		format "\n"; print "VertIslandFinder_v.getNewIslandsPerLayer()"
 
+		format "verts_all: %\n" verts_all
+		format "verts_process: %\n" verts_process
 		format "verts_process.numberSet: %\n" verts_process.numberSet
 		--format "layers_count: %\n" layers_count
 		--verts_processed = #{}
 		findIslandsPerLayer_timer = timeStamp()
-
 		if verts_above.isEmpty then
 			verts_above = copy verts_all
 
@@ -60,17 +61,20 @@ struct VertIslandFinder_v
 
 		used_layers_count = layers_with_verts.count
 
+		heap_before = heapFree
 
 		for layer in layers_with_verts do -- layer has not verts if item is integer ( layer number )
 		(
+
+			--format "\n==============================\nlayer: %\n" layer
 			--format "layer: %\n" layer
-			format "\n==============================\nlayer: %\n" layer
+
 			if mod layer 50 == 0 then (format "layer: % of: %\n" layer used_layers_count)
 
 			/* GET VERTS IN LAYER */
 			verts_in_layer = verts_layers[layer]
 		--	format "verts_in_layer: %\n" verts_in_layer
-			/* REMOVE VERTS FORM CURENT LAYER FROM VERTS ABOVE */
+			/* REMOVE VERTS FORM CURENT LAYER FROM VERTS ABOVE */c
 			verts_above  -= verts_in_layer
 
 			/* GET ALL FACES IN LAYER */
@@ -83,7 +87,8 @@ struct VertIslandFinder_v
 			verts_of_new_faces = ( polyop.getVertsUsingFace obj new_faces_in_layer ) * verts_in_layer
 
 			/* JOIN NEW FACES TO ALL ISLANDS */
-			this._joinVertsToIslands(verts_of_new_faces)
+			this._joinToIslandsByVerts(verts_of_new_faces)layer
+
 		--	format "islands_all: %\n" islands_all
 			--format "islands_all.count: %\n" islands_all.count
 
@@ -91,13 +96,16 @@ struct VertIslandFinder_v
 			(
 				new_island = verts_island * verts_in_layer
 
-				--format "new_island: %\n" new_island
-
-				append this.new_islands new_island
+				if not (new_island * verts_process ).isEmpty then
+					append this.new_islands new_island
 			)
 
 			faces_processed += faces_in_layer
 			verts_processed += verts_in_layer
+			--format "heap_before: %\n" ( ( heapFree - heap_before ) /1024 /1024 )
+			--format "heap_before: %\n" ( ( heap_before - heapFree ) /1024 /1024 )
+			--format "heap_before: %\n" ( ( heap_before - heapFree ) /1024 )
+			--format "heapSize: %\n" heapFree
 
 		)
 
@@ -111,13 +119,15 @@ struct VertIslandFinder_v
 
 		polyop.setVertColor obj.baseobject 0 verts_all white
 
-		for new_island in this.new_islands do
+		for new_island in this.new_islands  do
+		--for new_island in this.new_islands  do
 		(
 			polyop.setVertColor obj.baseobject 0 (new_island) red
 
 			this._getCenterOfIsland (new_island)
 
 		)
+
 		--gc light:true
 		gc()
 		--gc delayed:true
@@ -127,12 +137,9 @@ struct VertIslandFinder_v
 
 	/** Join verts to islands
 	 */
-	function _joinVertsToIslands verts =
+	function _joinToIslandsByVerts verts layer =
 	(
 	--	format "\n"; print "VertIslandFinder_v.joinVertsToIslands()"
-
-		islands_in_layer = #()
-
 		vert = ( verts as Array )[1]
 
 		layer_verts_processed	= #{}
@@ -149,8 +156,9 @@ struct VertIslandFinder_v
 			for i = 1 to islands_all.count do
 			(
 				--format "islands_all[i]: %\n" islands_all[i]
-
-				if ((islands_all[i] - verts_above)* (verts_of_faces - verts_above) ).numberSet > 1 then
+				--if not ((islands_all[i] - verts_above) * (verts_of_faces - verts_above) ).isEmpty then
+				if ((islands_all[i] - verts_above) * (verts_of_faces - verts_above) ).numberSet > 1 then
+				--if ( islands_all[i] * (verts_of_faces - verts_above) ).numberSet > 1 then
 				(
 					merged = true
 
@@ -172,30 +180,44 @@ struct VertIslandFinder_v
 				vert = (verts as Array )[1]
 		)
 
-		--for island in islands_all do
-			--format "island: %\n" island
+		--format "islands_all.count: %\n" islands_all.count
+
+
+		--if islands_all.count > 10 then
+		--(
+		--	format "\n==============================\nlayer: %\n" layer
+		--	format "islands_all.count: %\n" islands_all.count
+		--
+		--	for island in islands_all do
+		--		format "island: %\n" island
+		--)
+
+		--this.islands_all = #()
 
 		this._mergeIslands()
 
-		format "islands_all.count: %\n" islands_all.count
+		--format "islands_all.count: %\n" islands_all.count
 
 	),
+
 
 	/** Merge islands
 	 */
 	function _mergeIslands =
 	(
 		--format "\n"; print "VertIslandFinder_v._mergeIslands()"
+
+
 		for x = this.islands_all.count to 1 by -1 do
 		(
 			merged = false
 
 			bitarrays_x = this.islands_all[x]
-
+			--format "bitarrays_x: %\n" bitarrays_x
 			bitarrays_x_sliced = bitarrays_x - verts_above
 
-			--for y = this.islands_all.count to 1 by -1 where x != y and not ( this.islands_all[x] * this.islands_all[y] ).isEmpty do -- "not ( this.islands_all[x] * this.islands_all[y] ).isEmpty" WILL CONNECT FACES WHICH SHARE SIGNLGE VERTEX - IT IS NOT ACCURATE
-			--for y = this.islands_all.count to 1 by -1 where x != y and ( this.islands_all[x] * this.islands_all[y] ).numberSet > 1 do -- "not ( this.islands_all[x] * this.islands_all[y] ).isEmpty" WILL CONNECT FACES WHICH SHARE SIGNLGE VERTEX - IT IS NOT ACCURATE
+			----for y = this.islands_all.count to 1 by -1 where x != y and not ( this.islands_all[x] * this.islands_all[y] ).isEmpty do -- "not ( this.islands_all[x] * this.islands_all[y] ).isEmpty" WILL CONNECT FACES WHICH SHARE SIGNLGE VERTEX - IT IS NOT ACCURATE
+			----for y = this.islands_all.count to 1 by -1 where x != y and ( this.islands_all[x] * this.islands_all[y] ).numberSet > 1 do -- "not ( this.islands_all[x] * this.islands_all[y] ).isEmpty" WILL CONNECT FACES WHICH SHARE SIGNLGE VERTEX - IT IS NOT ACCURATE
 			for y = this.islands_all.count to 1 by -1 where x != y do -- "not ( this.islands_all[x] * this.islands_all[y] ).isEmpty" WILL CONNECT FACES WHICH SHARE SIGNLGE VERTEX - IT IS NOT ACCURATE
 			(
 
@@ -214,7 +236,26 @@ struct VertIslandFinder_v
 				deleteItem this.islands_all x
 		)
 
+		--this.islands_all = #()
 	),
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	/** Merge bit arrays wich shared bits
 	  *
@@ -574,7 +615,7 @@ struct VertIslandFinder_v
 		elements = #()
 
 		while not faces.isEmpty do
-																										(
+		(
 			face = (faces as array)[1]
 
 			element = polyop.getElementsUsingFace obj_snap #(face)
@@ -633,17 +674,6 @@ struct VertIslandFinder_v
 
 
 	private
-
-	/** Get face layers
-	 */
-	function getFaceLayers faces_in_layer =
-	(
-		--format "\n"; print "VertIslandFinder_v.getFaceLayers()"
-	),
-
-
-
-
 
 	/**
 	 */
