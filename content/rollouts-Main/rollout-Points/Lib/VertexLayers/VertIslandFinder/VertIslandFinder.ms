@@ -64,7 +64,7 @@ struct VertIslandFinder_v
 		for layer in layers_with_verts do -- layer has not verts if item is integer ( layer number )
 		(
 			--format "layer: %\n" layer
-			--format "\n==============================\nlayer: %\n" layer
+			format "\n==============================\nlayer: %\n" layer
 			if mod layer 50 == 0 then (format "layer: % of: %\n" layer used_layers_count)
 
 			/* GET VERTS IN LAYER */
@@ -132,16 +132,6 @@ struct VertIslandFinder_v
 	--	format "\n"; print "VertIslandFinder_v.joinVertsToIslands()"
 
 		islands_in_layer = #()
-		--
-		--faces_of_verts	= polyop.getFacesUsingVert obj verts
-		--
-		--
-		--faceverts =  for face in faces_of_verts collect polyop.getVertsUsingFace obj face
-		--
-		--islands_in_layer = this._mergeBitArraysbySharedBits(faceverts)
-		--
-		--join islands_all islands_in_layer
-
 
 		vert = ( verts as Array )[1]
 
@@ -154,15 +144,13 @@ struct VertIslandFinder_v
 			--format "faces_of_vert: %\n" faces_of_vert
 			verts_of_faces	= polyop.getVertsUsingFace obj faces_of_vert
 
-			--format "verts_of_faces: %\n" verts_of_faces
-		--	format "islands_in_layer.count: %\n" islands_in_layer.count
 			merged = false
 
 			for i = 1 to islands_all.count do
 			(
 				--format "islands_all[i]: %\n" islands_all[i]
-				if (islands_all[i] * verts_of_faces ).numberSet > 1  then
-				--if not (islands_all[i] * verts_of_faces ).isEmpty then
+
+				if ((islands_all[i] - verts_above)* (verts_of_faces - verts_above) ).numberSet > 1 then
 				(
 					merged = true
 
@@ -172,30 +160,24 @@ struct VertIslandFinder_v
 
 			if not merged then
 				append islands_all verts_of_faces
-			--
-			--islands_in_layer = this._mergeBitArraysbySharedBits (islands_in_layer) merge_if_more_than_one_bit_is_shared:true
 
 			verts	-= verts_of_faces
 			layer_verts_processed	+= verts_of_faces
 
-			--format "layer_verts_processed: %\n" layer_verts_processed
-			--format "-verts: %\n" -verts
-
 			next_verts = verts_of_faces - layer_verts_processed
 
 			vert = (next_verts as Array )[1]
-		--)
 
 			if vert == undefined then
 				vert = (verts as Array )[1]
 		)
 
-		--join islands_all islands_in_layer
-
-		--format "islands_all.count: %\n" islands_all.count
+		--for island in islands_all do
+			--format "island: %\n" island
 
 		this._mergeIslands()
-		--format "islands_all.count: %\n" islands_all.count
+
+		format "islands_all.count: %\n" islands_all.count
 
 	),
 
