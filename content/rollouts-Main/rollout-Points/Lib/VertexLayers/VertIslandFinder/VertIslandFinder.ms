@@ -56,7 +56,7 @@ struct VertIslandFinder_v
 		if verts_above.isEmpty then
 			verts_above = copy verts_all
 
-		layers_with_verts = for layer_index = 1 to verts_layers.count where classOf ( all_verts_in_layer = verts_layers[layer_index] ) == BitArray collect layer_index -- layer has not verts if item is integer ( layer number )
+		layers_with_verts = for layer_index = 1 to verts_layers.count where classOf ( verts_in_layer = verts_layers[layer_index] ) == BitArray collect layer_index -- layer has not verts if item is integer ( layer number )
 
 		used_layers_count = layers_with_verts.count
 
@@ -67,49 +67,37 @@ struct VertIslandFinder_v
 			--format "\n==============================\nlayer: %\n" layer
 			if mod layer 50 == 0 then (format "layer: % of: %\n" layer used_layers_count)
 
-			layer_verts_processed = #{}
+			/* GET VERTS IN LAYER */
+			verts_in_layer = verts_layers[layer]
 
-			all_verts_in_layer = verts_layers[layer]
+			/* REMOVE VERTS FORM CURENT LAYER FROM VERTS ABOVE */
+			verts_above  -= verts_in_layer
 
-			verts_above  -= all_verts_in_layer
+			/* GET ALL FACES IN LAYER */
+			faces_in_layer = polyop.getFacesUsingVert obj verts_in_layer
 
-			layer_verts_process = copy all_verts_in_layer
-			--layer_verts_process = all_verts_in_layer * verts_process
+			/* GET ONLY NEW FACES IN LAYER - avoid repetion of faces across layers */
+			new_faces_in_layer = faces_in_layer - faces_processed
 
+			/* GET VERTS OF NEW FACES IN LAYER */
+			verts_of_new_faces = ( polyop.getVertsUsingFace obj new_faces_in_layer ) * verts_in_layer
 
-			vert = ( layer_verts_process as Array )[1]
-
-
-			while not layer_verts_process.isEmpty do
-			(
-				faces_of_vert	= polyop.getFacesUsingVert obj vert
-				verts_of_faces	= polyop.getVertsUsingFace obj faces_of_vert
-
-				verts_of_faces -= verts_above
-
-				if ( verts_of_faces - layer_verts_processed ).numberSet > 0 then
-				(
-					append islands_all verts_of_faces
-
-					this._mergeBitArraysbySharedBits (islands_all) merge_if_more_than_one_bit_is_shared:true
-
-					layer_verts_process	-= verts_of_faces
-					layer_verts_processed	+= verts_of_faces
-
-					next_verts = verts_of_faces - layer_verts_processed
-
-					vert = (next_verts as Array )[1]
-				)
-
-				if vert == undefined then
-					vert = (layer_verts_process as Array )[1]
-			)
-
+			/* JOIN NEW FACES TO ALL ISLANDS */
+			this._joinVertsToIslands(verts_of_new_faces)
+			--format "islands_all: %\n" islands_all
+			format "islands_all.count: %\n" islands_all.count
 
 			for verts_island in islands_all where (verts_island * verts_processed ).isEmpty do
-				append this.new_islands verts_island
+			(
+				new_island = verts_island * verts_in_layer
 
-			verts_processed	+= all_verts_in_layer
+				--format "new_island: %\n" new_island
+
+				append this.new_islands new_island
+			)
+
+			faces_processed += faces_in_layer
+			verts_processed += verts_in_layer
 
 		)
 
@@ -136,6 +124,85 @@ struct VertIslandFinder_v
 
 		this.new_islands --return
 	),
+
+	/** Join verts to islands
+	 */
+	function _joinVertsToIslands verts =
+	(
+		--format "\n"; print "VertIslandFinder_v.joinVertsToIslands()"
+		vert = ( verts as Array )[1]
+
+		layer_verts_processed	= #{}
+
+		while not verts.isEmpty do
+		(
+			faces_of_vert	= polyop.getFacesUsingVert obj vert
+			--format "faces_of_vert: %\n" faces_of_vert
+			verts_of_faces	= polyop.getVertsUsingFace obj faces_of_vert
+
+			--verts_of_faces -= verts_above
+
+			if ( verts_of_faces - layer_verts_processed ).numberSet > 0 then
+			(
+				append islands_all verts_of_faces
+
+				this._mergeBitArraysbySharedBits (islands_all) merge_if_more_than_one_bit_is_shared:true
+
+				verts	-= verts_of_faces
+				layer_verts_processed	+= verts_of_faces
+
+				next_verts = verts_of_faces - layer_verts_processed
+
+				vert = (next_verts as Array )[1]
+			)
+
+			if vert == undefined then
+				vert = (verts as Array )[1]
+		)
+
+	),
+
+	/** Merge bit arrays wich shared bits
+	  *
+	  * @param #( #{} ) bitarrays Array of bittarays
+	 */
+	function _mergeBitArraysbySharedBits bitarrays merge_if_more_than_one_bit_is_shared:false =
+	(
+		--limit = if merge_if_more_than_one_bit_is_shared then 1 else 0
+		--format "\n"; print ".mergeBitArraysTest2()"
+
+		for x = bitarrays.count to 1 by -1 do
+		(
+			merged = false
+
+			bitarrays_x = bitarrays[x]
+
+			bitarrays_x_sliced = bitarrays_x - verts_above
+
+			--for y = bitarrays.count to 1 by -1 where x != y and not ( bitarrays[x] * bitarrays[y] ).isEmpty do -- "not ( bitarrays[x] * bitarrays[y] ).isEmpty" WILL CONNECT FACES WHICH SHARE SIGNLGE VERTEX - IT IS NOT ACCURATE
+			--for y = bitarrays.count to 1 by -1 where x != y and ( bitarrays[x] * bitarrays[y] ).numberSet > 1 do -- "not ( bitarrays[x] * bitarrays[y] ).isEmpty" WILL CONNECT FACES WHICH SHARE SIGNLGE VERTEX - IT IS NOT ACCURATE
+			for y = bitarrays.count to 1 by -1 where x != y do -- "not ( bitarrays[x] * bitarrays[y] ).isEmpty" WILL CONNECT FACES WHICH SHARE SIGNLGE VERTEX - IT IS NOT ACCURATE
+			(
+
+				bitarrays_y_sliced = bitarrays[y] - verts_above
+
+				--if ( bitarrays_x_sliced * bitarrays_y_sliced ).numberSet > 1 then
+				if ( bitarrays_x_sliced * bitarrays_y_sliced ).numberSet > 0 then
+				(
+					bitarrays[y] += bitarrays[x]
+
+					merged = true
+				)
+			)
+
+			if merged then
+				deleteItem bitarrays x
+		)
+
+		bitarrays --return
+	),
+
+
 
 	/** Slice layers
 	 */
@@ -229,9 +296,9 @@ struct VertIslandFinder_v
 	function _getFirstLayerIslands =
 	(
 		format "\n"; print "VertIslandFinder_v._getFirstLayer()"
-		for layer = 1 to verts_layers.count where classOf ( all_verts_in_layer = verts_layers[layer] ) == BitArray and not ( all_verts_in_layer * verts_process ).isEmpty  do -- layer has not verts if item is integer ( layer number )
+		for layer = 1 to verts_layers.count where classOf ( verts_in_layer = verts_layers[layer] ) == BitArray and not ( verts_in_layer * verts_process ).isEmpty  do -- layer has not verts if item is integer ( layer number )
 		(
-			faces_in_layer = polyop.getFacesUsingVert obj all_verts_in_layer
+			faces_in_layer = polyop.getFacesUsingVert obj verts_in_layer
 			format "faces_in_layer: %\n" faces_in_layer
 			this.faces_processed += faces_in_layer
 
@@ -312,7 +379,7 @@ struct VertIslandFinder_v
 
 		with redraw off
 		(
-			for layer = 1 to layers_count where classOf ( all_verts_in_layer = verts_layers[layer] ) == BitArray do -- layer has not verts if item is integer ( layer number )
+			for layer = 1 to layers_count where classOf ( verts_in_layer = verts_layers[layer] ) == BitArray do -- layer has not verts if item is integer ( layer number )
 			(
 				----vert_color.hue = ( random 0 255 )
 				--format "\n==============\nlayer: %\n" layer
@@ -320,13 +387,13 @@ struct VertIslandFinder_v
 				if mod layer 100 == 0 then
 					(format "layer: % of: %\n" layer layers_count)
 
-				verts_used_in_layer = all_verts_in_layer * verts_used
+				verts_used_in_layer = verts_in_layer * verts_used
 
 				--format "ISLANDS: %\n" islands_all
 
 				/* GET FACES IN LAYER */
-				faces_in_layer = polyop.getFacesUsingVert obj all_verts_in_layer
-				--faces_in_layer = getFacesUsingVert obj all_verts_in_layer
+				faces_in_layer = polyop.getFacesUsingVert obj verts_in_layer
+				--faces_in_layer = getFacesUsingVert obj verts_in_layer
 				--format "faces_in_layer: %\n" faces_in_layer
 
 				face_islands_in_layer = this.getElementsOfFaces (faces_in_layer)
@@ -493,34 +560,7 @@ struct VertIslandFinder_v
 	),
 
 
-	/** Merge bit arrays wich shared bits
-	  *
-	  * @param #( #{} ) bitarrays Array of bittarays
-	 */
-	function _mergeBitArraysbySharedBits bitarrays merge_if_more_than_one_bit_is_shared:false =
-	(
-		limit = if merge_if_more_than_one_bit_is_shared then 1 else 0
-		--format "\n"; print ".mergeBitArraysTest2()"
 
-		for x = bitarrays.count to 1 by -1 do
-		(
-			merged = false
-
-			--for y = bitarrays.count to 1 by -1 where x != y and not ( bitarrays[x] * bitarrays[y] ).isEmpty do -- "not ( bitarrays[x] * bitarrays[y] ).isEmpty" WILL CONNECT FACES WHICH SHARE SIGNLGE VERTEX - IT IS NOT ACCURATE
-			--for y = bitarrays.count to 1 by -1 where x != y and ( bitarrays[x] * bitarrays[y] ).numberSet > 1 do -- "not ( bitarrays[x] * bitarrays[y] ).isEmpty" WILL CONNECT FACES WHICH SHARE SIGNLGE VERTEX - IT IS NOT ACCURATE
-			for y = bitarrays.count to 1 by -1 where x != y and ( bitarrays[x] * bitarrays[y] ).numberSet > limit do -- "not ( bitarrays[x] * bitarrays[y] ).isEmpty" WILL CONNECT FACES WHICH SHARE SIGNLGE VERTEX - IT IS NOT ACCURATE
-			(
-				bitarrays[y] += bitarrays[x]
-
-				merged = true
-			)
-
-			if merged then
-				deleteItem bitarrays x
-		)
-
-		bitarrays --return
-	),
 
 
 	/**
