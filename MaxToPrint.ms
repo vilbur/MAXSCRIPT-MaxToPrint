@@ -19,10 +19,13 @@ try(
 
 
 	/* CHANGE PROPERTIES oF ROLLOUTS */
-	--ContentLoader.Dialog.title = "MaxToPrint"
+	ContentLoader.Dialog.title = "MaxToPrint"
+
 
 	--/* CREATE DIALOG */
 	MaxToPrint = ContentLoader.create width:420 height:1024
+	--MaxToPrint = ContentLoader.create width:420 height:#AUTO
+	--MaxToPrint = ContentLoader.create width:420 height:undefined
 
 	--MaxToPrint.register()
 
