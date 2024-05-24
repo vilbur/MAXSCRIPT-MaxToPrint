@@ -5,7 +5,7 @@ filein( getFilenamePath(getSourceFileName()) + "/../VertexColors.ms" )	--"./../V
 
 /**
   */
-function createSourceMesh obj: segments:8 vertex_selection:#{} vertex_color: =
+function createSourceMesh segments:8 =
 (
 	format "\n"; print "MeshVertexGetterTest.ms.createSourceMesh()"
 	delete objects
@@ -91,7 +91,7 @@ colors_of_selected_verts = VertexColors.getColorsOfSelectedVerts()
 --format "colors_of_selected_verts: %\n" colors_of_selected_verts
 
 
-/* SELECTED ALL VERTS OF COLORS */
+/* GET ALL VERTS OF SELECTED COLORS */
 verts_by_colors = #{}
 
 for clr in colors_of_selected_verts do verts_by_colors += all_verts_by_colors[clr as string ]

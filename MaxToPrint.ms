@@ -3,6 +3,9 @@ clearListener(); print("Cleared in:"+getSourceFileName())
 filein( getFilenamePath(getSourceFileName()) + "/../MAXSCRIPT-UI-framework/Lib/ContentLoader/ContentLoader.ms" )	--"./../MAXSCRIPT-UI-framework/Lib/ContentLoader/ContentLoader.ms"
 
 
+filein( getFilenamePath(getSourceFileName()) + "/Lib/MeshDataGetters/VertexColors/VertexColors.ms" )	--"./Lib/MeshDataGetters/VertexColors/VertexColors.ms"
+
+
 current_dir = getFilenamePath(getSourceFileName())
 
 
