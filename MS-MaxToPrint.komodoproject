@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Komodo Project File - DO NOT EDIT -->
 <project id="d47eec58-7219-4d00-b9e5-768b2160a2d4" kpf_version="5" name="MS-MaxToPrint.komodoproject">
+<livefolder id="767dddb0-d1ff-4908-ba5a-32e7f4a1e581" idref="d47eec58-7219-4d00-b9e5-768b2160a2d4" name="rollouts-Main" url="content/rollouts-Main/">
+</livefolder>
+<livefolder id="ce6e6793-1f9e-46c9-bb50-c2279b1fe225" idref="d47eec58-7219-4d00-b9e5-768b2160a2d4" name="Lib" url="Lib/">
+</livefolder>
 <preference-set idref="d47eec58-7219-4d00-b9e5-768b2160a2d4" id="project" preftype="project">
   <long id="prefs_version">1</long>
 </preference-set>

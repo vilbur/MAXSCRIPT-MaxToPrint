@@ -496,7 +496,7 @@ struct MeshDataGetter_v
 	 */
 	on create do
 	(
-		--format "\n"; print "MeshDataGetter.onCreate()"
+		format "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"; print "MESHDATAGETTER.onCreate()"
 
 		ConvexVertFinder	= ConvexVertFinder_v(obj)
 		MeshVertToColorVertexConvert	= MeshVertToColorVertexConvertor_v(obj)

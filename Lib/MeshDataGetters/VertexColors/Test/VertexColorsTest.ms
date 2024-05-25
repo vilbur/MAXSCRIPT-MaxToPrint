@@ -2,16 +2,15 @@ clearListener(); print("Cleared in:\n"+getSourceFileName())
 
 filein( getFilenamePath(getSourceFileName()) + "/../VertexColors.ms" )	--"./../VertexColors.ms"
 
-
 /**
   */
-function createSourceMesh segments:8 =
+function createSourceMesh segments:8 add_modifiers:false =
 (
 	format "\n"; print "MeshVertexGetterTest.ms.createSourceMesh()"
 	delete objects
 
-	if  obj == unsupplied then
-		obj = Sphere radius:15 pos:[0,0, 50 ] segments:segments isSelected:on --showVertexColors:true	vertexColorsShaded:true -- diameter 3 cm
+	--if  obj == unsupplied then
+	obj = Sphere radius:15 pos:[0,0, 50 ] segments:segments isSelected:on --showVertexColors:true	vertexColorsShaded:true -- diameter 3 cm
 
 	macros.run "Modifier Stack" "Convert_to_Poly"
 
@@ -37,19 +36,50 @@ function createSourceMesh segments:8 =
 	for i = 1 to colors.count do
 		polyop.setVertColor obj 0 #{ (i * vertex_count_step )..(vertex_count)} colors[i]
 
+
+	if add_modifiers then
+	(
+		addModifier obj meshsmooth
+
+		addModifier obj Edit_Poly
+	)
+
+
 	obj --return
 )
 
+/** Select verts
+ */
+function selectVerts obj verts =
+(
+	--format "\n"; print ".selectVerts()"
+	max modify mode
+
+	subObjectLevel = 1
+
+	if classOf (_mod = modPanel.getCurrentObject() ) == Edit_Poly then
+	(
+		_mod.SetSelection #Vertex #{}
+
+		_mod.Select #Vertex verts
+	)
+	else
+		if classOf _mod == Editable_Poly then
+			_mod.SetSelection #Vertex verts
+
+	verts --return
+)
 
 
 /*--------------------------------------------------------------------
-	PREPARE TEST OBJECTS
+	CREATE TEST OBJECTS
 --------------------------------------------------------------------------------*/
 
 obj = if selection.count == 0 then
 (
 	--createSourceMesh()
 	createSourceMesh segments:16
+	--createSourceMesh segments:16 add_modifiers:true
 	--createSourceMesh segments:64
 	--createSourceMesh segments:128
 	--createSourceMesh segments:1024
@@ -60,16 +90,20 @@ obj = if selection.count == 0 then
 else
 	selection[1]
 
-/* set random vertex selection */
-subObjectLevel = 1
 
-vertex_count = getNumVerts obj.mesh
+/*--------------------------------------------------------------------
+	SET RANDOM VERTEX SELECTION, IF NOT SET BU USER
+--------------------------------------------------------------------------------*/
+
+vertex_count	= getNumVerts obj.mesh
+vertex_sel	= getVertSelection obj.mesh
 
 verts_first = random 1 vertex_count
 verts_last  = random (verts_first+1) vertex_count
 
-obj.EditablePoly.SetSelection #Vertex #{verts_first..verts_last}
-
+format "vertex_sel.numberSet: %\n" vertex_sel.numberSet
+if vertex_sel.numberSet == 0 then
+	vertex_sel	= selectVerts obj #{verts_first..verts_last}
 
 
 /*==============================================================================
@@ -80,28 +114,18 @@ obj.EditablePoly.SetSelection #Vertex #{verts_first..verts_last}
 VertexColors = VertexColors_v(obj)
 
 
-/* GET ALL COLORS */
-all_verts_by_colors = VertexColors.getAllColors()
---for color_data in all_verts_by_colors do format "color_data: %\n" color_data
+/* GET ALL VERTS SORTED BY COLORS */
+all_verts_by_colors = VertexColors.getVertsAndColors()
+--for color_data in all_verts_by_colors do format "COLOR: %	VERTS: %\n" color_data.key color_data.value
+
+--/* GET ALL VERTS SORTED BY COLORS OF SELECTED VERTS */
+verts_by_selected_colors = VertexColors.getVertsAndColors verts:vertex_sel
+--for color_data in verts_by_selected_colors do format "COLOR: %	VERTS: %\n" color_data.key color_data.value
 
 
-/* GET COLORS OF SELECTED VERTS */
-
-colors_of_selected_verts = VertexColors.getColorsOfSelectedVerts()
---format "colors_of_selected_verts: %\n" colors_of_selected_verts
-
-
-/* GET ALL VERTS OF SELECTED COLORS */
-verts_by_colors = #{}
-
-for clr in colors_of_selected_verts do verts_by_colors += all_verts_by_colors[clr as string ]
-
-obj.EditablePoly.SetSelection #Vertex verts_by_colors
-
-
-
-
-
+/* GET VERTS WITH SAME COLORS */
+verts_of_same_colors = VertexColors.getVertsWithSameColors (vertex_sel)
+--selectVerts (obj) (verts_of_same_colors)
 
 
 

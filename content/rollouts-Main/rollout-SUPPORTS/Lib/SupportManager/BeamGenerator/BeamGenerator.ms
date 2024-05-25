@@ -55,11 +55,11 @@ struct BeamGenerator_v
 
 		/** Get posiotion of point on line
 		 */
-		function getPosOnLine direction point_pos offset =
+		function getPosOnLine direction point_data offset =
 		(
 			dir = if direction == #BOTTOM then -1 else 1
 
-			point_pos[direction]	+ ( offset	* point_data[#VECTOR] * dir)
+			point_data[direction]	+ ( offset	* point_data[#VECTOR] * dir)
 		)
 
 		beams_created = #()

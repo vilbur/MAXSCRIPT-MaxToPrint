@@ -123,9 +123,14 @@ struct HelperObject_v
 
 		local _normal = if this.normal != undefined then this.normal * source_obj.transform - source_obj.pos
 
-		/* RETRUN IF NORMAL NOT FIT */
-		if this.Options.normal_limit and _normal.z > 0 then
-			return false
+		/* RETRUN IF NORMAL NOT FIT
+
+			!!!! BUG - DOES NOT WORK WITH CHECBOX
+
+
+		*/
+		--if this.Options.normal_limit and _normal.z > 0 then
+			--return false
 
 
 		/* ADD FIRST POINT */

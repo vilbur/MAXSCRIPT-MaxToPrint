@@ -79,6 +79,6 @@ icon:	"across:1|offset:[ 0, 6 ]|width:242|height:32|tooltip:GEENERATE BEAMS betw
 			clearListener(); print("Cleared in:\n"+getSourceFileName())
 			--filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-viltools3\VilTools\rollouts-Tools\rollout-PRINT-3D\6-GENERATOR.mcr"
 
-			(getSupportManagerInstance()).createBeams( selection as Array )
+			(getSupportManagerInstance(ROLLOUT_points)).createBeams( selection as Array )
 		)
 )

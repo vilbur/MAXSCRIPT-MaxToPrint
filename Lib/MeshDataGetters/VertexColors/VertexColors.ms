@@ -1,6 +1,19 @@
 filein( getFilenamePath(getSourceFileName()) + "/MeshVertToColorVertexConvertor/MeshVertToColorVertexConvertor.ms" )	--"./MeshVertToColorVertexConvertor/MeshVertToColorVertexConvertor.ms"
 filein( getFilenamePath(getSourceFileName()) + "/ConvexVertFinder/ConvexVertFinder.ms" )	--"./ConvexVertFinder/ConvexVertFinder.ms"
 /** Vertex colors getter
+
+ * SINGLE MESH VERT CAN APPEAR IN MULTIPLE COLORS - Each map vert can has its own color
+ *
+ * NOTES:
+ *		1) getvertcolor()	INPUT CPV vertex
+ *		2) getVertsByColor()	RETURN MESH VERTEX
+ *
+ *
+ * KNOWING ISSUE: remove_multi_colored_verts_from_white
+ *				If vertex has mutliple colors, then first is used, include white color.
+ *				Only way to make it work seem to iterate all map verts. THIS IS OVERKIL FOR SUCH SIPMPLE OPARTION ON HIGH VERTEX COUNT OBJECTS... MAX SUCKS !
+ *
+ *
  */
 struct VertexColors_v
 (
@@ -8,77 +21,64 @@ struct VertexColors_v
 	obj,
 
 	/* required */
-
-
 	/* properties */
-	colors 	= Dictionary #STRING,
-
+	----colors 	= Dictionary #STRING,
 	/* private */
 	/* dependency */
 	MeshVertToColorVertexConvert,
 	ConvexVertFinder,
 
-
 	/* reference */
 	/* inhered */
 
-	/** Set vertex colors Ditionary
-	  *
-	  * SINGLE MESH VERT CAN APPEAR IN MULTIPLE COLORS - Each map vert can has its own color
-	  *
-	  * NOTES:
-	  *		1) getvertcolor()	INPUT CPV vertex
-	  *		2) getVertsByColor()	RETURN MESH VERTEX
-	  *
-	  *
-	  * KNOWING ISSUE: remove_multi_colored_verts_from_white
-	  *				If vertex has mutliple colors, then first is used, include white color.
-	  *				Only way to make it work seem to iterate all map verts. THIS IS OVERKIL FOR SUCH SIPMPLE OPARTION ON HIGH VERTEX COUNT OBJECTS... MAX SUCKS !
+	/** Get verts and their colors
 	  *
 	  * @param boolean remove_multi_colored_verts_from_white TRUE: collect first non white color | FALSE: collect all colors for vert ( mesh vert is occuring in muliple colors )
 	  *
-	  * @return Dictionary of BitArrays of mesh verts sorted by color E.G.: #( "color 255 255 255", #{1..999}  )  #( "color 0 255 255", #{1..3}  )
+	  * @return Dictionary KEY: color as string VALUE: BitArray of verts
 	  */
-	function getAllColors =
+	function getVertsAndColors verts:#{} =
 	(
-		format "\n"; print "MeshDataGetter_v._getVertexColors()"
-		/** Loop map verts of single mesh vert
-		  *
-		  * Test if vertex color is new
-		  *
-		  * @retrun color of map vertex
-		 */
-		function _searchNewVertexColor colors map_verts =
-		(
-			--format "\n"; print "MeshDataGetter_v._searchNewVertexColor()"
-			--format "map_verts: %\n" map_verts
-			--format "this.colors: %\n" this.colors
-			--format "COLOR: %\n" (getvertcolor obj.mesh map_verts[1])
-			local color_of_vert
+		--format "\n"; print "MeshDataGetter_v.getVertsByColor()"
+		--format "verts: %\n" verts
+		if verts.numberSet == 0 then
+			verts = #{1..(getNumVerts obj.mesh)}
 
-			i = 1
-			while map_verts[i] != undefined and hasDictValue colors ( (color_of_vert = getvertcolor obj.mesh map_verts[i]) as string )  do
-				i += 1
+		this._getColorsOfVerts (verts)
+	),
 
-			color_of_vert --return
-		)
+	/** Get verts of same colors as give verts
+	 */
+	function getVertsWithSameColors verts =
+	(
+		--format "\n"; print "VertexColors_v.getVertsWithSameColors()"
+		verts_by_colors_flat = #{}
 
-		/** White verts exists
-		 */
-		function whiteVertsExists colors = hasDictValue colors ( white as string )
+		verts_by_colors = this._getColorsOfVerts (verts)
+
+		for color_verts in verts_by_colors do verts_by_colors_flat += color_verts.value
+
+		verts_by_colors_flat --return
+	),
 
 
-		local white_clr = white as string
+	private
 
+	/** Get colors of verts
+	 */
+	function _getColorsOfVerts verts_get_colors =
+	(
+		format "\n"; print "VertexColors_v._getColorsOfVerts()"
 		local color_of_vert
 
+		colors = Dictionary #STRING
+
+		white_clr = white as string
 
 		/* IF VERTEX COLORS EXISTS */
 		if  (getNumCPVVerts obj.mesh != 0) then
 		(
 			MeshVertToColorVertexConvert.get_single_vert = false
-
-			verts_get_colors = #{1..(getNumVerts obj.mesh)}
 
 			while not verts_get_colors.isEmpty do
 			(
@@ -86,7 +86,7 @@ struct VertexColors_v
 
 				map_verts_of_mesh_vert = makeUniqueArray (MeshVertToColorVertexConvert.meshVertsToMapVerts (mesh_vert) flat:true )
 
-				color_of_vert = _searchNewVertexColor (colors) (map_verts_of_mesh_vert)
+				color_of_vert = this._searchNewVertexColor (colors) (map_verts_of_mesh_vert)
 
 				mesh_verts_by_color = meshop.getVertsByColor obj.mesh color_of_vert 0.01 0.01 0.01 	-- get all verts by thath color
 
@@ -96,7 +96,7 @@ struct VertexColors_v
 			)
 
 			/* REMOVE MULTI COLORED VERTS FROM WHITE - (if one of vert colors is not white, then vert is not white) */
-			if whiteVertsExists(colors) then
+			if this.whiteVertsExists(colors) then
 				for clr in colors.keys  where clr != white_clr do
 					colors[white_clr] -= colors[clr]
 		)
@@ -104,24 +104,30 @@ struct VertexColors_v
 		colors --return
 	),
 
-	/** Get colors of selected verts
+	/** Loop map verts of single mesh vert
+	  *
+	  * Test if vertex color is new
+	  *
+	  * @retrun color of map vertex
 	 */
-	function getColorsOfSelectedVerts =
+	function _searchNewVertexColor colors map_verts =
 	(
-		format "\n"; print "VertexColors_v.getColorsOfSelectedVerts()"
+		--format "\n"; print "MeshDataGetter_v._searchNewVertexColor()"
+		--format "map_verts: %\n" map_verts
+		--format "this.colors: %\n" this.colors
+		--format "COLOR: %\n" (getvertcolor obj.mesh map_verts[1])
+		local color_of_vert
 
-		selected_colors = #()
+		i = 1
+		while map_verts[i] != undefined and hasDictValue colors ( (color_of_vert = getvertcolor obj.mesh map_verts[i]) as string )  do
+			i += 1
 
-		if colors.count == 0 then
-			this.getAllColors()
-
-		vertex_sel	= getVertSelection obj.mesh --else #{} -- ignore vertex selection if not suobject level active
-
-		for clr in colors.keys where (colors[clr] * vertex_sel).numberSet > 0 collect execute clr
-
+		color_of_vert --return
 	),
 
-	private
+	/** White verts exists
+	 */
+	function whiteVertsExists colors = hasDictValue colors ( white as string ),
 
 
 	/**
@@ -132,5 +138,4 @@ struct VertexColors_v
 		ConvexVertFinder	= ConvexVertFinder_v(obj)
 		MeshVertToColorVertexConvert	= MeshVertToColorVertexConvertor_v(obj)
 	)
-
 )

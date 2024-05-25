@@ -56,6 +56,6 @@ icon:	"across:1|offset:[ 0, 6 ]|width:242|height:32|tooltip:GEENERATE PINS for s
 			--filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-viltools3\VilTools\rollouts-Tools\rollout-PRINT-3D\Lib\SupportManager\SupportManager.ms"
 			--filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-viltools3\VilTools\rollouts-Tools\rollout-PRINT-3D\5-PINS.mcr"
 
-			(getSupportManagerInstance()).createPins( selection as Array )
+			(getSupportManagerInstance(ROLLOUT_points)).createPins( selection as Array )
 		)
 )

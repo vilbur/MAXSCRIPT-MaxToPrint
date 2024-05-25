@@ -463,11 +463,9 @@ function getSupportManagerInstance _rollout =
 	for ctrl in _rollout.controls where (prop_key = regExReplace ctrl.name ("^("+control_type_to_fetch_values+")_") "") != undefined and hasProperty SupportManager.Options prop_key do
 		setProperty SupportManager.Options prop_key ( if classOf ctrl == CheckBoxControl or classOf ctrl == RadioControl  then ctrl.state else ctrl.value )
 
-    SupportManager.BeamGenerator.same_height	= _rollout.CBX_same_height.state
+    --SupportManager.BeamGenerator.same_height	= _rollout.CBX_same_height.state
 
 	--SupportManager.Options.init()
 
 	SupportManager --return
 )
-
-

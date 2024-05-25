@@ -6,7 +6,7 @@ filein( getFilenamePath(getSourceFileName()) + "/../MeshDataGetter.ms" )	--"./..
 
 /**
   */
-function createSourceMesh obj: segments:8 vertex_selection:#{}  =
+function createSourceMesh obj: segments:8 vertex_selection:#{} vertex_color: =
 (
 	format "\n"; print "MeshVertexGetterTest.ms.createSourceMesh()"
 	delete objects
@@ -15,6 +15,27 @@ function createSourceMesh obj: segments:8 vertex_selection:#{}  =
 		obj = Sphere radius:15 pos:[0,0, 50 ] segments:segments isSelected:on --showVertexColors:true	vertexColorsShaded:true -- diameter 3 cm
 
 	macros.run "Modifier Stack" "Convert_to_Poly"
+
+
+	Rotate obj ( AngleAxis 180 [1,0,0]) -- rotate object upside down
+
+
+
+	/* VERTEX COLORS */
+	obj.showVertexColors	= vertex_color != unsupplied
+	obj.vertexColorsShaded	= vertex_color != unsupplied
+
+
+	if vertex_color != unsupplied then
+		polyop.setVertColor obj 0 vertex_selection vertex_color
+
+	/* VERTEX SELECTION */
+	if vertex_selection.numberSet > 0 then
+	(
+		subObjectLevel = 1
+
+		obj.EditablePoly.SetSelection #Vertex vertex_selection
+	)
 
 	obj --return
 )
@@ -29,6 +50,7 @@ function createSourceMesh obj: segments:8 vertex_selection:#{}  =
 --createSourceMesh segments:128
 --createSourceMesh segments:1024
 
+createSourceMesh segments:64 vertex_selection:#{1..32} vertex_color:red
 
 --obj = selection[1]
 
@@ -65,8 +87,10 @@ function selectVertsOnBottom =
 	verts_data = MeshDataGetter.getVertexData()
 
 	subObjectLevel = 1
+
 	obj.EditablePoly.SetSelection #Vertex verts_data[#VERTS]
 )
+
 selectVertsOnBottom()
 
 
