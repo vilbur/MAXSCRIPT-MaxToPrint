@@ -18,18 +18,44 @@ filein( getFilenamePath(getSourceFileName()) + "/ConvexVertFinder/ConvexVertFind
 struct VertexColors_v
 (
 	/* construct */
-	obj,
+	obj, -- Editable_Poly
 
 	/* required */
 	/* properties */
 	----colors 	= Dictionary #STRING,
 	/* private */
 	/* dependency */
-	MeshVertToColorVertexConvert,
 	ConvexVertFinder,
 
 	/* reference */
 	/* inhered */
+	MeshVertToColorVertexConvert,
+
+
+	/** Get vertex colors of selection
+	 */
+	function getVertexColorsOfSelection flat:false =
+	(
+		--format "\n"; print "VertexColors_v.getVertexColorsOfSelkection()"
+
+		vertex_sel	= getVertSelection obj.mesh
+
+		verts_by_colors =  this.getVertsAndColors verts:vertex_sel
+
+		if flat then this.flatternColors(verts_by_colors) else verts_by_colors --return
+	),
+
+	/** Flattern colors
+	 */
+	function flatternColors verts_by_colors =
+	(
+		--format "\n"; print "VertexColors_v.flatternColors()"
+		verts_by_colors_flat = #{}
+
+		for color_verts in verts_by_colors do verts_by_colors_flat += color_verts.value
+
+		verts_by_colors_flat --return
+	),
 
 	/** Get verts and their colors
 	  *
@@ -39,12 +65,12 @@ struct VertexColors_v
 	  */
 	function getVertsAndColors verts:#{} =
 	(
-		--format "\n"; print "MeshDataGetter_v.getVertsByColor()"
+		--format "\n"; print "VertexColors_v.getVertsByColor()"
 		--format "verts: %\n" verts
 		if verts.numberSet == 0 then
 			verts = #{1..(getNumVerts obj.mesh)}
 
-		this._getColorsOfVerts (verts)
+		this._getColorsAndVerts (verts)
 	),
 
 	/** Get verts of same colors as give verts
@@ -54,11 +80,23 @@ struct VertexColors_v
 		--format "\n"; print "VertexColors_v.getVertsWithSameColors()"
 		verts_by_colors_flat = #{}
 
-		verts_by_colors = this._getColorsOfVerts (verts)
+		verts_by_colors = this._getColorsAndVerts (verts)
 
 		for color_verts in verts_by_colors do verts_by_colors_flat += color_verts.value
 
 		verts_by_colors_flat --return
+	),
+
+	/** Get vert color
+	 */
+	function _getVertColor mesh_vert =
+	(
+		--format "\n"; print "VertexColors_v._getVertColor()"
+		map_verts_of_mesh_vert = makeUniqueArray (MeshVertToColorVertexConvert.meshVertsToMapVerts (mesh_vert) flat:true )
+
+		color_of_vert = this._searchNewVertexColor (colors) (map_verts_of_mesh_vert)
+
+		color_of_vert --return
 	),
 
 
@@ -66,9 +104,9 @@ struct VertexColors_v
 
 	/** Get colors of verts
 	 */
-	function _getColorsOfVerts verts_get_colors =
+	function _getColorsAndVerts verts_get_colors =
 	(
-		format "\n"; print "VertexColors_v._getColorsOfVerts()"
+		format "\n"; print "VertexColors_v._getColorsAndVerts()"
 		local color_of_vert
 
 		colors = Dictionary #STRING
@@ -112,7 +150,7 @@ struct VertexColors_v
 	 */
 	function _searchNewVertexColor colors map_verts =
 	(
-		--format "\n"; print "MeshDataGetter_v._searchNewVertexColor()"
+		--format "\n"; print "VertexColors_v._searchNewVertexColor()"
 		--format "map_verts: %\n" map_verts
 		--format "this.colors: %\n" this.colors
 		--format "COLOR: %\n" (getvertcolor obj.mesh map_verts[1])
@@ -136,6 +174,6 @@ struct VertexColors_v
 	(
 		--format "\n"; print "VertexColorsGetter.onCreate()"
 		ConvexVertFinder	= ConvexVertFinder_v(obj)
-		MeshVertToColorVertexConvert	= MeshVertToColorVertexConvertor_v(obj)
+		--MeshVertToColorVertexConvert	= MeshVertToColorVertexConvertor_v(obj)
 	)
 )
