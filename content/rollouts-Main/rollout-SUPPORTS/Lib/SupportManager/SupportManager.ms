@@ -4,9 +4,11 @@
 --filein( getFilenamePath(getSourceFileName()) + "/../../../rollout-LAYERS/Lib/LayersManager/LayersManager.ms" )	--"./../../../rollout-LAYERS/Lib/LayersManager/LayersManager.ms"
 
 --filein( getFilenamePath(getSourceFileName()) + "/../../../rollout-SELECTION - EDIT POLY/Lib/MeshDataGetter/MeshDataGetter.ms" )	--"./../../../rollout-SELECTION - EDIT POLY/Lib/MeshDataGetter/MeshDataGetter.ms"
---filein( getFilenamePath(getSourceFileName()) + "/../MeshDataGetter/MeshDataGet ter.ms" )	--"./../MeshDataGetter/MeshDataGetter.ms"
+--filein( getFilenamePath(getSourceFileName()) + "/../MeshDataGetter/MeshDataGetter.ms" )	--"./../MeshDataGetter/MeshDataGetter.ms"
 --filein( getFilenamePath(getSourceFileName()) + "/../../../../../../MAXSCRIPT-viltools3/VilTools/rollouts-Tools/rollout-SELECTION - EDIT POLY/Lib/MeshDataGetter/MeshDataGetter.ms" )	--"./../../../../../../MAXSCRIPT-viltools3/VilTools/rollouts-Tools/rollout-SELECTION - EDIT POLY/Lib/MeshDataGetter/MeshDataGetter.ms"
-filein @"c:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-vilTools3\VilTools\rollouts-Tools\rollout-SELECTION - EDIT POLY\Lib\MeshDataGetter\MeshDataGetter.ms"
+--filein @"c:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-vilTools3\VilTools\rollouts-Tools\rollout-SELECTION - EDIT POLY\Lib\MeshDataGetter\MeshDataGetter.ms"
+
+filein( getFilenamePath(getSourceFileName()) + "/../../../rollout-VERTEX SELECTION/Lib/MeshDataGetter/MeshDataGetter.ms" )	--"./../../../rollout-VERTEX SELECTION/Lib/MeshDataGetter/MeshDataGetter.ms"
 
 filein( getFilenamePath(getSourceFileName()) + "/ShapeKnotGetter/ShapeKnotGetter.ms" )	--"./ShapeKnotGetter/ShapeKnotGetter.ms"
 
@@ -51,7 +53,7 @@ filein( getFilenamePath(getSourceFileName()) + "/BeamGenerator/BeamGenerator.ms"
   * 					4a) RAFT     Same as support obejct, but ends on last point in chain
   * 					4b) SUPPORT: Line connecting all points in chain.
   *
-  *		 					5) BEAM: Cross lines connectn[ig supports
+  *		 					5) BEAM: Cross lines between supports
  */
 struct SupportManager_v
 (

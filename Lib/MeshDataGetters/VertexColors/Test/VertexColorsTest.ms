@@ -2,9 +2,11 @@ clearListener(); print("Cleared in:\n"+getSourceFileName())
 
 filein( getFilenamePath(getSourceFileName()) + "/../VertexColors.ms" )	--"./../VertexColors.ms"
 
+global obj
+
 /**
   */
-function createSourceMesh segments:8 add_modifiers:false =
+function createSourceMesh segments:8 add_modifiers:false break_map_faces:false =
 (
 	format "\n"; print "MeshVertexGetterTest.ms.createSourceMesh()"
 	delete objects
@@ -20,9 +22,52 @@ function createSourceMesh segments:8 add_modifiers:false =
 
 	--Rotate obj ( AngleAxis 180 [1,0,0]) -- rotate object upside down
 
+	if break_map_faces then
+		for face_id = 1 to polyop.getNumFaces obj.baseobject do
+		(
+			polyop.setFaceColor obj.baseobject 0 face_id black
+			polyop.setFaceColor obj.baseobject 0 face_id white
+
+		)
+
 	/* VERTEX COLORS */
 	obj.showVertexColors	= true
 	obj.vertexColorsShaded	= true
+
+	--if add_modifiers then
+	--(
+	--	addModifier obj meshsmooth
+	--
+	--	addModifier obj Edit_Poly
+	--)
+
+
+	obj --return
+)
+
+/** Set verts colors
+ */
+function setVertsColors =
+(
+	verts_colors = Dictionary #string
+
+	verts_colors[ "red" as string ]	= #{1..2}
+	verts_colors[ "green" as string ]	= #{3..4}
+
+	for color_verts in verts_colors do
+		polyop.setVertColor obj.baseobject 0 color_verts.value ( execute color_verts.key )
+
+	--channelInfo.Dialog ()
+	--channelInfo.Update ()
+)
+
+/** Set verts colors
+ */
+function setVertsColorsRandom =
+(
+	vertex_count	= getNumVerts obj.mesh
+	--vertex_sel	= getVertSelection obj.mesh
+	--
 
 	colors = #( white, red, green, blue )
 
@@ -36,17 +81,8 @@ function createSourceMesh segments:8 add_modifiers:false =
 	for i = 1 to colors.count do
 		polyop.setVertColor obj 0 #{ (i * vertex_count_step )..(vertex_count)} colors[i]
 
-
-	if add_modifiers then
-	(
-		addModifier obj meshsmooth
-
-		addModifier obj Edit_Poly
-	)
-
-
-	obj --return
 )
+
 
 /** Select verts
  */
@@ -78,12 +114,14 @@ function selectVerts obj verts =
 obj = if selection.count == 0 then
 (
 	--createSourceMesh()
-	createSourceMesh segments:16
-	--createSourceMesh segments:16 add_modifiers:true
-	--createSourceMesh segments:64
+	--createSourceMesh segments:16
+	--createSourceMesh segments:4 break_map_faces:true
+	----createSourceMesh segments:16 add_modifiers:true
+	createSourceMesh segments:64
 	--createSourceMesh segments:128
+	--createSourceMesh segments:256
 	--createSourceMesh segments:1024
-
+	--
 	--createSourceMesh segments:64 vertex_selection:#{1..32} vertex_color:red
 	--createSourceMesh segments:8 vertex_selection:#{1..8} vertex_color:red
 )
@@ -94,17 +132,28 @@ else
 /*--------------------------------------------------------------------
 	SET RANDOM VERTEX SELECTION, IF NOT SET BU USER
 --------------------------------------------------------------------------------*/
+--
+--vertex_count	= getNumVerts obj.mesh
+--vertex_sel	= getVertSelection obj.mesh
+--
+--verts_first = random 1 vertex_count
+--verts_last  = random (verts_first+1) vertex_count
+--
+--format "vertex_sel.numberSet: %\n" vertex_sel.numberSet
+--if vertex_sel.numberSet == 0 then
+--	vertex_sel	= selectVerts obj #{verts_first..verts_last}
 
-vertex_count	= getNumVerts obj.mesh
-vertex_sel	= getVertSelection obj.mesh
 
-verts_first = random 1 vertex_count
-verts_last  = random (verts_first+1) vertex_count
+/*--------------------------------------------------------------------
+	SET RANDOM VERTEX COLORS
+--------------------------------------------------------------------------------*/
+--setVertsColorsRandom()
 
-format "vertex_sel.numberSet: %\n" vertex_sel.numberSet
-if vertex_sel.numberSet == 0 then
-	vertex_sel	= selectVerts obj #{verts_first..verts_last}
+/*--------------------------------------------------------------------
+	SET EXACT VERTEX COLORS
+--------------------------------------------------------------------------------*/
 
+--setVertsColors()
 
 /*==============================================================================
 		RUN TESTS
@@ -116,16 +165,13 @@ VertexColors = VertexColors_v(obj)
 
 /* GET ALL VERTS SORTED BY COLORS */
 all_verts_by_colors = VertexColors.getVertsAndColors()
---for color_data in all_verts_by_colors do format "COLOR: %	VERTS: %\n" color_data.key color_data.value
+for color_data in all_verts_by_colors do format "COLOR: %	VERTS: %\n" color_data.key color_data.value
 
---/* GET ALL VERTS SORTED BY COLORS OF SELECTED VERTS */
-verts_by_selected_colors = VertexColors.getVertsAndColors verts:vertex_sel
---for color_data in verts_by_selected_colors do format "COLOR: %	VERTS: %\n" color_data.key color_data.value
-
-
-/* GET VERTS WITH SAME COLORS */
-verts_of_same_colors = VertexColors.getVertsWithSameColors (vertex_sel)
---selectVerts (obj) (verts_of_same_colors)
-
-
-
+----/* GET ALL VERTS SORTED BY COLORS OF SELECTED VERTS */
+--verts_by_selected_colors = VertexColors.getVertsAndColors verts:vertex_sel
+----for color_data in verts_by_selected_colors do format "COLOR: %	VERTS: %\n" color_data.key color_data.value
+--
+--
+--/* GET VERTS WITH SAME COLORS */
+--verts_of_same_colors = VertexColors.getVertsWithSameColors (vertex_sel)
+----selectVerts (obj) (verts_of_same_colors)

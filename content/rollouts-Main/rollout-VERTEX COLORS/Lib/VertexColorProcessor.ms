@@ -114,7 +114,7 @@ struct VertexColorProcessor_v
 	 */
 	function _unhideVerts verts_unhide =
 	(
-		--format "\n"; print "VertexColorProcessor_v._HideVerts()"
+		format "\n"; print "VertexColorProcessor_v._unhideVerts()"
 
 		if classOf curr_mod == Edit_Poly then
 		(
@@ -143,7 +143,7 @@ struct VertexColorProcessor_v
 
 			polyop.unHideAllVerts obj
 
-			polyop.setHiddenVerts obj ( hidden_verts - verts )
+			polyop.setHiddenVerts obj ( hidden_verts - verts_unhide )
 		)
 
 	),

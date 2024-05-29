@@ -250,29 +250,29 @@ icon:	"MENU:&ISOLATE Color"
 --			messageBox ("There is not any vertex color on object:\n\n"+obj.name) title:"NO VERTEX COLOR"
 --	)
 --)
---
---/**
---  *
---  */
---macroscript	epoly_vertex_color_property_toggle
---category:	"_Epoly-Vertex-Color"
---buttonText:	"SHOW-Colors"
---toolTip:	"Toggle show\hide"
---icon:	"across:4|MENU:true"
---(
---	on isVisible return subObjectLevel != 0
---
---	on execute do
---	undo "Show Vertex Colors" on
---	(
---		--clearListener(); print("Cleared in:\n"+getSourceFileName())
---		--filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-MaxToPrint\content\rollouts-Main\rollout-VERTEX COLORS\VERTEX COLOR.mcr"
---
---		if selection.count > 0 then
---		(
---			$.showVertexColors = not selection[1].showVertexColors
---			$.vertexColorsShaded = on
---			$.vertexColorType = 0
---		)
---	)
---)
+
+/**
+  *
+  */
+macroscript	epoly_vertex_color_property_toggle
+category:	"_Epoly-Vertex-Color"
+buttonText:	"SHOW-Colors"
+toolTip:	"Toggle show\hide"
+icon:	"across:4|MENU:true"
+(
+	on isVisible return subObjectLevel != 0
+
+	on execute do
+	undo "Show Vertex Colors" on
+	(
+		--clearListener(); print("Cleared in:\n"+getSourceFileName())
+		--filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-MaxToPrint\content\rollouts-Main\rollout-VERTEX COLORS\VERTEX COLOR.mcr"
+
+		if selection.count > 0 then
+		(
+			$.showVertexColors = not selection[1].showVertexColors
+			$.vertexColorsShaded = on
+			$.vertexColorType = 0
+		)
+	)
+)

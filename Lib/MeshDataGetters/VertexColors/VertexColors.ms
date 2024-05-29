@@ -4,6 +4,16 @@ filein( getFilenamePath(getSourceFileName()) + "/ConvexVertFinder/ConvexVertFind
 
  * SINGLE MESH VERT CAN APPEAR IN MULTIPLE COLORS - Each map vert can has its own color
  *
+ *
+ * IMPORTANT:
+ *		 METHODS USING MESH VERTS:
+ *				meshop.getVertsByColor()
+ *				polyop.setVertColor()
+ *
+ *		 METHODS USING MAP VERTS:
+ *				getvertcolor()
+ *
+  *
  * NOTES:
  *		1) getvertcolor()	INPUT CPV vertex
  *		2) getVertsByColor()	RETURN MESH VERTEX
@@ -107,7 +117,15 @@ struct VertexColors_v
 	function _getColorsAndVerts verts_get_colors =
 	(
 		format "\n"; print "VertexColors_v._getColorsAndVerts()"
+		format "verts_get_colors: %\n" verts_get_colors
+
 		local color_of_vert
+
+		vertex_count	= getNumVerts obj.mesh
+		CPV_verts 	= getNumCPVVerts obj.mesh
+
+		format "CPV_verts: %\n" CPV_verts
+		format "vertex_count: %\n" vertex_count
 
 		colors = Dictionary #STRING
 
@@ -174,6 +192,6 @@ struct VertexColors_v
 	(
 		--format "\n"; print "VertexColorsGetter.onCreate()"
 		ConvexVertFinder	= ConvexVertFinder_v(obj)
-		--MeshVertToColorVertexConvert	= MeshVertToColorVertexConvertor_v(obj)
+		MeshVertToColorVertexConvert	= MeshVertToColorVertexConvertor_v(obj)
 	)
 )
