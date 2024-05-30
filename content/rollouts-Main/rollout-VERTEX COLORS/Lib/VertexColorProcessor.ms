@@ -1,5 +1,6 @@
 ( getFilenamePath(getSourceFileName()) + "/../../../../Lib/MeshDataGetters/VertexColors/VertexColors.ms" )	--"./../../../../Lib/MeshDataGetters/VertexColors/VertexColors.ms"
 
+
 /** Vertex color processor
  */
 struct VertexColorProcessor_v
@@ -25,7 +26,7 @@ struct VertexColorProcessor_v
 	 */
 	function setVertexColor verts clr =
 	(
-		format "\n"; print "VertexColors_v.setVertexColor()"
+		format "\n"; print "VertexColorProcessor_v.setVertexColor()"
 		format "verts: %\n" verts
 
 		verts_base = this._getBaseObjectVerts(verts)
@@ -33,7 +34,12 @@ struct VertexColorProcessor_v
 
 		map_verts = makeUniqueArray (MeshVertToColorVertexConvert.meshVertsToMapVerts (verts_base) flat:true )
 		format "map_verts: %\n" map_verts
+
+		this._updateCache(verts_base)(clr as string )
+
+		start_setVertColor = timeStamp()
 		polyop.setVertColor obj.baseobject 0 map_verts clr
+		format "start_setVertColor: % ms\n" (( timeStamp()) - start_setVertColor)
 	),
 
 	/** Process operation on verts by vertex color
@@ -41,6 +47,7 @@ struct VertexColorProcessor_v
 	function byColor method colors =
 	(
 		format "\n"; print "VertexColorProcessor_v.byColor()"
+		format "colors: %\n" colors
 
 		verts_by_colors = #{}
 
@@ -59,10 +66,18 @@ struct VertexColorProcessor_v
 	function byVerts method verts =
 	(
 		format "\n"; print "VertexColorProcessor_v.byVerts()"
+		format "method: %\n" method
+		format "verts: %\n" verts
 
 		verts_by_colors = #{}
 
 		all_verts_by_colors = VertexColors.getVertsAndColors()
+
+		for colors_data in all_verts_by_colors do
+		format "colors_data: %\n" colors_data
+
+
+
 
 		for clr in all_verts_by_colors.keys where not ( all_verts_by_colors[clr] * verts ).isEmpty do
 			verts_by_colors += all_verts_by_colors[clr]
@@ -242,6 +257,65 @@ struct VertexColorProcessor_v
 		else if classOf curr_mod  == Editable_Poly then
 			curr_mod.SetSelection #VERTEX sel_bitarray
 	),
+
+
+	/** Update cache
+	 */
+	function _updateCache verts clr =
+	(
+		format "\n"; print "VertexColorProcessor_v._updateCache()"
+		format "verts: %\n" verts
+		format "clr: %\n" clr
+		pointer = (getHandleByAnim obj) as string
+
+
+		if ( colors = VERTEX_COLORS_CACHE[pointer] ) == undefined then
+			colors = VERTEX_COLORS_CACHE[pointer] = VertexColors.getAllVertsAndColors()
+
+			--VERTEX_COLORS_CACHE[pointer] = VertexColors.getAllVertsAndColors()
+
+			/* remove verts from other colors */
+			for _color in colors.keys do colors[_color] -= verts
+
+			/* add verts to color */
+			if colors[clr] == undefined then
+				VERTEX_COLORS_CACHE[pointer][clr] = verts
+			else
+				VERTEX_COLORS_CACHE[pointer][clr] += verts
+
+
+		for colors_data in VERTEX_COLORS_CACHE[pointer] do
+		format "colors_data: %\n" colors_data
+
+
+		--if VERTEX_COLORS_CACHE[pointer] != undefined then
+		--(
+
+		--	/* add verts to color */
+		--	if VERTEX_COLORS_CACHE[pointer][clr] == undefined then
+		--		VERTEX_COLORS_CACHE[pointer][clr] = verts
+		--	else
+		--		VERTEX_COLORS_CACHE[pointer][clr] += verts
+		--
+		--)
+		--else
+		--	VERTEX_COLORS_CACHE[pointer] = VertexColors.getAllVertsAndColors()
+		--
+		--	/* remove verts from other colors */
+		--	for _color in VERTEX_COLORS_CACHE[pointer].keys do VERTEX_COLORS_CACHE[pointer][_color] -= verts
+		--
+		--	/* add verts to color */
+		--	if VERTEX_COLORS_CACHE[pointer][clr] == undefined then
+		--		VERTEX_COLORS_CACHE[pointer][clr] = verts
+		--	else
+		--		VERTEX_COLORS_CACHE[pointer][clr] += verts
+		--
+		--
+		--for colors_data in VERTEX_COLORS_CACHE[pointer] do
+		--format "colors_data: %\n" colors_data
+
+	),
+
 
 	/**
 	 */

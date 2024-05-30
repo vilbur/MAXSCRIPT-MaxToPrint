@@ -4,6 +4,8 @@ filein( getFilenamePath(getSourceFileName()) + "/Lib/VertexColorProcessor.ms" )	
 
 global VERTEX_COLOR_PARAM
 
+global COLOR_BLUE = ( color 0 135 255 )
+
 /** Call vertex color submenu
   *
   * 1) Macro	-> Open Submenu openVertexColorSubmenu()	-- Choose used method
@@ -46,7 +48,7 @@ function openVertexColorSubmenu method =
 
 	Menu.item "&RED"	( call_fn + "red"	)
 	Menu.item "&GREEN"	( call_fn + "green"	)
-	Menu.item "&BLUE"	( call_fn + "blue"	)
+	Menu.item "&BLUE"	( call_fn + " " + COLOR_BLUE as string	)
 	Menu.item "&ORANGE"	( call_fn + "orange"	)
 	Menu.item "&WHITE"	( call_fn + "white"	)
 
@@ -103,7 +105,7 @@ icon:	"across:6|width:56|MENU:&Color Set|tooltip:\n\n----------------------\n\nF
 	undo "Set Vertex Color" on
 	(
 		--clearListener(); print("Cleared in:\n"+getSourceFileName())
-		--filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-MaxToPrint\content\rollouts-Main\rollout-VERTEX COLORS\1-VERTEX COLOR.mcr"
+		filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-MaxToPrint\content\rollouts-Main\rollout-VERTEX COLORS\1-VERTEX COLOR.mcr"
 
 		if (vertex_sel = getVertSelection obj.mesh).numberSet > 0 then
 		(
@@ -177,7 +179,7 @@ icon:	"MENU:Set &BLUE"
 	on isVisible return subObjectLevel != 0
 
 	on execute do
-		callMethodByVertexColor #SET ( color 0 135 255 ) -- blue
+		callMethodByVertexColor #SET COLOR_BLUE
 )
 
 /**

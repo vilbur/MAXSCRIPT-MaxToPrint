@@ -1,3 +1,5 @@
+
+
 /** Mesh vert to color vertex convertor
  */
 struct MeshVertToColorVertexConvertor_v
@@ -24,6 +26,7 @@ struct MeshVertToColorVertexConvertor_v
 	 */
 	function meshVertsToMapVerts verts flat:false =
 	(
+		format "\n"; print "MeshVertToColorVertexConvertor_v.meshVertsToMapVerts()"
 		/** Get map vert from face
 		 */
 		function getMapVertFromFace vert face_id =

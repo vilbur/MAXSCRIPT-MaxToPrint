@@ -114,10 +114,10 @@ function selectVerts obj verts =
 obj = if selection.count == 0 then
 (
 	--createSourceMesh()
-	--createSourceMesh segments:16
+	createSourceMesh segments:16
 	--createSourceMesh segments:4 break_map_faces:true
 	----createSourceMesh segments:16 add_modifiers:true
-	createSourceMesh segments:64
+	--createSourceMesh segments:64
 	--createSourceMesh segments:128
 	--createSourceMesh segments:256
 	--createSourceMesh segments:1024

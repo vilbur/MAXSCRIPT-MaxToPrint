@@ -1,5 +1,8 @@
 filein( getFilenamePath(getSourceFileName()) + "/MeshVertToColorVertexConvertor/MeshVertToColorVertexConvertor.ms" )	--"./MeshVertToColorVertexConvertor/MeshVertToColorVertexConvertor.ms"
 filein( getFilenamePath(getSourceFileName()) + "/ConvexVertFinder/ConvexVertFinder.ms" )	--"./ConvexVertFinder/ConvexVertFinder.ms"
+
+global VERTEX_COLORS_CACHE = Dictionary #string
+
 /** Vertex colors getter
 
  * SINGLE MESH VERT CAN APPEAR IN MULTIPLE COLORS - Each map vert can has its own color
@@ -75,7 +78,7 @@ struct VertexColors_v
 	  */
 	function getVertsAndColors verts:#{} =
 	(
-		--format "\n"; print "VertexColors_v.getVertsByColor()"
+		format "\n"; print "VertexColors_v.getVertsByColor()"
 		--format "verts: %\n" verts
 		if verts.numberSet == 0 then
 			verts = #{1..(getNumVerts obj.mesh)}
@@ -109,20 +112,18 @@ struct VertexColors_v
 		color_of_vert --return
 	),
 
-
-	private
-
-	/** Get colors of verts
+	/** Get all verts and lors
 	 */
-	function _getColorsAndVerts verts_get_colors =
+	function getAllVertsAndColors =
 	(
-		format "\n"; print "VertexColors_v._getColorsAndVerts()"
-		format "verts_get_colors: %\n" verts_get_colors
-
+		format "\n"; print "VertexColors_v.getAllVertsAndColors()"
 		local color_of_vert
 
 		vertex_count	= getNumVerts obj.mesh
 		CPV_verts 	= getNumCPVVerts obj.mesh
+
+		verts_get_colors = #{1..obj.mesh.numverts}
+		--verts_get_colors = #{1..$.numverts}
 
 		format "CPV_verts: %\n" CPV_verts
 		format "vertex_count: %\n" vertex_count
@@ -157,7 +158,38 @@ struct VertexColors_v
 					colors[white_clr] -= colors[clr]
 		)
 
+
+
 		colors --return
+	),
+
+	private
+
+	/** Get colors of verts
+	 */
+	function _getColorsAndVerts verts_get_colors =
+	(
+		format "\n"; print "VertexColors_v._getColorsAndVerts()"
+		format "verts_get_colors: %\n" verts_get_colors
+		pointer = (getHandleByAnim  obj) as string
+
+		if ( colors = VERTEX_COLORS_CACHE[pointer] ) == undefined then
+			colors = VERTEX_COLORS_CACHE[pointer] = this.getAllVertsAndColors()
+
+			format "colors: %\n" colors
+		--if verts_get_colors.numberSet != obj.mesh.numverts  then
+		--(
+			colors_of_verts = Dictionary #STRING
+
+			for colors_data in  colors where not (verts_of_color = (colors_data.value * verts_get_colors)).isEmpty do
+				colors_of_verts[ colors_data.key ] = verts_of_color
+
+
+		format "COLORS_OF_VERTS: %\n" colors_of_verts
+			colors_of_verts --return
+		--)
+		--else
+		--	colors --return
 	),
 
 	/** Loop map verts of single mesh vert
