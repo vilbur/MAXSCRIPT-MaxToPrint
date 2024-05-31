@@ -28,6 +28,7 @@ struct VertexColorProcessor_v
 	(
 		format "\n"; print "VertexColorProcessor_v.setVertexColor()"
 		format "verts: %\n" verts
+		MeshVertToColorVertexConvert.get_single_vert = true
 
 		verts_base = this._getBaseObjectVerts(verts)
 		format "verts_base: %\n" verts_base
@@ -66,18 +67,13 @@ struct VertexColorProcessor_v
 	function byVerts method verts =
 	(
 		format "\n"; print "VertexColorProcessor_v.byVerts()"
-		format "method: %\n" method
-		format "verts: %\n" verts
+		--format "method: %\n" method
+		--format "verts: %\n" verts
 
 		verts_by_colors = #{}
 
 		all_verts_by_colors = VertexColors.getVertsAndColors()
-
-		for colors_data in all_verts_by_colors do
-		format "colors_data: %\n" colors_data
-
-
-
+		--for colors_data in all_verts_by_colors do format "COLOR: %	VERTS: %\n" colors_data.key colors_data.value
 
 		for clr in all_verts_by_colors.keys where not ( all_verts_by_colors[clr] * verts ).isEmpty do
 			verts_by_colors += all_verts_by_colors[clr]
@@ -243,7 +239,7 @@ struct VertexColorProcessor_v
 	 */
 	function _selectVerts sel_bitarray =
 	(
-		format "\n"; print "VertSelector_v.selectVerts()"
+		format "\n"; print "VertexColorProcessor_v.selectVerts()"
 		format "sel_bitarray: %\n" sel_bitarray
 		format "classOf curr_mod: %\n" (classOf curr_mod)
 		--max modify mode
@@ -258,24 +254,24 @@ struct VertexColorProcessor_v
 			curr_mod.SetSelection #VERTEX sel_bitarray
 	),
 
-
 	/** Update cache
 	 */
 	function _updateCache verts clr =
 	(
 		format "\n"; print "VertexColorProcessor_v._updateCache()"
-		format "verts: %\n" verts
-		format "clr: %\n" clr
-		pointer = (getHandleByAnim obj) as string
 
+		pointer = (getHandleByAnim obj.baseobject) as string
 
-		if ( colors = VERTEX_COLORS_CACHE[pointer] ) == undefined then
+		if (colors_cahce = VERTEX_COLORS_CACHE[pointer]) != undefined then
+		(
 			colors = VERTEX_COLORS_CACHE[pointer] = VertexColors.getAllVertsAndColors()
 
-			--VERTEX_COLORS_CACHE[pointer] = VertexColors.getAllVertsAndColors()
 
 			/* remove verts from other colors */
-			for _color in colors.keys do colors[_color] -= verts
+			for _color in colors.keys do VERTEX_COLORS_CACHE[pointer][_color] -= verts
+
+			/* remove verts from other colors */
+			for colors_data in colors where colors_data.value.isEmpty do removeDictValue VERTEX_COLORS_CACHE[pointer] colors_data.key
 
 			/* add verts to color */
 			if colors[clr] == undefined then
@@ -283,39 +279,13 @@ struct VertexColorProcessor_v
 			else
 				VERTEX_COLORS_CACHE[pointer][clr] += verts
 
+			--for colors_data in VERTEX_COLORS_CACHE[pointer] do format "COLOR: %	VERTS: %\n" colors_data.key colors_data.value
 
-		for colors_data in VERTEX_COLORS_CACHE[pointer] do
-		format "colors_data: %\n" colors_data
-
-
-		--if VERTEX_COLORS_CACHE[pointer] != undefined then
-		--(
-
-		--	/* add verts to color */
-		--	if VERTEX_COLORS_CACHE[pointer][clr] == undefined then
-		--		VERTEX_COLORS_CACHE[pointer][clr] = verts
-		--	else
-		--		VERTEX_COLORS_CACHE[pointer][clr] += verts
-		--
-		--)
-		--else
-		--	VERTEX_COLORS_CACHE[pointer] = VertexColors.getAllVertsAndColors()
-		--
-		--	/* remove verts from other colors */
-		--	for _color in VERTEX_COLORS_CACHE[pointer].keys do VERTEX_COLORS_CACHE[pointer][_color] -= verts
-		--
-		--	/* add verts to color */
-		--	if VERTEX_COLORS_CACHE[pointer][clr] == undefined then
-		--		VERTEX_COLORS_CACHE[pointer][clr] = verts
-		--	else
-		--		VERTEX_COLORS_CACHE[pointer][clr] += verts
-		--
-		--
-		--for colors_data in VERTEX_COLORS_CACHE[pointer] do
-		--format "colors_data: %\n" colors_data
-
+			VERTEX_COLORS_CACHE[pointer] --return
+		)
+		else
+			colors_cahce --return
 	),
-
 
 	/**
 	 */
@@ -330,5 +300,4 @@ struct VertexColorProcessor_v
 
 		VertexColors.MeshVertToColorVertexConvert = MeshVertToColorVertexConvert
 	)
-
 )

@@ -170,13 +170,25 @@ struct VertexColors_v
 	function _getColorsAndVerts verts_get_colors =
 	(
 		format "\n"; print "VertexColors_v._getColorsAndVerts()"
-		format "verts_get_colors: %\n" verts_get_colors
+		--format "verts_get_colors: %\n" verts_get_colors
 		pointer = (getHandleByAnim  obj) as string
+		--format "pointer: %\n" pointer
+		--format "VERTEX_COLORS_CACHE: %\n" VERTEX_COLORS_CACHE
 
-		if ( colors = VERTEX_COLORS_CACHE[pointer] ) == undefined then
+		colors = VERTEX_COLORS_CACHE[pointer]
+
+		--format "-------------\nCACHE\n"
+		--if colors != undefined then
+			--for colors_data in colors do format "COLOR: %	VERTS: %\n" colors_data.key colors_data.value
+
+
+		if colors == undefined then
 			colors = VERTEX_COLORS_CACHE[pointer] = this.getAllVertsAndColors()
 
-			format "colors: %\n" colors
+		--format "-------------\nCOLORS\n"
+		--for colors_data in colors do format "COLOR: %	VERTS: %\n" colors_data.key colors_data.value
+
+
 		--if verts_get_colors.numberSet != obj.mesh.numverts  then
 		--(
 			colors_of_verts = Dictionary #STRING
@@ -185,7 +197,9 @@ struct VertexColors_v
 				colors_of_verts[ colors_data.key ] = verts_of_color
 
 
-		format "COLORS_OF_VERTS: %\n" colors_of_verts
+		--format "-------------\nCACHE UPDATED\n"
+		--for colors_data in colors do format "COLOR: %	VERTS: %\n" colors_data.key colors_data.value
+
 			colors_of_verts --return
 		--)
 		--else

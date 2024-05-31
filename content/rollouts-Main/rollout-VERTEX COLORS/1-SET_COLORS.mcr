@@ -2,6 +2,7 @@
 filein( getFilenamePath(getSourceFileName()) + "/../../../../MAXSCRIPT-UI-framework/Lib/Menus/RcMenu/RcMenu.ms" )	--"./../../../../MAXSCRIPT-UI-framework/Lib/Menus/RcMenu/RcMenu.ms"
 filein( getFilenamePath(getSourceFileName()) + "/Lib/VertexColorProcessor.ms" )	--"./Lib/VertexColorProcessor.ms"
 
+
 global VERTEX_COLOR_PARAM
 
 global COLOR_BLUE = ( color 0 135 255 )
@@ -105,7 +106,7 @@ icon:	"across:6|width:56|MENU:&Color Set|tooltip:\n\n----------------------\n\nF
 	undo "Set Vertex Color" on
 	(
 		--clearListener(); print("Cleared in:\n"+getSourceFileName())
-		filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-MaxToPrint\content\rollouts-Main\rollout-VERTEX COLORS\1-VERTEX COLOR.mcr"
+		--filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-MaxToPrint\content\rollouts-Main\rollout-VERTEX COLORS\1-VERTEX COLOR.mcr"
 
 		if (vertex_sel = getVertSelection obj.mesh).numberSet > 0 then
 		(

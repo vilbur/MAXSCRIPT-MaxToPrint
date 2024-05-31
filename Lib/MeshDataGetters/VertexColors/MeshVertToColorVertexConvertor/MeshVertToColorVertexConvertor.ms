@@ -10,7 +10,7 @@ struct MeshVertToColorVertexConvertor_v
 	get_single_vert = false,
 
 	/* properties */
-	faces_of_vert_cache   	= Dictionary (#integer),
+	--faces_of_vert_cache   	= Dictionary (#integer),
 	map_verts_of_face_cache = Dictionary (#integer),
 	mesh_verts_of_face_cache = Dictionary (#integer),
 
@@ -32,10 +32,19 @@ struct MeshVertToColorVertexConvertor_v
 		function getMapVertFromFace vert face_id =
 		(
 			--format "\n"; print "MeshVertToColorVertexConvertor_v.getMapVertFromFace()"
-			mesh_verts	= getFace 	obj.mesh face_id
-			map_verts	= getVCFace	obj.mesh	face_id
+			mesh_verts	= if (mesh_verts_cache = mesh_verts_of_face_cache[face_id]) == undefined then
+					getFace obj.mesh face_id
+				else
+					mesh_verts_cache
 
-			map_verts_arr = #( mesh_verts.x, mesh_verts.y, mesh_verts.z )
+			map_verts_arr	= if (map_verts_cache = map_verts_of_face_cache[face_id]) == undefined then
+			(
+				map_verts	= getVCFace	obj.mesh	face_id
+
+				#( mesh_verts.x, mesh_verts.y, mesh_verts.z )
+			)
+			else
+				map_verts_cache
 
 			vert_index	= findItem map_verts_arr vert
 
