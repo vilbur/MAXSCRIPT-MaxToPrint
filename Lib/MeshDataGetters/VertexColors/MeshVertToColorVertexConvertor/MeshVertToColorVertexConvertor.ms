@@ -6,13 +6,17 @@ struct MeshVertToColorVertexConvertor_v
 (
 	/* construct */
 	obj,
+	obj_mesh,
 
 	get_single_vert = false,
 
 	/* properties */
 	--faces_of_vert_cache   	= Dictionary (#integer),
-	map_verts_of_face_cache = Dictionary (#integer),
-	mesh_verts_of_face_cache = Dictionary (#integer),
+	--map_verts_of_face_cache = Dictionary (#integer),
+	--mesh_verts_of_face_cache = Dictionary (#integer),
+
+	map_verts_of_face_cache = #(),
+	mesh_verts_of_face_cache = #(),
 
 	/* dependency */
 	/* reference */
@@ -27,19 +31,24 @@ struct MeshVertToColorVertexConvertor_v
 	function meshVertsToMapVerts verts flat:false =
 	(
 		format "\n"; print "MeshVertToColorVertexConvertor_v.meshVertsToMapVerts()"
+
+		obj_mesh = obj.mesh
+
 		/** Get map vert from face
 		 */
 		function getMapVertFromFace vert face_id =
 		(
-			--format "\n"; print "MeshVertToColorVertexConvertor_v.getMapVertFromFace()"
+			format "\n"; print "MeshVertToColorVertexConvertor_v.getMapVertFromFace()"
+			format "vert: %\n" vert
+			format "face_id: %\n" face_id
 			mesh_verts	= if (mesh_verts_cache = mesh_verts_of_face_cache[face_id]) == undefined then
-					getFace obj.mesh face_id
+					getFace obj_mesh face_id
 				else
 					mesh_verts_cache
 
 			map_verts_arr	= if (map_verts_cache = map_verts_of_face_cache[face_id]) == undefined then
 			(
-				map_verts	= getVCFace	obj.mesh	face_id
+				map_verts	= getVCFace	obj_mesh	face_id
 
 				#( mesh_verts.x, mesh_verts.y, mesh_verts.z )
 			)
@@ -64,6 +73,10 @@ struct MeshVertToColorVertexConvertor_v
 			array_flat --return flattern matrix
 		)
 
+		--all_verts = #{1..obj.numverts}
+		map_verts_of_face_cache[obj_mesh.numverts]  = undefined
+		mesh_verts_of_face_cache[obj_mesh.numverts] = undefined
+
 
 		if classOf verts == integer then
 			verts = #( verts )
@@ -73,33 +86,32 @@ struct MeshVertToColorVertexConvertor_v
 
 		CPV_verts_all = deepCopy verts
 
+		/*------ GET CPV VERTS ------*/
+		--for i = 1 to verts.count do
+		--(
+		--	vert = verts[i]
+		--
+		--	faces =  ( meshop.getFacesUsingVert obj_mesh vert ) as Array
+		--
+		--	if not get_single_vert then
+		--		CPV_verts_all[i] = for face_id in faces collect getMapVertFromFace(vert)(face_id)
+		--
+		--	else
+		--		CPV_verts_all[i] = getMapVertFromFace(vert)(faces[1])
+		--)
+
 		/*------ FLATTERN RESULT ARRAY ------*/
-		for i = 1 to verts.count do
-		(
-			vert = verts[i]
-
-			faces =  ( meshop.getFacesUsingVert obj.mesh vert ) as Array
-
-			if not get_single_vert then
-				CPV_verts_all[i] = for face_id in faces collect getMapVertFromFace(vert)(face_id)
-
-			else
-				CPV_verts_all[i] = getMapVertFromFace(vert)(faces[1])
-		)
-
-		/*------ LOOP VERTS ------*/
-		if flat and not get_single_vert then
-			flatternArray(CPV_verts_all) --return
-		else
+		--if flat and not get_single_vert then
+		--	flatternArray(CPV_verts_all) --return
+		--else
 			CPV_verts_all --return
 	),
-
 
 	/** Map verts to mesh verts
 	 */
 	function mapVertsToMeshVerts map_verts =
 	(
-		--format "\n"; print "MeshVertToColorVertexConvertor_v.mapVertsToMeshVerts()"
+		format "\n"; print "MeshVertToColorVertexConvertor_v.mapVertsToMeshVerts()"
 
 		if classOf map_verts == Array then map_verts = map_verts as BitArray
 
@@ -131,7 +143,8 @@ struct MeshVertToColorVertexConvertor_v
 	 */
 	on create do
 	(
-		--format "\n"; print "MeshVertToColorVertexConvertor.onCreate()"
+		format "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+		format "\n"; print "MeshVertToColorVertexConvertor.onCreate()"
 		--for prop in #(  ) where getProperty this prop == undefined do -- CHECK CONSTRUCT PROPERTIES -- Array of this struct properties necessary to run
 		--	throw ("\n\n\nUNDEFINED CONSTRUCT PROPERTY\n\n\nSTRUCT:\n\n"+ ((filterString( classof this as string )"(:")[2]) +"\n\n\nPROPERTY:\n\n"+ prop )
 	)

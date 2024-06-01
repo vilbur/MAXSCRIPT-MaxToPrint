@@ -17,7 +17,7 @@ struct VertexColorProcessor_v
 	/* private */
 	/* dependency */
 	VertexColors,
-	MeshVertToColorVertexConvert,
+	--MeshVertToColorVertexConvert,
 
 	/* reference */
 	/* inhered */
@@ -28,19 +28,25 @@ struct VertexColorProcessor_v
 	(
 		format "\n"; print "VertexColorProcessor_v.setVertexColor()"
 		format "verts: %\n" verts
-		MeshVertToColorVertexConvert.get_single_vert = true
+		VertexColors.MeshVertToColorVertexConvert.get_single_vert = true
 
 		verts_base = this._getBaseObjectVerts(verts)
-		format "verts_base: %\n" verts_base
+		--format "verts_base: %\n" verts_base
 
-		map_verts = makeUniqueArray (MeshVertToColorVertexConvert.meshVertsToMapVerts (verts_base) flat:true )
+		start_map_verts = timeStamp()
+		format "start_map_verts()\n"
+		--map_verts = makeUniqueArray (VertexColors.MeshVertToColorVertexConvert.meshVertsToMapVerts (verts_base) flat:true )
+		map_verts = (VertexColors.MeshVertToColorVertexConvert.meshVertsToMapVerts (verts_base) flat:true )
 		format "map_verts: %\n" map_verts
+		format "map_verts: % ms\n" (( timeStamp()) - start_map_verts)
 
+		start_update_chache = timeStamp()
 		this._updateCache(verts_base)(clr as string )
+		format "update_chache: % ms\n" (( timeStamp()) - start_update_chache)
 
 		start_setVertColor = timeStamp()
 		polyop.setVertColor obj.baseobject 0 map_verts clr
-		format "start_setVertColor: % ms\n" (( timeStamp()) - start_setVertColor)
+		format "setVertColor: % ms\n" (( timeStamp()) - start_setVertColor)
 	),
 
 	/** Process operation on verts by vertex color
@@ -296,8 +302,8 @@ struct VertexColorProcessor_v
 		this.prepareObject()
 
 		VertexColors	= VertexColors_v(obj.baseobject)
-		MeshVertToColorVertexConvert	= MeshVertToColorVertexConvertor_v(obj)
+		--MeshVertToColorVertexConvert	= MeshVertToColorVertexConvertor_v(obj)
 
-		VertexColors.MeshVertToColorVertexConvert = MeshVertToColorVertexConvert
+		--VertexColors.MeshVertToColorVertexConvert = MeshVertToColorVertexConvert
 	)
 )

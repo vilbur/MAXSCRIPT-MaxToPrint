@@ -111,30 +111,30 @@ function selectVerts obj verts =
 	CREATE TEST OBJECTS
 --------------------------------------------------------------------------------*/
 
-obj = if selection.count == 0 then
+obj = if selection.count != 0 then selection[1] else
 (
 	--createSourceMesh()
 	--createSourceMesh segments:4
 	--createSourceMesh segments:4 break_map_faces:true
 	----createSourceMesh segments:16 add_modifiers:true
-	createSourceMesh segments:16
-	--createSourceMesh segments:64
+	--createSourceMesh segments:16
+	createSourceMesh segments:64
 	--createSourceMesh segments:128
+	--createSourceMesh segments:128 break_map_faces:true
 	--createSourceMesh segments:256
+	--createSourceMesh segments:512
 	--createSourceMesh segments:1024
 	--
 	--createSourceMesh segments:64 vertex_selection:#{1..32} vertex_color:red
 	--createSourceMesh segments:8 vertex_selection:#{1..8} vertex_color:red
 )
-else
-	selection[1]
 
 
 /*--------------------------------------------------------------------
 	SET RANDOM VERTEX SELECTION, IF NOT SET BU USER
 --------------------------------------------------------------------------------*/
 --
---vertex_count	= getNumVerts obj.mesh
+vertex_count	= getNumVerts obj.mesh
 --vertex_sel	= getVertSelection obj.mesh
 --
 --verts_first = random 1 vertex_count
@@ -148,7 +148,7 @@ else
 /*--------------------------------------------------------------------
 	SET RANDOM VERTEX COLORS
 --------------------------------------------------------------------------------*/
---setVertsColorsRandom()
+setVertsColorsRandom()
 
 /*--------------------------------------------------------------------
 	SET EXACT VERTEX COLORS
@@ -165,7 +165,10 @@ VertexColors = VertexColors_v(obj)
 
 
 /* GET ALL VERTS SORTED BY COLORS */
+timer_get_all_colors = timeStamp()
 all_verts_by_colors = VertexColors.getVertsAndColors()
+format "get_all_colors: % ms\n" (( timeStamp()) - timer_get_all_colors)
+
 for color_data in all_verts_by_colors do format "COLOR: %	VERTS: %\n" color_data.key color_data.value
 
 ----/* GET ALL VERTS SORTED BY COLORS OF SELECTED VERTS */
