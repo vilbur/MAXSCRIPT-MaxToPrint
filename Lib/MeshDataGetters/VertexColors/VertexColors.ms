@@ -244,8 +244,8 @@ struct VertexColors_v
 	 */
 	on create do
 	(
-		format "2) --------------- VERTEXCOLORS\n"
-		format "\n"; print "VertexColors_v.onCreate()"
+		--format "2) --------------- VERTEXCOLORS\n"
+		--format "\n"; print "VertexColors_v.onCreate()"
 		--ConvexVertFinder	= ConvexVertFinder_v(obj)
 		MeshVertToColorVertexConvert	= MeshVertToColorVertexConvertor_v(obj)
 	)

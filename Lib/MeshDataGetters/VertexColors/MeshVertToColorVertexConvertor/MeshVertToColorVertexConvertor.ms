@@ -39,30 +39,9 @@ struct MeshVertToColorVertexConvertor_v
 		function getMapVertFromFace vert face_id =
 		(
 			--format "\n"; print "MeshVertToColorVertexConvertor_v.getMapVertFromFace()"
-			--format "vert: %\n" vert
-			--format "face_id: %\n" face_id
-			--mesh_verts	= if (mesh_verts_cache = mesh_verts_of_face_cache[face_id]) == undefined then
-			--		getFace obj_mesh face_id
-			--	else
-			--		mesh_verts_cache
-			--
-			--map_verts_arr	= if (map_verts_cache = map_verts_of_face_cache[face_id]) == undefined then
-			--(
-			--	map_verts	= getVCFace	obj_mesh	face_id
-			--
-			--	#( mesh_verts.x, mesh_verts.y, mesh_verts.z )
-			--)
-			--else
-			--	map_verts_cache
-			--
-			--vert_index	= findItem map_verts_arr vert
-
-			--map_verts[vert_index] as integer --return
-
 
 			mesh_verts	= getFace obj_mesh face_id
 			map_verts	= getVCFace	obj_mesh	face_id
-
 
 			case of
 			(
@@ -70,7 +49,6 @@ struct MeshVertToColorVertexConvertor_v
 				(mesh_verts[2] == vert): map_verts[2]
 				(mesh_verts[3] == vert): map_verts[3]
 			)
-
 		)
 
 		/** Flattern array
@@ -98,7 +76,7 @@ struct MeshVertToColorVertexConvertor_v
 		else if classOf verts == BitArray then
 			verts = verts as Array
 
-		
+
 		--CPV_verts_all = deepCopy verts
 		CPV_verts_all = #()
 		CPV_verts_all[verts.count] = undefined --initialize a 100 elements array in memory
@@ -163,8 +141,8 @@ struct MeshVertToColorVertexConvertor_v
 	on create do
 	(
 		format "\n"; print "MeshVertToColorVertexConvertor.onCreate()"
-		format "3) --------------- MESH VERT TO COLOR VERTEX CONVERTOR\n"
-		--for prop in #(  ) where getProperty this prop == undefined do -- CHECK CONSTRUCT PROPERTIES -- Array of this struct properties necessary to run
+		--format "3) --------------- MESH VERT TO COLOR VERTEX CONVERTOR\n"
+		----for prop in #(  ) where getProperty this prop == undefined do -- CHECK CONSTRUCT PROPERTIES -- Array of this struct properties necessary to run
 		--	throw ("\n\n\nUNDEFINED CONSTRUCT PROPERTY\n\n\nSTRUCT:\n\n"+ ((filterString( classof this as string )"(:")[2]) +"\n\n\nPROPERTY:\n\n"+ prop )
 	)
 

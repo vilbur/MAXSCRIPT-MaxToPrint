@@ -340,28 +340,9 @@ toolTip:	"Reset Vertex Colors"
 	(
 		obj	= selection[1]
 		/* SET NEW CLASS INSTANCE */
-		VertexColors = VertexColors_v(obj)
 		VertexColorProcessor = VertexColorProcessor_v(obj)
-
-
-		/* GET ALL VERTS SORTED BY COLORS */
-		colors = VertexColors.getVertsAndColors()
-
-        polyOp.defaultMapFaces obj 0
-        polyOp.setVertColor obj 0 #all white
-
-		removeDictValue colors (white as string )
-
-		for colors_data in colors do format "\n********\n\nCOLOR: %\nVERTS: %\n" colors_data.key colors_data.value
-
-		for colors_data in colors do
-		(
-			VertexColorProcessor.setVertexColor colors_data.value (execute colors_data.key)
-
-
-		)
-
-
+		
+		VertexColorProcessor.resetCPVVerts()
 	)
 )
 

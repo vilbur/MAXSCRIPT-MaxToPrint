@@ -32,14 +32,14 @@ struct VertexColorProcessor_v
 		format "\n"; print "VertexColorProcessor_v.setVertexColor()"
 		format "verts: %\n" verts
 		format "clr: %\n" clr
-		format "VertexColors: %\n" VertexColors
+		--format "VertexColors: %\n" VertexColors
 		VertexColors.MeshVertToColorVertexConvert.get_single_vert = true
 
 		verts_base = this._getBaseObjectVerts(verts)
 		--format "verts_base: %\n" verts_base
 
 		start_map_verts = timeStamp()
-		format "start_map_verts()\n"
+		--format "start_map_verts()\n"
 
 
 		vertex_count	= getNumVerts obj.mesh
@@ -48,34 +48,27 @@ struct VertexColorProcessor_v
 		format "vertex_count: %\n" vertex_count
 		format "CPV_verts: %\n" CPV_verts
 
-		map_verts = if getNumVerts obj.mesh != getNumCPVVerts obj.mesh then
-						VertexColors.MeshVertToColorVertexConvert.meshVertsToMapVerts (verts_base) flat:true
-						--makeUniqueArray (VertexColors.MeshVertToColorVertexConvert.meshVertsToMapVerts (verts_base) flat:true )
-					else
-						verts_base
+		 if getNumVerts obj.mesh != getNumCPVVerts obj.mesh then
+			this.resetCPVVerts()
 
-		--map_verts = VertexColors.MeshVertToColorVertexConvert.meshVertsToMapVerts (verts_base) flat:true
-		--map_verts = verts_base
 
 		--map_verts = (VertexColors.MeshVertToColorVertexConvert.meshVertsToMapVerts (verts_base) flat:true )
-		format "map_verts: %\n" map_verts
-		format "map_verts: % ms\n" (( timeStamp()) - start_map_verts)
 
-		start_update_chache = timeStamp()
+		--start_update_chache = timeStamp()
 		this._updateCache(verts_base)(clr as string )
-		format "update_chache: % ms\n" (( timeStamp()) - start_update_chache)
+		--format "update_chache: % ms\n" (( timeStamp()) - start_update_chache)
 
-		start_setVertColor = timeStamp()
-		polyop.setVertColor obj.baseobject 0 map_verts (clr)
-		format "setVertColor: % ms\n" (( timeStamp()) - start_setVertColor)
+		--start_setVertColor = timeStamp()
+		polyop.setVertColor obj.baseobject 0 verts_base (clr)
+		--format "setVertColor: % ms\n" (( timeStamp()) - start_setVertColor)
 	),
 
 	/** Process operation on verts by vertex color
 	 */
 	function byColor method colors =
 	(
-		format "\n"; print "VertexColorProcessor_v.byColor()"
-		format "colors: %\n" colors
+		--format "\n"; print "VertexColorProcessor_v.byColor()"
+		--format "colors: %\n" colors
 
 		verts_by_colors = #{}
 
@@ -93,7 +86,7 @@ struct VertexColorProcessor_v
 	 */
 	function byVerts method verts =
 	(
-		format "\n"; print "VertexColorProcessor_v.byVerts()"
+		--format "\n"; print "VertexColorProcessor_v.byVerts()"
 		--format "method: %\n" method
 		--format "verts: %\n" verts
 
@@ -106,6 +99,26 @@ struct VertexColorProcessor_v
 			verts_by_colors += all_verts_by_colors[clr]
 
 		this._callMethod (method) (verts_by_colors)
+	),
+
+	/** Reset vertex colors channel
+	 */
+	function resetCPVVerts =
+	(
+		format "\n"; print "VertexColorProcessor_v.resetCPVVerts()"
+		format "\n----------\nRESET CPV VERTS\n"
+		/* GET ALL VERTS SORTED BY COLORS */
+		colors = VertexColors.getVertsAndColors()
+
+        polyOp.defaultMapFaces obj 0
+        polyOp.setVertColor obj 0 #all white
+
+		removeDictValue colors (white as string )
+
+		--for colors_data in colors do format "\n********\n\nCOLOR: %\nVERTS: %\n" colors_data.key colors_data.value
+
+		for colors_data in colors do
+			this.setVertexColor colors_data.value (execute colors_data.key)
 	),
 
 	private
@@ -318,7 +331,7 @@ struct VertexColorProcessor_v
 	 */
 	on create do
 	(
-		format "1) --------------- VERTEXCOLOR\n"
+		--format "1) --------------- VERTEXCOLOR\n"
 		curr_mod	= modPanel.getCurrentObject()
 
 		this.prepareObject()
