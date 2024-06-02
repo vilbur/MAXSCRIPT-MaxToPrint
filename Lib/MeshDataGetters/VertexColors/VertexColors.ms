@@ -82,13 +82,13 @@ struct VertexColors_v
 	  */
 	function getVertsAndColors verts:#{} =
 	(
-		format "\n"; print "VertexColors_v.getVertsByColor()"
-		format "verts: %\n" verts
-		format "verts.numberSet: %\n" verts.numberSet
+		--format "\n"; print "VertexColors_v.getVertsByColor()"
+		--format "verts: %\n" verts
+		--format "verts.numberSet: %\n" verts.numberSet
 		if verts.numberSet == 0 then
 			verts = #{1..(getNumVerts obj_mesh)}
 
-		format "verts: %\n" verts
+		--format "verts: %\n" verts
 		this._getColorsAndVerts (verts)
 	),
 
@@ -111,7 +111,8 @@ struct VertexColors_v
 	function _getVertColor mesh_vert =
 	(
 		--format "\n"; print "VertexColors_v._getVertColor()"
-		map_verts_of_mesh_vert = makeUniqueArray (MeshVertToColorVertexConvert.meshVertsToMapVerts (mesh_vert) flat:true )
+		--map_verts_of_mesh_vert = makeUniqueArray (MeshVertToColorVertexConvert.meshVertsToMapVerts (mesh_vert) flat:true )
+		map_verts_of_mesh_vert = MeshVertToColorVertexConvert.meshVertsToMapVerts (mesh_vert) flat:true
 
 		color_of_vert = this._searchNewVertexColor (colors) (map_verts_of_mesh_vert)
 
@@ -122,7 +123,7 @@ struct VertexColors_v
 	 */
 	function getAllVertsAndColors =
 	(
-		format "\n"; print "VertexColors_v.getAllVertsAndColors()"
+		--format "\n"; print "VertexColors_v.getAllVertsAndColors()"
 		local color_of_vert
 
 		vertex_count	= getNumVerts obj_mesh
@@ -131,8 +132,8 @@ struct VertexColors_v
 		verts_get_colors = #{1..obj_mesh.numverts}
 		--verts_get_colors = #{1..$.numverts}
 
-		format "CPV_verts: %\n" CPV_verts
-		format "vertex_count: %\n" vertex_count
+		--format "CPV_verts: %\n" CPV_verts
+		--format "vertex_count: %\n" vertex_count
 
 		colors = Dictionary #STRING
 
@@ -177,17 +178,21 @@ struct VertexColors_v
 	 */
 	function _getColorsAndVerts verts_get_colors =
 	(
-		format "\n"; print "VertexColors_v._getColorsAndVerts()"
+		--format "\n"; print "VertexColors_v._getColorsAndVerts()"
 		--format "verts_get_colors: %\n" verts_get_colors
 		pointer = (getHandleByAnim  obj) as string
 		--format "pointer: %\n" pointer
 		--format "VERTEX_COLORS_CACHE: %\n" VERTEX_COLORS_CACHE
 
-		--colors = VERTEX_COLORS_CACHE[pointer]
+		colors = VERTEX_COLORS_CACHE[pointer]
 
 		--format "-------------\nCACHE\n"
 		--if colors != undefined then
 			--for colors_data in colors do format "COLOR: %	VERTS: %\n" colors_data.key colors_data.value
+
+		all_verts_empty = #{1..obj_mesh.numverts}
+
+		all_verts_empty *= #{}
 
 
 		if colors == undefined then
@@ -202,7 +207,11 @@ struct VertexColors_v
 			colors_of_verts = Dictionary #STRING
 
 			for colors_data in  colors where not (verts_of_color = (colors_data.value * verts_get_colors)).isEmpty do
-				colors_of_verts[ colors_data.key ] = verts_of_color
+			(
+
+
+				colors_of_verts[ colors_data.key ] = (all_verts_empty + verts_of_color)
+			)
 
 
 		--format "-------------\nCACHE UPDATED\n"

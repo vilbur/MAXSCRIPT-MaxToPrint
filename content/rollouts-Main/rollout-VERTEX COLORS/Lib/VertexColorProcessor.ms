@@ -27,11 +27,11 @@ struct VertexColorProcessor_v
 	 */
 	function setVertexColor verts clr =
 	(
-		format "4) --------------- SET VERTEX COLOR\n"
-
-		format "\n"; print "VertexColorProcessor_v.setVertexColor()"
-		format "verts: %\n" verts
-		format "clr: %\n" clr
+		--format "4) --------------- SET VERTEX COLOR\n"
+		--
+		--format "\n"; print "VertexColorProcessor_v.setVertexColor()"
+		--format "verts: %\n" verts
+		--format "clr: %\n" clr
 		--format "VertexColors: %\n" VertexColors
 		VertexColors.MeshVertToColorVertexConvert.get_single_vert = true
 
@@ -45,8 +45,8 @@ struct VertexColorProcessor_v
 		vertex_count	= getNumVerts obj.mesh
 		CPV_verts 	= getNumCPVVerts obj.mesh
 
-		format "vertex_count: %\n" vertex_count
-		format "CPV_verts: %\n" CPV_verts
+		--format "vertex_count: %\n" vertex_count
+		--format "CPV_verts: %\n" CPV_verts
 
 		 if getNumVerts obj.mesh != getNumCPVVerts obj.mesh then
 			this.resetCPVVerts()
@@ -219,7 +219,7 @@ struct VertexColorProcessor_v
 	 */
 	function prepareObject =
 	(
-		format "\n"; print "VertexColors_v.prepareObject()"
+		--format "\n"; print "VertexColorProcessor_v.prepareObject()"
 		--format "TEST: %\n" ( polyop.getMapSupport obj 0)
 
 		if not polyop.getMapSupport obj 0 then
@@ -279,9 +279,9 @@ struct VertexColorProcessor_v
 	 */
 	function _selectVerts sel_bitarray =
 	(
-		format "\n"; print "VertexColorProcessor_v.selectVerts()"
-		format "sel_bitarray: %\n" sel_bitarray
-		format "classOf curr_mod: %\n" (classOf curr_mod)
+		--format "\n"; print "VertexColorProcessor_v.selectVerts()"
+		--format "sel_bitarray: %\n" sel_bitarray
+		--format "classOf curr_mod: %\n" (classOf curr_mod)
 		--max modify mode
 		--subObjectLevel = 1
 
@@ -298,7 +298,7 @@ struct VertexColorProcessor_v
 	 */
 	function _updateCache verts clr =
 	(
-		format "\n"; print "VertexColorProcessor_v._updateCache()"
+		--format "\n"; print "VertexColorProcessor_v._updateCache()"
 
 		pointer = (getHandleByAnim obj.baseobject) as string
 

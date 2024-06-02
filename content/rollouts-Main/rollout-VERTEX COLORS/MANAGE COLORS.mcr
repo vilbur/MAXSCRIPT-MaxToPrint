@@ -317,7 +317,7 @@ toolTip:	"List Vertex Colors"
 		/* GET ALL VERTS SORTED BY COLORS */
 		colors = VertexColors.getVertsAndColors()
 
-		for colors_data in colors do format "\n********\n\nCOLOR: %\nVERTS: %\n" colors_data.key colors_data.value
+		for colors_data in colors do format "\n********\n\nCOLOR: %\nVERTS: %\nCOUNT: %\n" colors_data.key colors_data.value colors_data.value.numberSet
 
 	)
 )
@@ -341,7 +341,7 @@ toolTip:	"Reset Vertex Colors"
 		obj	= selection[1]
 		/* SET NEW CLASS INSTANCE */
 		VertexColorProcessor = VertexColorProcessor_v(obj)
-		
+
 		VertexColorProcessor.resetCPVVerts()
 	)
 )

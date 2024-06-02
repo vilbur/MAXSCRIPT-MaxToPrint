@@ -15,8 +15,8 @@ struct MeshVertToColorVertexConvertor_v
 	--map_verts_of_face_cache = Dictionary (#integer),
 	--mesh_verts_of_face_cache = Dictionary (#integer),
 
-	map_verts_of_face_cache = #(),
-	mesh_verts_of_face_cache = #(),
+	--map_verts_of_face_cache = #(),
+	--mesh_verts_of_face_cache = #(),
 
 	/* dependency */
 	/* reference */
@@ -66,8 +66,8 @@ struct MeshVertToColorVertexConvertor_v
 
 		--obj_numverts = obj.numverts
 
-		map_verts_of_face_cache[obj_mesh.numverts]  = undefined
-		mesh_verts_of_face_cache[obj_mesh.numverts] = undefined
+		--map_verts_of_face_cache[obj_mesh.numverts]  = undefined
+		--mesh_verts_of_face_cache[obj_mesh.numverts] = undefined
 
 
 		if classOf verts == integer then
@@ -108,7 +108,7 @@ struct MeshVertToColorVertexConvertor_v
 	 */
 	function mapVertsToMeshVerts map_verts =
 	(
-		format "\n"; print "MeshVertToColorVertexConvertor_v.mapVertsToMeshVerts()"
+		--format "\n"; print "MeshVertToColorVertexConvertor_v.mapVertsToMeshVerts()"
 
 		if classOf map_verts == Array then map_verts = map_verts as BitArray
 
@@ -140,7 +140,7 @@ struct MeshVertToColorVertexConvertor_v
 	 */
 	on create do
 	(
-		format "\n"; print "MeshVertToColorVertexConvertor.onCreate()"
+		--format "\n"; print "MeshVertToColorVertexConvertor.onCreate()"
 		--format "3) --------------- MESH VERT TO COLOR VERTEX CONVERTOR\n"
 		----for prop in #(  ) where getProperty this prop == undefined do -- CHECK CONSTRUCT PROPERTIES -- Array of this struct properties necessary to run
 		--	throw ("\n\n\nUNDEFINED CONSTRUCT PROPERTY\n\n\nSTRUCT:\n\n"+ ((filterString( classof this as string )"(:")[2]) +"\n\n\nPROPERTY:\n\n"+ prop )
