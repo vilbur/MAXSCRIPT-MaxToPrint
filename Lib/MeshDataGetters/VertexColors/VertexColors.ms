@@ -1,4 +1,6 @@
 filein( getFilenamePath(getSourceFileName()) + "/MeshVertToColorVertexConvertor/MeshVertToColorVertexConvertor.ms" )	--"./MeshVertToColorVertexConvertor/MeshVertToColorVertexConvertor.ms"
+
+--filein( getFilenamePath(getSourceFileName()) + "/MeshVertToColorVertexConvertor/MeshVertToColorVertexConvertor.ms" )	--"./MeshVertToColorVertexConvertor/MeshVertToColorVertexConvertor.ms"
 --filein( getFilenamePath(getSourceFileName()) + "/ConvexVertFinder/ConvexVertFinder.ms" )	--"./ConvexVertFinder/ConvexVertFinder.ms"
 
 global VERTEX_COLORS_CACHE = Dictionary #string
@@ -81,10 +83,12 @@ struct VertexColors_v
 	function getVertsAndColors verts:#{} =
 	(
 		format "\n"; print "VertexColors_v.getVertsByColor()"
-		--format "verts: %\n" verts
+		format "verts: %\n" verts
+		format "verts.numberSet: %\n" verts.numberSet
 		if verts.numberSet == 0 then
 			verts = #{1..(getNumVerts obj_mesh)}
 
+		format "verts: %\n" verts
 		this._getColorsAndVerts (verts)
 	),
 
@@ -134,10 +138,11 @@ struct VertexColors_v
 
 		white_clr = white as string
 
+		MeshVertToColorVertexConvert.get_single_vert = true
+
 		/* IF VERTEX COLORS EXISTS */
 		if  (getNumCPVVerts obj_mesh != 0) then
 		(
-			MeshVertToColorVertexConvert.get_single_vert = true
 
 			while not verts_get_colors.isEmpty do
 			(
@@ -147,7 +152,8 @@ struct VertexColors_v
 
 				color_of_vert = this._searchNewVertexColor (colors) (map_verts_of_mesh_vert)
 
-				mesh_verts_by_color = meshop.getVertsByColor obj_mesh color_of_vert 0.01 0.01 0.01 	-- get all verts by thath color
+				mesh_verts_by_color = meshop.getVertsByColor obj_mesh color_of_vert 0.01 0.01 0.01 	-- get all verts by that color
+				--mesh_verts_by_color = meshop.getVertsByColor obj_mesh color_of_vert 10 10 10  	-- get all verts by that color
 
 				colors[ color_of_vert as string ] = mesh_verts_by_color
 
@@ -177,7 +183,7 @@ struct VertexColors_v
 		--format "pointer: %\n" pointer
 		--format "VERTEX_COLORS_CACHE: %\n" VERTEX_COLORS_CACHE
 
-		colors = VERTEX_COLORS_CACHE[pointer]
+		--colors = VERTEX_COLORS_CACHE[pointer]
 
 		--format "-------------\nCACHE\n"
 		--if colors != undefined then
@@ -238,7 +244,8 @@ struct VertexColors_v
 	 */
 	on create do
 	(
-		--format "\n"; print "VertexColorsGetter.onCreate()"
+		format "2) --------------- VERTEXCOLORS\n"
+		format "\n"; print "VertexColors_v.onCreate()"
 		--ConvexVertFinder	= ConvexVertFinder_v(obj)
 		MeshVertToColorVertexConvert	= MeshVertToColorVertexConvertor_v(obj)
 	)

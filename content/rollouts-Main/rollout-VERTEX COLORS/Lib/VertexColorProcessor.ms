@@ -1,5 +1,6 @@
-( getFilenamePath(getSourceFileName()) + "/../../../../Lib/MeshDataGetters/VertexColors/VertexColors.ms" )	--"./../../../../Lib/MeshDataGetters/VertexColors/VertexColors.ms"
 
+
+filein( getFilenamePath(getSourceFileName()) + "/../../../../Lib/MeshDataGetters/VertexColors/VertexColors.ms" )	--"./../../../../Lib/MeshDataGetters/VertexColors/VertexColors.ms"
 
 /** Vertex color processor
  */
@@ -26,8 +27,12 @@ struct VertexColorProcessor_v
 	 */
 	function setVertexColor verts clr =
 	(
+		format "4) --------------- SET VERTEX COLOR\n"
+
 		format "\n"; print "VertexColorProcessor_v.setVertexColor()"
 		format "verts: %\n" verts
+		format "clr: %\n" clr
+		format "VertexColors: %\n" VertexColors
 		VertexColors.MeshVertToColorVertexConvert.get_single_vert = true
 
 		verts_base = this._getBaseObjectVerts(verts)
@@ -35,8 +40,24 @@ struct VertexColorProcessor_v
 
 		start_map_verts = timeStamp()
 		format "start_map_verts()\n"
-		--map_verts = makeUniqueArray (VertexColors.MeshVertToColorVertexConvert.meshVertsToMapVerts (verts_base) flat:true )
-		map_verts = (VertexColors.MeshVertToColorVertexConvert.meshVertsToMapVerts (verts_base) flat:true )
+
+
+		vertex_count	= getNumVerts obj.mesh
+		CPV_verts 	= getNumCPVVerts obj.mesh
+
+		format "vertex_count: %\n" vertex_count
+		format "CPV_verts: %\n" CPV_verts
+
+		map_verts = if getNumVerts obj.mesh != getNumCPVVerts obj.mesh then
+						VertexColors.MeshVertToColorVertexConvert.meshVertsToMapVerts (verts_base) flat:true
+						--makeUniqueArray (VertexColors.MeshVertToColorVertexConvert.meshVertsToMapVerts (verts_base) flat:true )
+					else
+						verts_base
+
+		--map_verts = VertexColors.MeshVertToColorVertexConvert.meshVertsToMapVerts (verts_base) flat:true
+		--map_verts = verts_base
+
+		--map_verts = (VertexColors.MeshVertToColorVertexConvert.meshVertsToMapVerts (verts_base) flat:true )
 		format "map_verts: %\n" map_verts
 		format "map_verts: % ms\n" (( timeStamp()) - start_map_verts)
 
@@ -45,7 +66,7 @@ struct VertexColorProcessor_v
 		format "update_chache: % ms\n" (( timeStamp()) - start_update_chache)
 
 		start_setVertColor = timeStamp()
-		polyop.setVertColor obj.baseobject 0 map_verts clr
+		polyop.setVertColor obj.baseobject 0 map_verts (clr)
 		format "setVertColor: % ms\n" (( timeStamp()) - start_setVertColor)
 	),
 
@@ -297,6 +318,7 @@ struct VertexColorProcessor_v
 	 */
 	on create do
 	(
+		format "1) --------------- VERTEXCOLOR\n"
 		curr_mod	= modPanel.getCurrentObject()
 
 		this.prepareObject()

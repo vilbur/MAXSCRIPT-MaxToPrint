@@ -2,7 +2,6 @@ clearListener(); print("Cleared in:\n"+getSourceFileName())
 
 filein( getFilenamePath(getSourceFileName()) + "/../VertexColors.ms" )	--"./../VertexColors.ms"
 
-global obj
 
 /**
   */
@@ -110,6 +109,7 @@ function selectVerts obj verts =
 /*--------------------------------------------------------------------
 	CREATE TEST OBJECTS
 --------------------------------------------------------------------------------*/
+--global obj
 
 obj = if selection.count != 0 then selection[1] else
 (
@@ -148,7 +148,7 @@ vertex_count	= getNumVerts obj.mesh
 /*--------------------------------------------------------------------
 	SET RANDOM VERTEX COLORS
 --------------------------------------------------------------------------------*/
-setVertsColorsRandom()
+--setVertsColorsRandom()
 
 /*--------------------------------------------------------------------
 	SET EXACT VERTEX COLORS

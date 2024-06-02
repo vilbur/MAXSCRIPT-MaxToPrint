@@ -1,6 +1,6 @@
 --filein( getFilenamePath(getSourceFileName()) + "/../rollout-VERTEX SELECTION/Lib/VertSelector/VertSelector.ms" )	--"./../rollout-VERTEX SELECTION/Lib/VertSelector/VertSelector.ms"
 filein( getFilenamePath(getSourceFileName()) + "/../../../../MAXSCRIPT-UI-framework/Lib/Menus/RcMenu/RcMenu.ms" )	--"./../../../../MAXSCRIPT-UI-framework/Lib/Menus/RcMenu/RcMenu.ms"
-filein( getFilenamePath(getSourceFileName()) + "/Lib/VertexColorProcessor.ms" )	--"./Lib/VertexColorProcessor.ms"
+--filein( getFilenamePath(getSourceFileName()) + "/Lib/VertexColorProcessor.ms" )	--"./Lib/VertexColorProcessor.ms"
 
 
 global VERTEX_COLOR_PARAM

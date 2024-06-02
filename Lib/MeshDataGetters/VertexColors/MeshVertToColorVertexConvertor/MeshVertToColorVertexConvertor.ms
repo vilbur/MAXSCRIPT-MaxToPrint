@@ -30,7 +30,7 @@ struct MeshVertToColorVertexConvertor_v
 	 */
 	function meshVertsToMapVerts verts flat:false =
 	(
-		format "\n"; print "MeshVertToColorVertexConvertor_v.meshVertsToMapVerts()"
+		--format "\n"; print "MeshVertToColorVertexConvertor_v.meshVertsToMapVerts()"
 
 		obj_mesh = obj.mesh
 
@@ -38,26 +38,39 @@ struct MeshVertToColorVertexConvertor_v
 		 */
 		function getMapVertFromFace vert face_id =
 		(
-			format "\n"; print "MeshVertToColorVertexConvertor_v.getMapVertFromFace()"
-			format "vert: %\n" vert
-			format "face_id: %\n" face_id
-			mesh_verts	= if (mesh_verts_cache = mesh_verts_of_face_cache[face_id]) == undefined then
-					getFace obj_mesh face_id
-				else
-					mesh_verts_cache
+			--format "\n"; print "MeshVertToColorVertexConvertor_v.getMapVertFromFace()"
+			--format "vert: %\n" vert
+			--format "face_id: %\n" face_id
+			--mesh_verts	= if (mesh_verts_cache = mesh_verts_of_face_cache[face_id]) == undefined then
+			--		getFace obj_mesh face_id
+			--	else
+			--		mesh_verts_cache
+			--
+			--map_verts_arr	= if (map_verts_cache = map_verts_of_face_cache[face_id]) == undefined then
+			--(
+			--	map_verts	= getVCFace	obj_mesh	face_id
+			--
+			--	#( mesh_verts.x, mesh_verts.y, mesh_verts.z )
+			--)
+			--else
+			--	map_verts_cache
+			--
+			--vert_index	= findItem map_verts_arr vert
 
-			map_verts_arr	= if (map_verts_cache = map_verts_of_face_cache[face_id]) == undefined then
+			--map_verts[vert_index] as integer --return
+
+
+			mesh_verts	= getFace obj_mesh face_id
+			map_verts	= getVCFace	obj_mesh	face_id
+
+
+			case of
 			(
-				map_verts	= getVCFace	obj_mesh	face_id
-
-				#( mesh_verts.x, mesh_verts.y, mesh_verts.z )
+				(mesh_verts[1] == vert): map_verts[1]
+				(mesh_verts[2] == vert): map_verts[2]
+				(mesh_verts[3] == vert): map_verts[3]
 			)
-			else
-				map_verts_cache
 
-			vert_index	= findItem map_verts_arr vert
-
-			map_verts[vert_index] as integer --return
 		)
 
 		/** Flattern array
@@ -73,7 +86,8 @@ struct MeshVertToColorVertexConvertor_v
 			array_flat --return flattern matrix
 		)
 
-		--all_verts = #{1..obj.numverts}
+		--obj_numverts = obj.numverts
+
 		map_verts_of_face_cache[obj_mesh.numverts]  = undefined
 		mesh_verts_of_face_cache[obj_mesh.numverts] = undefined
 
@@ -84,27 +98,32 @@ struct MeshVertToColorVertexConvertor_v
 		else if classOf verts == BitArray then
 			verts = verts as Array
 
-		CPV_verts_all = deepCopy verts
+		
+		--CPV_verts_all = deepCopy verts
+		CPV_verts_all = #()
+		CPV_verts_all[verts.count] = undefined --initialize a 100 elements array in memory
 
 		/*------ GET CPV VERTS ------*/
-		--for i = 1 to verts.count do
-		--(
-		--	vert = verts[i]
-		--
-		--	faces =  ( meshop.getFacesUsingVert obj_mesh vert ) as Array
-		--
-		--	if not get_single_vert then
-		--		CPV_verts_all[i] = for face_id in faces collect getMapVertFromFace(vert)(face_id)
-		--
-		--	else
-		--		CPV_verts_all[i] = getMapVertFromFace(vert)(faces[1])
-		--)
+		for i = 1 to verts.count do
+		(
+			vert = verts[i]
+
+			faces =  ( meshop.getFacesUsingVert obj_mesh vert ) as Array
+
+			if not get_single_vert then
+				CPV_verts_all[i] = for face_id in faces collect getMapVertFromFace(vert)(face_id)
+
+			else
+				CPV_verts_all[i] = getMapVertFromFace(vert)(faces[1])
+		)
 
 		/*------ FLATTERN RESULT ARRAY ------*/
-		--if flat and not get_single_vert then
-		--	flatternArray(CPV_verts_all) --return
-		--else
+		if flat and not get_single_vert then
+			flatternArray(CPV_verts_all) --return
+		else
 			CPV_verts_all --return
+
+
 	),
 
 	/** Map verts to mesh verts
@@ -143,8 +162,8 @@ struct MeshVertToColorVertexConvertor_v
 	 */
 	on create do
 	(
-		format "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
 		format "\n"; print "MeshVertToColorVertexConvertor.onCreate()"
+		format "3) --------------- MESH VERT TO COLOR VERTEX CONVERTOR\n"
 		--for prop in #(  ) where getProperty this prop == undefined do -- CHECK CONSTRUCT PROPERTIES -- Array of this struct properties necessary to run
 		--	throw ("\n\n\nUNDEFINED CONSTRUCT PROPERTY\n\n\nSTRUCT:\n\n"+ ((filterString( classof this as string )"(:")[2]) +"\n\n\nPROPERTY:\n\n"+ prop )
 	)
