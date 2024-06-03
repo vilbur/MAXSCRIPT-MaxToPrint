@@ -4,10 +4,11 @@ filein( getFilenamePath(getSourceFileName()) + "/content/rollouts-Main/rollout-V
 
 filein( getFilenamePath(getSourceFileName()) + "/../MAXSCRIPT-UI-framework/Lib/ContentLoader/ContentLoader.ms" )	--"./../MAXSCRIPT-UI-framework/Lib/ContentLoader/ContentLoader.ms"
 
+filein( getFilenamePath(getSourceFileName()) + "/../MAXSCRIPT-viltools3/VilTools/rollouts-Tools/rollout-EXPORT/rollouts-ExportTo/rollout-3D-PRINT/Lib/PrinterVolume/PrinterVolume.ms" )	--"./../MAXSCRIPT-viltools3/VilTools/rollouts-Tools/rollout-EXPORT/rollouts-ExportTo/rollout-3D-PRINT/Lib/PrinterVolume/PrinterVolume.ms"
 
 current_dir = getFilenamePath(getSourceFileName())
 
-
+global DIALOG_content
 /*------------------------------------------------------------------------------
 	START VilTools
 ------------------------------------------------------------------------------*/

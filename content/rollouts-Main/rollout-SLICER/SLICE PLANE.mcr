@@ -1,4 +1,4 @@
-global ROLLOUT_print_3d
+global ROLLOUT_slicer
 global DIALOG_elevation_slider
 
 
@@ -25,7 +25,8 @@ icon:	"across:5|height:32|tooltip:\n\n----------------------\n\nFIX IF NOT WORK 
 	on execute do
 		(
 			clearListener(); print("Cleared in:\n"+getSourceFileName())
-		--	filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-MaxToPrint\content\rollouts-Main\rollout-Points\1-SLICE PLANE.mcr"
+		--	filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-MaxToPrint\content\rollouts-Main\rollout-SLICER\SLICE PLANE.mcr"
+			format "EventFired	= % \n" EventFired
 
 			/* DEVELOP: KILL SLICE DIALOG */
 			--try(
@@ -42,35 +43,36 @@ icon:	"across:5|height:32|tooltip:\n\n----------------------\n\nFIX IF NOT WORK 
 				--format "\n"; print ".addSliceMod()"
 				addModifier obj slice_mod
 
-				--mod_TM =	(getModContextTM obj slice_mod)	* (  obj.transform )
 				mod_TM =	(getModContextTM obj slice_mod)	* (  obj.transform )
 				--format "mod_TM	= % \n" mod_TM
 				setModContextTM obj slice_mod mod_TM
 			)
 
+			slice_modes = Dictionary #( #SLICE_PLANE_TOP, ROLLOUT_slicer.CBX_slice_top.state ) #( #SLICE_PLANE_BOTTOM, ROLLOUT_slicer.CBX_slice_bottom.state )
 
-			for data in Dictionary #( #SLICE_PLANE_TOP, ROLLOUT_print_3d.CBX_slice_top.state ) #( #SLICE_PLANE_BOTTOM, ROLLOUT_print_3d.CBX_slice_bottom.state ) where data.value do
+			/* SET DETAFULT SLICE TOP IF NOTHINK SET */
+			if not (slice_modes[ #SLICE_PLANE_TOP ]and slice_modes[ #SLICE_PLANE_BOTTOM ])  then
+				slice_modes[ #SLICE_PLANE_TOP ] = true
+
+			for data in slice_modes where data.value do
 			(
 				format "data	= % \n" data
 				mod_name = data.key
 
-				mods_in_scene = for mod_in_scene in getClassInstances ( SliceModifier ) where mod_in_scene.name as name == mod_name collect mod_in_scene
+				/* GET ALL INSANCES OF MODIFIER IN SCENE */
+				modifiers_in_scene = for mod_in_scene in getClassInstances ( SliceModifier ) where mod_in_scene.name as name == mod_name collect mod_in_scene
 
-				if ( slice_mod = mods_in_scene[1] ) == undefined then
-					slice_mod = SliceModifier name:( mod_name as string ) Faces___Polygons_Toggle:1
+				/* GET NEW INSANCE MODIFIER */
+				if ( slice_modifier = modifiers_in_scene[1] ) == undefined then
+					slice_modifier = SliceModifier name:( mod_name as string ) Faces___Polygons_Toggle:1
 
-				objects_with_modifier = refs.dependentNodes slice_mod
+				/* GET OBJECTS WITH MODIFIER INS */
+				objects_with_modifier = refs.dependentNodes slice_modifier
 
-
+				/* ADD MODIIFER WHERE IS NOT */
 				for obj in selection where superClassOf obj == GeometryClass and findItem objects_with_modifier obj == 0 do
-					addSliceMod (obj)	(slice_mod)
+					addSliceMod (obj)	(slice_modifier)
 			)
-
-			--for obj in selection where (_mod = obj.modifiers[mod_name]) != undefined do
-			--	deleteModifier obj _mod
-
-
-
 
 
 			/* CREATE SLICE DIALOG */
@@ -80,6 +82,8 @@ icon:	"across:5|height:32|tooltip:\n\n----------------------\n\nFIX IF NOT WORK 
 
 		)
 )
+
+
 
 /**
   *
@@ -92,7 +96,7 @@ icon:	"across:5|height:32"
 (
 	on execute do
 		(
-			--filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-vilTools3\VilTools\rollouts-Tools\rollout-PRINT-3D\1-SLICE PLANE.mcr"
+			--filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-MaxToPrint\content\rollouts-Main\rollout-SLICER\SLICE PLANE.mcr"
 			--try(
 			--	cui.UnRegisterDialogBar DIALOG_elevation_slider
 			--
@@ -109,9 +113,9 @@ icon:	"across:5|height:32"
 				/*  */
 				 if selection.count == 0 then
 				 (
-					mods_in_scene = for mod_in_scene in getClassInstances ( SliceModifier ) where mod_in_scene.name as name == mod_name collect mod_in_scene
+					modifiers_in_scene = for mod_in_scene in getClassInstances ( SliceModifier ) where mod_in_scene.name as name == mod_name collect mod_in_scene
 
-					for mod_in_scene in mods_in_scene do
+					for mod_in_scene in modifiers_in_scene do
 						for obj in refs.dependentNodes mod_in_scene do
 							deleteModifier obj mod_in_scene
 

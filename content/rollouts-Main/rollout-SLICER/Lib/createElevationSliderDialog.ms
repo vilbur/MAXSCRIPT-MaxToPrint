@@ -86,8 +86,8 @@ function createElevationSliderDialog =
 				default:	1 -- non metric units
 			)
 
-			export_size = ROLLOUT_export.SPIN_export_size.value
-			layer_height	= ROLLOUT_print_3d.SPIN_layer_height.value
+			export_size = DIALOG_content.SPIN_export_size.value
+			layer_height	= DIALOG_content.SPIN_layer_height.value
 			current_layer = DIALOG_elevation_slider.SPIN_layer_current.value
 
 			/* MOVE SLICE PLANE TO SELCTION BOTTOM */
@@ -139,7 +139,7 @@ function createElevationSliderDialog =
 		--------------------------------------------------------------------------------*/
 		on BTN_exit_dialog pressed do
 			try(
-				removeSlicePlaneModifier( selection )
+				--removeSlicePlaneModifier( selection )
 
 				cui.UnRegisterDialogBar DIALOG_elevation_slider
 
@@ -156,7 +156,6 @@ function createElevationSliderDialog =
 		on SLIDER_elevation RIGHTCLICK do
 		(
 			--print "createElevationSliderDialog SLIDER_elevation rightClick"
-
 			/** Toggle slice modifiers
 			 */
 			function toggleSliceModifiers state mod_names:#( #SLICE_PLANE_TOP, #SLICE_PLANE_BOTTOM ) =
@@ -191,15 +190,17 @@ function createElevationSliderDialog =
 				(
 					--format "SELECTION CHANGED	= % \n" SET_ELEVATION
 
-					toggleSliceModifiers (false)
+			toggleSliceModifiers (false)
 
 					selection_min	= amin(for obj in selection collect getBbox (obj) (#min) (#z) )
 					selection_max	= amax(for obj in selection collect getBbox (obj) (#max) (#z) )
 					selection_center	= (selection_min + selection_max ) / 2
 
-					layer_index_min = posToLayerIndex( selection_min ) --+ 1 -- Without 1 then first layer under object is selected
+					layer_index_min = posToLayerIndex( selection_min ) --+1 -- Without 1 then first layer under object is selected
 					layer_index_max = posToLayerIndex( selection_max )
 					layer_index_center = posToLayerIndex( selection_center )
+
+					--layer_index_min+=10
 
 					layer_positions = #( layer_index_min, layer_index_center, layer_index_max )
 
@@ -269,8 +270,14 @@ function createElevationSliderDialog =
 			updateSlicePlaneSystem (val)
 
 
-		--/* ON DIALOG OOPEN */
+		--/* ON DIALOG OPEN */
 		--on DIALOG_elevation_slider OPEN do
+		--	updateSlicePlaneSystem (DIALOG_elevation_slider.SPIN_layer_current.value)
+
+		/* ON DIALOG CLOSE */
+		on DIALOG_elevation_slider CLOSE do
+				removeSlicePlaneModifier( selection )
+
 		--	updateSlicePlaneSystem (DIALOG_elevation_slider.SPIN_layer_current.value)
 
 	)

@@ -6,7 +6,7 @@
   */
 function updateSlicePlaneSystem layer_index incremental:false =
 (
-	--format "\n"; print "PRINTER DUMMY.mcr.updateSlicePlaneSystem()"
+	format "\n"; print "updateSlicePlaneSystem.ms.updateSlicePlaneSystem()"
 	--format "layer_index:	% \n" layer_index
 
 
@@ -30,27 +30,41 @@ function updateSlicePlaneSystem layer_index incremental:false =
 	if DIALOG_elevation_slider == undefined or GetDialogPos DIALOG_elevation_slider == [0,0] then
 		createElevationSliderDialog()
 
-	volume_height	= (PrinterVolume_v(ROLLOUT_export.SPIN_export_size.value)).printer_size.z
+	export_size = DIALOG_content.SPIN_export_size.value
+	--export_size = 1
+	--format "EXPORT SIZE TEMPORARY SET TO: %\n" export_size
+	volume_height	= (PrinterVolume_v(export_size)).printer_size.z
 
+	/* TODO: ACCESS TO UI VALUES SHOULD BE OUTSIDE FUNCTION
+
+	*/
 	layer_current	= DIALOG_elevation_slider.SLIDER_elevation.value
 
-	layer_height	= ROLLOUT_print_3d.SPIN_layer_height.value
-	cap_slice	= ROLLOUT_print_3d.CBX_cap_slice.state
-	select_plane	= ROLLOUT_print_3d.CBX_slice_select_plane.state
-	slice_top	= ROLLOUT_print_3d.CBX_slice_top.state
-	slice_bottom	= ROLLOUT_print_3d.CBX_slice_bottom.state
+	layer_height	= DIALOG_content.SPIN_layer_height.value
+
+	cap_slice	= ROLLOUT_slicer.CBX_cap_slice.state
+	select_plane	= ROLLOUT_slicer.CBX_slice_select_plane.state
+	slice_top	= ROLLOUT_slicer.CBX_slice_top.state
+	slice_bottom	= ROLLOUT_slicer.CBX_slice_bottom.state
 
 	layers_count	= volume_height / layer_height
 
 	if layer_index == undefined then
 		layer_index = layer_current
 
-	--format "slice_top:	% \n" slice_top
-	--format "slice_bottom % \n" slice_bottom
+	/* SET DEAGFULT SLICE TOP */
+	if not (slice_top and slice_bottom) then
+		slice_top = true
+
+
+	format "slice_top:	% \n" slice_top
+	format "slice_bottom % \n" slice_bottom
 
 	/* GET INCREMENTAL LAYER INDEX */
 	if incremental then
 		layer_index = layer_current + layer_index
+
+	format "LAYER_INDEX: %\n" layer_index
 
 	--try(
 		--DisableSceneRedraw()
@@ -67,7 +81,7 @@ function updateSlicePlaneSystem layer_index incremental:false =
 		--	setSelectPlaneModifier(layer_index) slice_top:slice_top slice_bottom:slice_bottom
 
 		/* UPDATE UI */
-		--ROLLOUT_print_3d.SPIN_current_layer.value	= layer_index
+		--ROLLOUT_export.SPIN_current_layer.value	= layer_index
 		DIALOG_elevation_slider.SPIN_layer_current.value	= layer_index
 		DIALOG_elevation_slider.SLIDER_elevation.value	= layer_index
 
