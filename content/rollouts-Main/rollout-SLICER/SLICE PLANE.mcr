@@ -20,21 +20,21 @@ macroscript	print_create_slicerdialog
 category:	"_3D-Print"
 buttontext:	"SLICE OBJECT"
 tooltip:	"Slice selected object."
-icon:	"across:5|height:32|tooltip:\n\n----------------------\n\nFIX IF NOT WORK PROPERLY: RESET OBJECT XFORM\n\nIF Z POZITION OF SLICE PLANE DOES NOT WORK PROPERLY"
+icon:	"across:2|height:32|tooltip:\n\n----------------------\n\nFIX IF NOT WORK PROPERLY: RESET OBJECT XFORM\n\nIF Z POZITION OF SLICE PLANE DOES NOT WORK PROPERLY"
 (
 	on execute do
 		(
 			clearListener(); print("Cleared in:\n"+getSourceFileName())
-		--	filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-MaxToPrint\content\rollouts-Main\rollout-SLICER\SLICE PLANE.mcr"
+			filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-MaxToPrint\content\rollouts-Main\rollout-SLICER\SLICE PLANE.mcr"
 			format "EventFired	= % \n" EventFired
 
 			/* DEVELOP: KILL SLICE DIALOG */
-			--try(
-			--	cui.UnRegisterDialogBar DIALOG_elevation_slider
-			--
-			--	destroyDialog DIALOG_elevation_slider
-			--
-			--)catch()
+			try(
+				cui.UnRegisterDialogBar DIALOG_elevation_slider
+
+				destroyDialog DIALOG_elevation_slider
+
+			)catch()
 
 			/** Add slice mod
 			 */
@@ -91,8 +91,8 @@ icon:	"across:5|height:32|tooltip:\n\n----------------------\n\nFIX IF NOT WORK 
 macroscript	print_remove_slice_modifiers
 category:	"_3D-Print"
 buttontext:	"Slice Object"
-tooltip:	"Remove slice modifiers from selected objects.\nUse all objects if nothing selected."
-icon:	"across:5|height:32"
+tooltip:	"EXIT SLICE MODE"
+icon:	"across:2|height:32"
 (
 	on execute do
 		(
@@ -129,6 +129,59 @@ icon:	"across:5|height:32"
 		)
 )
 
+/** Get layer number to move
+ */
+function getLayerNumberToMove direction =
+(
+	--format "\n"; print ".getLayerNumberToMove()"
+	ctrl	= keyboard.controlPressed
+	shift 	= keyboard.shiftPressed
+	alt 	= keyboard.altPressed
+
+
+	mod_keys_count = (for mod_value in #( ctrl, shift, alt ) where mod_value collect true).count
+	format "mod_keys_count: %\n" mod_keys_count
+	increment_val = case mod_keys_count of
+	(
+		(3):	100
+		(2):	25
+		(1):	10
+		default: 1
+	)
+
+	if direction == #MINUS then
+		increment_val *= -1
+
+	increment_val --return
+)
+
+/**
+  *
+  */
+macroscript	_print_slice_increment_plus
+category:	"_3D-Print"
+buttontext:	"+ \ -"
+tooltip:	"Shift layer UP"
+icon:	"across:2|height:32|Tooltip:CTRL:SHIFT:ALT: 10\25\25 Layers incremnet by number of mod keys pressed 1\2\3"
+(
+
+	on execute do
+		updateSlicePlaneSystem ( getLayerNumberToMove( #PLUS ) ) incremental:true
+)
+/**
+  *
+  */
+macroscript	_print_slice_increment_minus
+category:	"_3D-Print"
+buttontext:	"+ \ -"
+tooltip:	"RMB: Shift layer DOWN"
+icon:	"across:2|height:32"
+(
+
+	on execute do
+		updateSlicePlaneSystem ( getLayerNumberToMove( #MINUS ) ) incremental:true
+)
+
 
 
 /*------------------------------------------------------------------------------
@@ -143,7 +196,7 @@ macroscript	_print_slice_select_volume
 category:	"_3D-Print"
 buttontext:	"Select"
 tooltip:	"Select verts in sliced layer"
-icon:	"control:checkbox|id:#CBX_slice_select_plane|autorun:false|across:5|height:32|offset:[ 26, 0 ]"
+icon:	"control:checkbox|id:#CBX_slice_select_plane|autorun:false|across:4|height:32|offset:[ 26, 0 ]"
 (
 	on execute do
 		(
@@ -164,7 +217,7 @@ macroscript	_print_slice_plane_top
 category:	"_3D-Print"
 buttontext:	"Slice Top"
 tooltip:	"Slice plane top"
-icon:	"control:checkbox|autorun:false|across:5|height:32|offset:[ 10, 0 ]"
+icon:	"control:checkbox|autorun:false|across:4|height:32|offset:[ 10, 0 ]"
 (
 	on execute do
 	(
@@ -187,7 +240,7 @@ macroscript	_print_slice_plane_bottom
 category:	"_3D-Print"
 buttontext:	"Slice Bottom"
 tooltip:	"Slice plane bottom"
-icon:	"control:checkbox|autorun:false|across:5|height:32|offset:[ 4, 0 ]"
+icon:	"control:checkbox|autorun:false|across:4|height:32|offset:[ 4, 0 ]"
 (
 	on execute do
 	(
@@ -209,7 +262,7 @@ macroscript	_print_slice_plane_cap
 category:	"_3D-Print"
 buttontext:	"Cap Slice"
 tooltip:	"Cap Slice plane"
-icon:	"control:checkbox|autorun:false|across:5|height:32|offset:[ 12, 0 ]"
+icon:	"control:checkbox|autorun:false|across:4|height:32|offset:[ 12, 0 ]"
 (
 	on execute do
 		updateSlicePlaneSystem(undefined)

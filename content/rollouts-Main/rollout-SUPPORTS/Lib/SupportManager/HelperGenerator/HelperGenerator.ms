@@ -132,6 +132,7 @@ struct HelperGenerator_v
 		if superClassOf source_obj != shape then
 			/* GET DATA FROM MESH */
 			(MeshDataGetter_v(source_obj)).getVertexData verts:#ALL_OR_SELECTED positions:true colors:true normals:true
+			--(MeshDataGetter_v(source_obj)).getVertexData verts:#ALL_OR_SELECTED positions:true colors:false normals:true
 		else
 			/* GET DATA FROM SHAPE */
 			(ShapeKnotGetter_v(source_obj)(Options.use_nth_vertex)).getVetexData() -- SHAPE OBJECT

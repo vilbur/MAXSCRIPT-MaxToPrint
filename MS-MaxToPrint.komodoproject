@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Komodo Project File - DO NOT EDIT -->
 <project id="d47eec58-7219-4d00-b9e5-768b2160a2d4" kpf_version="5" name="MS-MaxToPrint.komodoproject">
+<livefolder id="1c61457e-2e9c-413f-9472-cb6b4ccddded" idref="d47eec58-7219-4d00-b9e5-768b2160a2d4" name="rollout-SLICER" url="content/rollouts-Main/rollout-SLICER/">
+</livefolder>
+<livefolder id="38589dd6-ecb1-41a6-8cc7-c917a35eaf9b" idref="d47eec58-7219-4d00-b9e5-768b2160a2d4" name="rollout-POINTS" url="content/rollouts-Main/rollout-POINTS/">
+</livefolder>
+<livefolder id="4212e5cc-4d2d-41b3-ac18-c15d5c828f39" idref="d47eec58-7219-4d00-b9e5-768b2160a2d4" name="rollout-SUPPORTS" url="content/rollouts-Main/rollout-SUPPORTS/">
+</livefolder>
+<livefolder id="72e72ffe-8688-4ecc-8b5f-1496cb6d3d27" idref="d47eec58-7219-4d00-b9e5-768b2160a2d4" name="rollout-VERTEX SELECTION" url="content/rollouts-Main/rollout-VERTEX%20SELECTION/">
+</livefolder>
 <livefolder id="767dddb0-d1ff-4908-ba5a-32e7f4a1e581" idref="d47eec58-7219-4d00-b9e5-768b2160a2d4" name="rollouts-Main" url="content/rollouts-Main/">
 </livefolder>
 <livefolder id="ce6e6793-1f9e-46c9-bb50-c2279b1fe225" idref="d47eec58-7219-4d00-b9e5-768b2160a2d4" name="Lib" url="Lib/">
+</livefolder>
+<livefolder id="edc64e05-0a53-41ea-ade0-f89e06d52832" idref="d47eec58-7219-4d00-b9e5-768b2160a2d4" name="rollout-VERTEX COLORS" url="content/rollouts-Main/rollout-VERTEX%20COLORS/">
 </livefolder>
 <preference-set idref="d47eec58-7219-4d00-b9e5-768b2160a2d4" id="project" preftype="project">
   <long id="prefs_version">1</long>

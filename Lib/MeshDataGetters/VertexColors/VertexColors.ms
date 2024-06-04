@@ -123,7 +123,7 @@ struct VertexColors_v
 	 */
 	function getAllVertsAndColors =
 	(
-		--format "\n"; print "VertexColors_v.getAllVertsAndColors()"
+		format "\n"; print "VertexColors_v.getAllVertsAndColors()"
 		local color_of_vert
 
 		vertex_count	= getNumVerts obj_mesh

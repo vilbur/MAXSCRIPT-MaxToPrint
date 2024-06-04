@@ -23,7 +23,9 @@ struct BeamGenerator_v
 	  */
 	function create _supports cross_instance:cross_instance =
 	(
-		--format "\n"; print "BeamGenerator_v.create()"
+		format "\n"; print "BeamGenerator_v.create()"
+		format "this.Options.connect: %\n" this.Options.connect
+		format "this.Options.max_distance: %\n" this.Options.max_distance
 		--format "_supports	= % \n" _supports
 		--format "_supports.count	= % \n" _supports.count
 
@@ -36,11 +38,14 @@ struct BeamGenerator_v
 		if supports.count < 2 then
 			return false
 
+		this.sortSupportsByDistance()
+
+
 		max create mode
 
 		--format "supports.count:	% \n" supports.count
 		for i = 1 to supports.count where supports[i + 1] != undefined do
-			this._createBeamsBetweenTwoSuppotrts (supports[i]) (supports[i + 1])
+			this._createBeamsBetweenTwoSupports (supports[i]) (supports[i + 1])
 
 		beams_created --return
 	),
@@ -49,9 +54,9 @@ struct BeamGenerator_v
 
 	/** Create beams
 	 */
-	function _createBeamsBetweenTwoSuppotrts support_A support_B =
+	function _createBeamsBetweenTwoSupports support_A support_B =
 	(
-		--format "\n"; print "BeamGenerator_v._createBeamsBetweenTwoSuppotrts()"
+		--format "\n"; print "BeamGenerator_v._createBeamsBetweenTwoSupports()"
 
 		/** Get posiotion of point on line
 		 */
@@ -129,8 +134,7 @@ struct BeamGenerator_v
 	 */
 	function _createBeam support_A support_B pos_bottom pos_top =
 	(
-		format "\n"; print "BeamGenerator_v._createBeam()"
-
+		--format "\n"; print "BeamGenerator_v._createBeam()"
 
 		new_beam = SplineShape name:(support_A.name + "-beam") wirecolor:(this._shiftWirecolor(support_A.wirecolor) )
 
@@ -146,18 +150,11 @@ struct BeamGenerator_v
 
 		Options.setProp new_beam #beam_supports #( Options.getThisPointer (support_A), Options.getThisPointer (support_B) )
 
-
-
 		/* COPY MODIFIERS OF PARENT SUPPORT NAME WHICH NAME IS MATCHING: "*BAR*" */
 		for i = support_A.modifiers.count to 1 by -1 where matchPattern support_A.modifiers[i].name pattern:"*BAR*" do
 			addModifier new_beam support_A.modifiers[i]
 
-
-
-
-
-
-		/* GET DISTANCE BETWEEN POINTS */
+/* GET DISTANCE BETWEEN POINTS */
 		--distance_between_points = this.getPointDistance (copy beam_start) (copy beam_end_top )
 		--distance_between_points = this.getPointDistance (point_bottom_1) (point_bottom_2 )
 
@@ -196,15 +193,15 @@ struct BeamGenerator_v
 	),
 
 
-	/** Get distance between points in 2D FROM TOP VIEW
-	  */
-	function getPointDistance point_1 point_2 =
-	(
-		--format "\n"; print "BeamGenerator_v.getPointDistance()"
-		--point_1.z = point_2.z = 0 -- get distance in 2D -- COPY OF PARAMETERS IS NEEDED FOR THIS E.G.: point_1_copy = copy point_1
-
-		distance point_1 point_2 --return
-	),
+	--/** Get distance between points in 2D FROM TOP VIEW
+	--  */
+	--function getPointDistance point_1 point_2 =
+	--(
+	--	--format "\n"; print "BeamGenerator_v.getPointDistance()"
+	--	--point_1.z = point_2.z = 0 -- get distance in 2D -- COPY OF PARAMETERS IS NEEDED FOR THIS E.G.: point_1_copy = copy point_1
+	--
+	--	distance point_1 point_2 --return
+	--),
 
 	/** Filter edit spline objects
 	  *
@@ -213,6 +210,44 @@ struct BeamGenerator_v
 	(
 		for support in supports where superClassOf support.baseobject == shape collect support
 	),
+
+	/** Sort supports by distance
+	 */
+	function sortSupportsByDistance =
+	(
+		format "\n"; print "BeamGenerator_v.sortSupportsByDistance()"
+
+		supports_positions	= for support in supports collect support.pos
+		proccessed_supports 	= #{1..supports.count} * #{}
+
+		next_support	= supports[1]
+		supports_sorted = #(next_support)
+		proccessed_supports[1]	= true
+
+		while next_support != undefined do
+		(
+			next_support_pos = next_support.pos
+			min_distance = 9999999
+			next_support = undefined
+
+			for i = 1 to supports.count where not proccessed_supports[i] do
+			 (
+				if (dist = distance	next_support_pos supports_positions[i] ) < min_distance then
+				(
+					min_distance = dist
+
+					append supports_sorted supports[i]
+
+					proccessed_supports[i]	= true
+
+					next_support = supports[i]
+				)
+			 )
+		)
+
+		this.supports = makeUniqueArray supports_sorted
+	),
+
 	/** Add to group
 	 */
 	function _addToGroup support point_helper =

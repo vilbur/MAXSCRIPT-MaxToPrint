@@ -26,7 +26,7 @@ function createElevationSliderDialog =
 	--if DIALOG_elevation_slider == undefined then
 
 
-	if DIALOG_elevation_slider == undefined then
+	--if DIALOG_elevation_slider == undefined then
 
 	rollout DIALOG_elevation_slider "Parent" --define a rollout and create a dialog
 	(
@@ -96,65 +96,12 @@ function createElevationSliderDialog =
 			layer_index --return
 		)
 
-		/** Get layer number to move
+		/** Toggle slice plane position
+		  * @param #TOP|BOTTOM|CENTER pos
 		 */
-		function getLayerNumberToMove direction =
+		function toggleSlicepPlanePosition pos: =
 		(
-			--format "\n"; print ".getLayerNumberToMove()"
-			ctrl	= keyboard.controlPressed
-			shift 	= keyboard.shiftPressed
-			alt 	= keyboard.altPressed
-
-			increment_val = case of
-			(
-				(ctrl and shift):	100
-				(shift):	10
-				(ctrl):	5
-				default: 1
-			)
-
-			if direction == #MINUS then
-				increment_val *= -1
-
-			increment_val --return
-		)
-
-		local viewport_height = (getViewportHeight())
-
-		/*------------------------------------------------------------------------------
-			CONTROLS
-		--------------------------------------------------------------------------------*/
-
-		button BTN_exit_dialog "EXIT" width:32 height:16  pos:[ 0, 0 ]
-
-		slider SLIDER_elevation "" range:[0,5000,0] type:#integer ticks:5000 orient:#vertical width:32 height:(viewport_height - 40) pos:[ 10, 16 ] tooltip:"Set positioon of slice plane.\n\nRMB: Circle slice plane on obejct min, center and maximum.\n\nRMB+CTRL: SET SLICE PLANE TO BOTTOM OF OBJECT"
-
-		button BTN_move_layer_increment "+ \ -" width:48 height:28  pos:[ -10, viewport_height - 24 ] tooltip:"LMB: Shift layer UP\n\nRMB: Shift layer DOWN\n\n   ————————————————————   \n\nCTRL:	value is 5\nSHIFT:	value is 10\nCTRL & SHIFT:	value is 100"
-
-		spinner SPIN_layer_current "" range:[0,5000,0] fieldWidth:32 pos:[ -8, viewport_height + 6 ] type:#integer
-
-
-		/*------------------------------------------------------------------------------
-			BUTTON EVENTS
-		--------------------------------------------------------------------------------*/
-		on BTN_exit_dialog pressed do
-			try(
-				--removeSlicePlaneModifier( selection )
-
-				cui.UnRegisterDialogBar DIALOG_elevation_slider
-
-				destroyDialog DIALOG_elevation_slider
-			)catch()
-
-		/*------------------------------------------------------------------------------
-			SLIDER EVENTS
-		--------------------------------------------------------------------------------*/
-		on SLIDER_elevation changed val do
-			updateSlicePlaneSystem (val)
-
-
-		on SLIDER_elevation RIGHTCLICK do
-		(
+			--format "\n"; print ".toggleIcepPlanePosition()"
 			--print "createElevationSliderDialog SLIDER_elevation rightClick"
 			/** Toggle slice modifiers
 			 */
@@ -190,7 +137,7 @@ function createElevationSliderDialog =
 				(
 					--format "SELECTION CHANGED	= % \n" SET_ELEVATION
 
-			toggleSliceModifiers (false)
+					toggleSliceModifiers (false)
 
 					selection_min	= amin(for obj in selection collect getBbox (obj) (#min) (#z) )
 					selection_max	= amax(for obj in selection collect getBbox (obj) (#max) (#z) )
@@ -213,12 +160,24 @@ function createElevationSliderDialog =
 
 				current_pos_index = findItem layer_positions current_layer
 
-				layer_index = case of
+
+				layer_index = case pos of
 				(
-					( keyboard.controlPressed):	layer_positions[1] -- GET SELECOIN  MIN IF CTRL RPESSED
-					((next_item = getNextItem(layer_positions)(current_pos_index)) != undefined ):	next_item	-- GET NEXT PREDEFINED POSITION
-					default:	layer_positions[2]	-- GET SELECTION CENTER AS DEFAULT
+					(#TOP):	selection_max
+					(#BOTTOM):	layer_index_min
+					(#CENTER):	layer_index_center
+
+					default: case of
+					(
+						( keyboard.controlPressed):	layer_positions[1] -- GET SELECOIN  MIN IF CTRL RPESSED
+						((next_item = getNextItem(layer_positions)(current_pos_index)) != undefined ):	next_item	-- GET NEXT PREDEFINED POSITION
+						default:	layer_positions[2]	-- GET SELECTION CENTER AS DEFAULT
+					)
 				)
+
+
+
+
 				--format "BBOX	= % \n" ( nodeGetBoundingBox selection[1] ( Matrix3 1))
 				--format "Z MIN	= % \n" ( amin(for obj in selection collect getBbox (obj) (#min) (#z) ))
 				--format "LAYER_POSITIONS	= % \n" layer_positions
@@ -232,9 +191,67 @@ function createElevationSliderDialog =
 				/* DEVELOP FIXING */
 				SET_ELEVATION = undefined
 			)
-
-
 		)
+
+		--/** Get layer number to move
+		-- */
+		--function getLayerNumberToMove direction =
+		--(
+		--	--format "\n"; print ".getLayerNumberToMove()"
+		--	ctrl	= keyboard.controlPressed
+		--	shift 	= keyboard.shiftPressed
+		--	alt 	= keyboard.altPressed
+		--
+		--	increment_val = case of
+		--	(
+		--		(ctrl and shift):	100
+		--		(shift):	10
+		--		(ctrl):	5
+		--		default: 1
+		--	)
+		--
+		--	if direction == #MINUS then
+		--		increment_val *= -1
+		--
+		--	increment_val --return
+		--)
+
+		local viewport_height = (getViewportHeight())
+
+		/*------------------------------------------------------------------------------
+			CONTROLS
+		--------------------------------------------------------------------------------*/
+
+		button BTN_exit_dialog "EXIT" width:36 height:22  pos:[ -2, -2 ] tooltip:"Exit and remove slicer from all objects"
+
+		slider SLIDER_elevation "" range:[0,5000,0] type:#integer ticks:5000 orient:#vertical width:32 height:(viewport_height - 40) pos:[ 10, 22 ] tooltip:"Set positioon of slice plane.\n\nRMB: Circle slice plane on obejct min, center and maximum.\n\nRMB+CTRL: SET SLICE PLANE TO BOTTOM OF OBJECT"
+
+		button BTN_move_layer_increment "+ \ -" width:48 height:28  pos:[ -10, viewport_height - 24 ] tooltip:"LMB: Shift layer UP\n\nRMB: Shift layer DOWN\n\n   ————————————————————   \n\nTooltip:CTRL:SHIFT:ALT: 5|25|25 Layers incremnet by number of mod keys pressed 1|2|3"
+
+		spinner SPIN_layer_current "" range:[0,5000,0] fieldWidth:32 pos:[ -8, viewport_height + 6 ] type:#integer
+
+
+		/*------------------------------------------------------------------------------
+			BUTTON EVENTS
+		--------------------------------------------------------------------------------*/
+		on BTN_exit_dialog pressed do
+			try(
+				--removeSlicePlaneModifier( selection )
+
+				cui.UnRegisterDialogBar DIALOG_elevation_slider
+
+				destroyDialog DIALOG_elevation_slider
+			)catch()
+
+		/*------------------------------------------------------------------------------
+			SLIDER EVENTS
+		--------------------------------------------------------------------------------*/
+		on SLIDER_elevation changed val do
+			updateSlicePlaneSystem (val)
+
+
+		on SLIDER_elevation RIGHTCLICK do
+			toggleSlicepPlanePosition()
 
 		on SLIDER_elevation BUTTONDOWN do
 		(
@@ -260,10 +277,13 @@ function createElevationSliderDialog =
 
 		/* ON BUTTON INCREMENT */
 		on BTN_move_layer_increment PRESSED do
-			updateSlicePlaneSystem ( getLayerNumberToMove( #PLUS ) ) incremental:true
+			macros.run "_3D-Print" "_print_slice_increment_plus"
+			--updateSlicePlaneSystem ( getLayerNumberToMove( #PLUS ) ) incremental:true
+
 
 		on BTN_move_layer_increment RIGHTCLICK do
-			updateSlicePlaneSystem ( getLayerNumberToMove( #MINUS ) ) incremental:true
+			macros.run "_3D-Print" "_print_slice_increment_minus"
+			--updateSlicePlaneSystem ( getLayerNumberToMove( #MINUS ) ) incremental:true
 
 		/* ON SLIDER CHANGE */
 		on SPIN_layer_current CHANGED val do
@@ -271,8 +291,9 @@ function createElevationSliderDialog =
 
 
 		--/* ON DIALOG OPEN */
-		--on DIALOG_elevation_slider OPEN do
-		--	updateSlicePlaneSystem (DIALOG_elevation_slider.SPIN_layer_current.value)
+		on DIALOG_elevation_slider OPEN do
+			toggleSlicepPlanePosition pos:#CENTER
+			--updateSlicePlaneSystem (DIALOG_elevation_slider.SPIN_layer_current.value)
 
 		/* ON DIALOG CLOSE */
 		on DIALOG_elevation_slider CLOSE do

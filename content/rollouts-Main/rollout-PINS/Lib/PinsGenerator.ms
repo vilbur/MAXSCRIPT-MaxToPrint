@@ -28,7 +28,7 @@ struct PinsGenerator_v
 
 			if vertex_sel.numberSet > 0 then
 			(
-				verts_data = (VertDataGetter_v(obj)).getData verts:vertex_sel
+				verts_data = (MeshDataGetter_v(obj)).getVertexData verts:vertex_sel positions:true normals:true
 				--verts_to_generate =  this._getVertsToGenerateFromObjects (reset_verts)
 
 				format "VERTS_DATA: %\n" verts_data

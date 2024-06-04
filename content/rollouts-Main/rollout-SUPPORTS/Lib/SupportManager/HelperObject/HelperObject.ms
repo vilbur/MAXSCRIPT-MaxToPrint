@@ -90,24 +90,27 @@ struct HelperObject_v
 	function _setPointsPositions vert_pos =
 	(
 		--format "\n"; print "HelperObject_v._setPointsPositions()"
+		--format "this.Options.keep_down: %\n" this.Options.keep_down
 		/** Set second point by normal of vertex
 		 */
 		function setSecondByNormal vert_pos _normal =
 		(
 			--format "\n"; print "HelperObject_v.setSecondByNormal()"
 			--format "_normal: %\n" _normal
-			local second_vert = copy vert_pos
+			local second_vert_pos = copy vert_pos
 
-			second_vert += this.Options.normal_length * normalize( _normal ) -- MOVE POSITION ALONG NORMAL
+			--second_vert_pos = second_vert_pos + normalize( _normal )
+
+			second_vert_pos += this.Options.normal_length * normalize( _normal ) -- MOVE POSITION ALONG NORMAL
 
 			/* KEEP SECOND POINT BELLOW FIRST OF GIVEN AMOUNT */
-			if this.Options.keep_down and ( difference = vert_pos.z - vert_pos.z ) < this.Options.keep_down_limit then
-				second_vert.z -= this.Options.keep_down_limit - difference
+			--if this.Options.keep_down and ( second_vert_pos.z - second_vert_pos.z ) < 0 then
+				--second_vert_pos.z = vert_pos.z - this.Options.keep_down_limit
 
 			--format "vert_pos: %\n" vert_pos
-			--format "second_vert: %\n" second_vert
-			--append this.points_positions second_vert
-			second_vert --return
+			--format "second_vert_pos: %\n" second_vert_pos
+			--append this.points_positions second_vert_pos
+			second_vert_pos --return
 		)
 
 		/** Set second down

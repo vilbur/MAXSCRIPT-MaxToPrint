@@ -1,5 +1,7 @@
 clearListener(); print("Cleared in:\n"+getSourceFileName())
 
+filein( @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-MaxToPrint\Lib\MeshDataGetters\VertexColors\MeshVertToColorVertexConvertor\MeshVertToColorVertexConvertor.ms" )
+
 filein( getFilenamePath(getSourceFileName()) + "/../SupportManager.ms" )	-- "./../SupportManager.ms"
 
 
@@ -109,28 +111,28 @@ SupportManager.Options.normal_length = 10
 
 
 
---print "---------------- GENERATE POINTS BY VERTEX COLOR SOURCE OBJECT ----------------"
---
---new_points = SupportManager.generatePointHelpers ( _source_object )
---format "NEW_POINTS	= % \n" new_points
+print "---------------- GENERATE POINTS BY VERTEX COLOR SOURCE OBJECT ----------------"
 
---
---
---
---print "---------------- GENERATE SUPPORTS ----------------"
+new_points = SupportManager.generatePointHelpers ( _source_object )
+format "NEW_POINTS	= % \n" new_points
+
+
+
+
+print "---------------- GENERATE SUPPORTS ----------------"
 --
 --new_supports = SupportManager.createSupports( new_points )
 --format "NEW_SUPPORTS	= % \n" new_supports
 --
-
-
+--
+--
 --
 --print "---------------- GENERATE BEAMS ----------------"
 --
 --SupportManager.Options.max_distance = 100
---
+
 --/* CONNECT ENDS */
---bbeames_connect_ends = SupportManager.createBeams( new_supports )
+--beames_connect_ends = SupportManager.createBeams( new_supports )
 --
 --
 --/* CONNECT MIDDLES */
@@ -144,7 +146,7 @@ SupportManager.Options.normal_length = 10
 --/* CONNECT IN QUATER OF SUPPORTS HEIGHT */
 --SupportManager.Options.connect = 4
 --beames_connect_quater = SupportManager.createBeams( new_supports )
---
+
 
 
 --
@@ -173,8 +175,8 @@ SupportManager.Options.normal_length = 10
 --print "---------------- GENERATE PINS ----------------"
 --delete shapes
 
-selectVertsForTest _source_object #{ 1,3,51,62 }
+--selectVertsForTest _source_object #{ 1,3,51,62 }
 --selectVertsForTest _source_object #{ 51 }
 --selectVertsForTest _source_object #{ 62 }
 
-pins = SupportManager.createPins( _source_object )
+--pins = SupportManager.createPins( _source_object )
