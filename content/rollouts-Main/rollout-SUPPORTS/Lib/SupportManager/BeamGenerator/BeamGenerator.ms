@@ -67,7 +67,23 @@ struct BeamGenerator_v
 			point_data[direction]	+ ( offset	* point_data[#VECTOR] * dir)
 		)
 
+		--if same_height then
+		--(
+		--	/* GET BOTTOM POS WHICH IS UPPER */
+		--	pos_bottom_1 = if pos_bottom_1.z > pos_bottom_2.z then pos_bottom_1 else pos_bottom_2
+		--	pos_bottom_2 = if pos_bottom_1.z > pos_bottom_2.z then pos_bottom_1 else pos_bottom_2
+		--
+		--
+		--	/* GET TOP POS WHICH IS LOWER */
+		--	pos_top_1 = pos_top_2 = if pos_top_1.z > pos_top_2.z then pos_top_1 else pos_top_2
+		--)
+
+		if ( support_A == undefined or support_B == undefined ) or  distance support_A.pos support_B.pos > this.Options.max_distance  then
+			return #()
+
 		beams_created = #()
+
+
 
 		point_data_A = this._getSegmentEndPoints(support_A)
 		point_data_B = this._getSegmentEndPoints(support_B)
@@ -89,20 +105,10 @@ struct BeamGenerator_v
 		pos_bottom_2  	= getPosOnLine #BOTTOM	point_data_B offset_B
 		pos_top_2	= getPosOnLine #TOP	point_data_A offset_A
 
-		--if same_height then
-		--(
-		--	/* GET BOTTOM POS WHICH IS UPPER */
-		--	pos_bottom_1 = if pos_bottom_1.z > pos_bottom_2.z then pos_bottom_1 else pos_bottom_2
-		--	pos_bottom_2 = if pos_bottom_1.z > pos_bottom_2.z then pos_bottom_1 else pos_bottom_2
-		--
-		--
-		--	/* GET TOP POS WHICH IS LOWER */
-		--	pos_top_1 = pos_top_2 = if pos_top_1.z > pos_top_2.z then pos_top_1 else pos_top_2
-		--)
-
-
 
 		this._createBeam support_A support_B pos_bottom_1 pos_top_1
+
+
 
 		if this.Options.connect != 2 then
 			this._createBeam support_B support_A pos_bottom_2 pos_top_2
@@ -220,32 +226,43 @@ struct BeamGenerator_v
 		supports_positions	= for support in supports collect support.pos
 		proccessed_supports 	= #{1..supports.count} * #{}
 
-		next_support	= supports[1]
-		supports_sorted = #(next_support)
-		proccessed_supports[1]	= true
+		next_support_i	= 1
+		supports_sorted = #(supports[next_support_i])
 
-		while next_support != undefined do
+		while next_support_i != undefined do
 		(
-			next_support_pos = next_support.pos
 			min_distance = 9999999
-			next_support = undefined
+			next_support	= supports[next_support_i]
+			next_support_pos	= next_support.pos
+
+			proccessed_supports[next_support_i]	= true
+
+			next_support_i = undefined
+			--supports_to_search = for i = 1 to supports.count where not proccessed_supports[i] collect i
 
 			for i = 1 to supports.count where not proccessed_supports[i] do
-			 (
-				if (dist = distance	next_support_pos supports_positions[i] ) < min_distance then
-				(
-					min_distance = dist
+			--if supports_to_search.count > 0 then
+			(
+				--for i in supports_to_search do
+					if (dist = distance next_support_pos supports_positions[i] ) < min_distance then
+					(
+						min_distance = dist
 
-					append supports_sorted supports[i]
 
-					proccessed_supports[i]	= true
+						--proccessed_supports[i]	= true
 
-					next_support = supports[i]
-				)
-			 )
+						next_support_i = i
+					)
+			)
+			--else
+				--next_support_i = undefined
+
+			if next_support_i != undefined then
+				append supports_sorted supports[next_support_i]
 		)
 
-		this.supports = makeUniqueArray supports_sorted
+		--this.supports = makeUniqueArray supports_sorted
+		this.supports = supports_sorted
 	),
 
 	/** Add to group

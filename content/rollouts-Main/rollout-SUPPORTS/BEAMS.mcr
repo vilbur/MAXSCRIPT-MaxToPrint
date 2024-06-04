@@ -31,8 +31,8 @@ icon:	"control:radiobuttons|across:1|align:#CENTER|items:#('END', 'MIDDLE', 'THI
 macroscript	_print_generator_beams_max_distance
 category:	"_3D-Print"
 buttontext:	"Max Distance"
-tooltip:	"Max distance between between supports"
-icon:	"across:3|control:spinner|type:#integer|range:[ 1, 999, 5 ]|width:64|offset:[ 36, 6 ]"
+--tooltip:	""
+icon:	"across:3|control:spinner|type:#integer|range:[ 1, 999, 5 ]|width:64|offset:[ 36, 6 ]|tooltip:Max distance in mm between supports to generate beam."
 (
 	format "EventFired:	% \n" EventFired
 )
