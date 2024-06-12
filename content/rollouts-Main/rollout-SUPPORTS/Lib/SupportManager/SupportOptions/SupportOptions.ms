@@ -40,8 +40,6 @@ struct SupportOptions_v
 	--cross_section_max	= 20,	-- max distance between platforms
 	--cross_section_min_height	= 10,	-- generate cross section only if platform is higher than this number
 
-	max_distance	= 20,	-- max distance between platforms
-	min_height	= 10,	-- generate cross section only if platform is higher than this number
 
 
 	/* RAFT OPTIONS */
@@ -49,6 +47,8 @@ struct SupportOptions_v
 
 	/* BEAMS OPTIONS */
 	connect = 1,
+	max_distance	= 20,	-- max distance between platforms
+	min_height	= 10,	-- generate beams only if platform is higher than this number
 
 	/* PINS OPTIONS */
 	pin_width	= 3.0, -- outter diametter of outter pin

@@ -25,6 +25,7 @@ struct BeamGenerator_v
 	(
 		format "\n"; print "BeamGenerator_v.create()"
 		format "this.Options.connect: %\n" this.Options.connect
+		format "this.Options.min_height: %\n" this.Options.min_height
 		format "this.Options.max_distance: %\n" this.Options.max_distance
 		--format "_supports	= % \n" _supports
 		--format "_supports.count	= % \n" _supports.count
@@ -77,13 +78,10 @@ struct BeamGenerator_v
 		--	/* GET TOP POS WHICH IS LOWER */
 		--	pos_top_1 = pos_top_2 = if pos_top_1.z > pos_top_2.z then pos_top_1 else pos_top_2
 		--)
-
-		if ( support_A == undefined or support_B == undefined ) or  distance support_A.pos support_B.pos > this.Options.max_distance  then
-			return #()
-
 		beams_created = #()
 
-
+		if ( support_A == undefined or support_B == undefined ) or  distance support_A.pos support_B.pos > this.Options.max_distance  then
+			return beams_created
 
 		point_data_A = this._getSegmentEndPoints(support_A)
 		point_data_B = this._getSegmentEndPoints(support_B)
@@ -91,6 +89,9 @@ struct BeamGenerator_v
 
 		length_A = distance point_data_A[#BOTTOM] point_data_A[#TOP]
 		length_B = distance point_data_B[#BOTTOM] point_data_B[#TOP]
+
+		if length_A < this.Options.min_height and length_B < this.Options.min_height then
+			return beams_created
 
 		/* DISTANCE FROM END POINTS */
 		offset_A = length_A / this.Options.connect -- Divide by 0|1|3 this.Options.connect:radiobuttons items:#('END', 'MIDDLE', 'QUATER')

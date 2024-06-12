@@ -54,10 +54,10 @@ icon:	"across:2|height:32|tooltip:\n\n----------------------\n\nFIX IF NOT WORK 
 			if not (slice_modes[ #SLICE_PLANE_TOP ]and slice_modes[ #SLICE_PLANE_BOTTOM ])  then
 				slice_modes[ #SLICE_PLANE_TOP ] = true
 
-			for data in slice_modes where data.value do
+			for slice_mode_data in slice_modes where slice_mode_data.value do
 			(
-				format "data	= % \n" data
-				mod_name = data.key
+				format "slice_mode_data	= % \n" slice_mode_data
+				mod_name = slice_mode_data.key
 
 				/* GET ALL INSANCES OF MODIFIER IN SCENE */
 				modifiers_in_scene = for mod_in_scene in getClassInstances ( SliceModifier ) where mod_in_scene.name as name == mod_name collect mod_in_scene

@@ -8,7 +8,7 @@ buttonText:	"SELECT Color"
 toolTip:	""
 --icon:	"MENU:&Select Color"
 (
-	on isVisible return subObjectLevel != 0
+	on isVisible return subObjectLevel != undefined and subObjectLevel != 0
 
 	on execute do if ( obj = selection[1] ) != undefined then
 	undo "Hide Verts By Selection" on
@@ -38,7 +38,7 @@ buttonText:	"SELECT Color"
 toolTip:	""
 icon:	"MENU:&SELECT Color"
 (
-	on isVisible return subObjectLevel != 0
+	on isVisible return subObjectLevel != undefined and subObjectLevel != 0
 
 	on execute do
 		openVertexColorSubmenu #SELECT
@@ -58,7 +58,7 @@ buttonText:	"HIDE Color"
 toolTip:	""
 --icon:	"MENU:&Hide Color"
 (
-	on isVisible return subObjectLevel != 0
+	on isVisible return subObjectLevel != undefined and subObjectLevel != 0
 
 	on execute do if ( obj = selection[1] ) != undefined then
 	undo "Hide Verts By Selection" on
@@ -88,7 +88,7 @@ buttonText:	"HIDE Color"
 toolTip:	""
 icon:	"MENU:&HIDE Color"
 (
-	on isVisible return subObjectLevel != 0
+	on isVisible return subObjectLevel != undefined and subObjectLevel != 0
 
 	on execute do
 		openVertexColorSubmenu #HIDE
@@ -107,7 +107,7 @@ buttonText:	"UNHIDE Color"
 toolTip:	""
 --icon:	"MENU:&UNHIDE Color"
 (
-	on isVisible return subObjectLevel != 0
+	on isVisible return subObjectLevel != undefined and subObjectLevel != 0
 
 
 	on execute do if ( obj = selection[1] ) != undefined then
@@ -132,7 +132,7 @@ buttonText:	"UNHIDE Color"
 toolTip:	""
 icon:	"MENU:&UNHIDE Color"
 (
-	on isVisible return subObjectLevel != 0
+	on isVisible return subObjectLevel != undefined and subObjectLevel != 0
 
 	on execute do
 		openVertexColorSubmenu #UNHIDE
@@ -177,7 +177,7 @@ buttonText:	"ISOLATE Color"
 toolTip:	""
 icon:	"MENU:&ISOLATE Color"
 (
-	on isVisible return subObjectLevel != 0
+	on isVisible return subObjectLevel != undefined and subObjectLevel != 0
 
 	on execute do
 		openVertexColorSubmenu #ISOLATE
@@ -193,7 +193,7 @@ icon:	"MENU:&ISOLATE Color"
 --toolTip:	""
 --icon:	"MENU:&Hide Color"
 --(
---	on isVisible return subObjectLevel != 0
+--	on isVisible return subObjectLevel != undefined and subObjectLevel != 0
 --
 --	on execute do
 --		openVertexColorSubmenu "color_unhide"
@@ -260,7 +260,7 @@ buttonText:	"SHOW-Colors"
 toolTip:	"Toggle show\hide"
 icon:	"across:4|MENU:true"
 (
-	on isVisible return subObjectLevel != 0
+	on isVisible return subObjectLevel != undefined and subObjectLevel != 0
 
 	on execute do
 	undo "Show Vertex Colors" on
@@ -286,7 +286,7 @@ buttonText:	"Channel Info"
 toolTip:	"Open or Update Channel Info Dialog"
 --icon:	"across:4|MENU:true"
 (
-	on isVisible return subObjectLevel != 0
+	on isVisible return subObjectLevel != undefined and subObjectLevel != 0
 
 	on execute do
 	(
@@ -305,7 +305,7 @@ buttonText:	"List Colors"
 toolTip:	"List Vertex Colors"
 --icon:	"across:4|MENU:true"
 (
-	on isVisible return subObjectLevel != 0
+	on isVisible return subObjectLevel != undefined and subObjectLevel != 0
 
 	on execute do
 	(
@@ -332,7 +332,7 @@ buttonText:	"Reset Colors"
 toolTip:	"Reset Vertex Colors"
 --icon:	"across:4|MENU:true"
 (
-	on isVisible return subObjectLevel != 0
+	on isVisible return subObjectLevel != undefined and subObjectLevel != 0
 
 	on execute do
 	if queryBox "Reest Vertex Colors ?" title:"RESET VERTEX COLORS" then
@@ -345,5 +345,3 @@ toolTip:	"Reset Vertex Colors"
 		VertexColorProcessor.resetCPVVerts()
 	)
 )
-
-
