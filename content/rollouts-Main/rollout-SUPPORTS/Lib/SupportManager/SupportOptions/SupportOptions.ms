@@ -83,6 +83,17 @@ struct SupportOptions_v
 		--format "chamfer_top_divider	= % \n" chamfer_top_divider
 	),
 
+	/** Set property value of this struct
+	 */
+	function setOptionValue prop_key val =
+	(
+		format "\n"; print "SupportOptions_v.setOptionValue()"
+		format "prop_key: %\n" prop_key
+		format "val: %\n" val
+
+		setProperty this prop_key val
+	),
+
 	/** Get node prop data
 	 */
 	function getProp obj key_of_key as_string:false =

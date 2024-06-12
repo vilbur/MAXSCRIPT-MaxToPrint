@@ -1,7 +1,9 @@
 
 
 -- DEV IMPORT
-filein( getFilenamePath(getSourceFileName()) + "/Lib/SupportManager/SupportManager.ms" )	--"./Lib/SupportManager/SupportManager.ms"
+filein( getFilenamePath(getSourceFileName()) + "/Lib/SupportManager/getSupportManagerInstance.ms" )	--"./Lib/SupportManager/getSupportManagerInstance.ms"
+
+
 /*==============================================================================
 
 		COTNROLS ROW 1
@@ -111,7 +113,7 @@ icon:	"across:2|offset:[0, 6]|height:32|width:128|tooltip:GEENERATE SUPPORTS.\n\
 			clearListener(); print("Cleared in:\n"+getSourceFileName())
 			--filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-viltools3\VilTools\rollouts-Tools\rollout-PRINT-3D\3-SUPPORTS.mcr"
 
-			(getSupportManagerInstance(ROLLOUT_points)).createSupports( selection as Array )
+			(getSupportManagerInstance(ROLLOUT_supports)).createSupports( selection as Array )
 		)
 )
 
@@ -128,6 +130,6 @@ icon:	"across:2|offset:[0, 6]|height:32|width:128|tooltip:GEENERATE RAFTS.\n\nWO
 			clearListener(); print("Cleared in:\n"+getSourceFileName())
 			--filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-viltools3\VilTools\rollouts-Tools\rollout-PRINT-3D\3-SUPPORTS.mcr"
 
-			(getSupportManagerInstance(ROLLOUT_points)).createSupports( selection as Array ) raft_mode:true
+			(getSupportManagerInstance(ROLLOUT_supports)).createSupports( selection as Array ) raft_mode:true
 		)
 )
