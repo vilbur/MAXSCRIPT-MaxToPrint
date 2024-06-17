@@ -21,9 +21,9 @@ struct BeamGenerator_v
 	  *
 	  *
 	  */
-	function create _supports = --cross_instance:cross_instance =
+	function createBeams _supports = --cross_instance:cross_instance =
 	(
-		format "\n"; print "BeamGenerator_v.create()"
+		format "\n"; print "BeamGenerator_v.createBeams()"
 		--format "this.Options.connect: %\n" this.Options.connect
 		--format "this.Options.min_height: %\n" this.Options.min_height
 		--format "this.Options.max_distance: %\n" this.Options.max_distance
@@ -41,7 +41,6 @@ struct BeamGenerator_v
 
 		this.sortSupportsByDistance()
 
-
 		max create mode
 
 		--format "supports.count:	% \n" supports.count
@@ -51,13 +50,34 @@ struct BeamGenerator_v
 		beams_created --return
 	),
 
+	/** Update
+	 */
+	function updateBeams beams =
+	(
+		format "\n"; print "BeamGenerator_v.updateBeams()"
+
+		supports_all = for obj in objects where superClassOf obj.baseobject == shape and getUserPropVal obj "raft_mode" != undefined collect obj
+
+		for beam in beams do
+		(
+			support_pointers = getUserPropVal beam "beam_supports"
+
+			support_A = (for support in supports_all where getUserPropVal support "this" == support_pointers[1] collect support)[1]
+			support_B = (for support in supports_all where getUserPropVal support "this" == support_pointers[2] collect support)[1]
+
+			if support_A != undefined and support_B != undefined then
+				this._createBeamsBetweenTwoSupports (support_A) (support_B) beam:beam
+		)
+
+	),
+
 	private
 
 	/** Create beams
 	 */
-	function _createBeamsBetweenTwoSupports support_A support_B =
+	function _createBeamsBetweenTwoSupports support_A support_B beam: =
 	(
-		--format "\n"; print "BeamGenerator_v._createBeamsBetweenTwoSupports()"
+		format "\n"; print "BeamGenerator_v._createBeamsBetweenTwoSupports()"
 
 		/** Get posiotion of point on line
 		 */
@@ -107,16 +127,25 @@ struct BeamGenerator_v
 		pos_top_2	= getPosOnLine #TOP	point_data_A offset_A
 
 
-		this._createBeam support_A support_B pos_bottom_1 pos_top_1
+		/* CREATE NEW BEAM */
+		if beam == unsupplied then
+		(
+			this._createBeam support_A support_B pos_bottom_1 pos_top_1
 
+			if this.Options.connect != 2 then
+				this._createBeam support_B support_A pos_bottom_2 pos_top_2
+		)
+		/* UPDATE NEW BEAM */
+		else
+		(
+			deleteSpline beam 1
 
+			this._drawLine (beam) (pos_bottom_1) (pos_top_1)
+		)
 
-		if this.Options.connect != 2 then
-			this._createBeam support_B support_A pos_bottom_2 pos_top_2
-
-		append beams_created new_beam
-
-		beams_created --return
+		--append beams_created new_beam
+		--
+		--beams_created --return
 	),
 
 	/** Get segment point_data
@@ -150,18 +179,18 @@ struct BeamGenerator_v
 		this._addToGroup (new_beam) (support_A)
 
 		new_beam.parent	= support_A
-		new_beam.pivot = new_beam.center
+		new_beam.pivot  = new_beam.center
 
 
-		Options.setProp new_beam #this (getHandleByAnim new_beam)
+		Options.setProp new_beam #THIS (getHandleByAnim new_beam)
 
-		Options.setProp new_beam #beam_supports #( Options.getThisPointer (support_A), Options.getThisPointer (support_B) )
+		Options.setProp new_beam #BEAM_SUPPORTS #( Options.getThisPointer (support_A), Options.getThisPointer (support_B) )
 
 		/* COPY MODIFIERS OF PARENT SUPPORT NAME WHICH NAME IS MATCHING: "*BAR*" */
 		for i = support_A.modifiers.count to 1 by -1 where matchPattern support_A.modifiers[i].name pattern:"*BAR*" do
 			addModifier new_beam support_A.modifiers[i]
 
-/* GET DISTANCE BETWEEN POINTS */
+		/* GET DISTANCE BETWEEN POINTS */
 		--distance_between_points = this.getPointDistance (copy beam_start) (copy beam_end_top )
 		--distance_between_points = this.getPointDistance (point_bottom_1) (point_bottom_2 )
 
@@ -169,7 +198,7 @@ struct BeamGenerator_v
 		--if distance_between_points < this.Options.max_distance then
 			--new_beam = this._drawLine (support_1) (beam_start) (beam_end_top)
 
-		new_beam --return
+		--new_beam --return
 		 --return
 	),
 

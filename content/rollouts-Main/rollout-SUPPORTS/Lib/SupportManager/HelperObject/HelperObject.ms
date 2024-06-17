@@ -36,7 +36,7 @@ struct HelperObject_v
 		--	format "isValidNode old_point: %\n" (isValidNode old_point)
 		----delete old_points
 
-		this._setSecondPOintPosition (pos)
+		this._setSecondPointPosition (pos)
 
 
 		for i = 1 to this.points_positions.count do
@@ -89,9 +89,9 @@ struct HelperObject_v
 	  * Direction of that point is along normal or straig down
 	  *
 	  */
-	function _setSecondPOintPosition vert_pos =
+	function _setSecondPointPosition vert_pos =
 	(
-		--format "\n"; print "HelperObject_v._setSecondPOintPosition()"
+		--format "\n"; print "HelperObject_v._setSecondPointPosition()"
 		--format "this.Options.keep_down: %\n" this.Options.keep_down
 		/** Set second point by normal of vertex
 		 */

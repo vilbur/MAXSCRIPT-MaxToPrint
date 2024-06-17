@@ -91,7 +91,10 @@ struct SupportOptions_v
 	function getProp obj prop_key as_string:false =
 	(
 		--format "\n"; print "SupportOptions_v.getProp()"
-		getUserPropVal obj (prop_key as string ) asString:as_string --return
+
+		key = ( toLower ( prop_key as string ))
+
+		getUserPropVal obj key asString:as_string --return
 	),
 
 	/** Set node prop data
@@ -99,7 +102,9 @@ struct SupportOptions_v
 	function setProp obj prop_key val =
 	(
 		--format "\n"; print "SupportOptions_v.setProp()"
-		setUserPropVal obj (prop_key as string ) val --return
+		key = ( toLower ( prop_key as string ))
+
+		setUserPropVal obj key val --return
 	),
 
 	/** Set node prop data from node to node
@@ -110,7 +115,10 @@ struct SupportOptions_v
 		if destination_key == unsupplied then
 			destination_key = from_key
 
-		setUserPropVal to_object (from_key as string ) ( getUserPropVal from_object (destination_key as string ) )
+		from_key =	( toLower ( from_key as string ))
+		destination_key = 	( toLower ( destination_key as string ))
+
+		setUserPropVal to_object from_key ( getUserPropVal from_object destination_key )
 	),
 
 	/** Get this pointer
@@ -127,12 +135,11 @@ struct SupportOptions_v
 			this.setProp obj #THIS this_pointer
 		)
 
-		this_pointer as string --return
+		this_pointer
 	),
 
 
 	private
-
 
 	/** Set units muliplier
 	  *

@@ -57,6 +57,29 @@ filein( getFilenamePath(getSourceFileName()) + "/BeamGenerator/BeamGenerator.ms"
   * 					4b) SUPPORT: Line connecting all points in chain.
   *
   *		 					5) BEAM: Cross lines between supports
+  *
+  *
+  *
+  *
+  * NOTICES: Pointers of objects are changing throught sessions
+  *
+  * USER PROPS KEYS:
+  *	#SOURCE_OBJECT	- Pointer of support source object saved into user props of sources object on first use of support system
+  *
+  *	#POINTER_SYNC	- #SOURCE_OBJECT Pointer saved to POINTS, SUPPORTS and BEAMS to keep connection with source object. #SOURCE_OBJECT==#POINTER_SYNC
+  *
+  *	#THIS        	- Pointer of object itself saved on object creation.
+  *
+  *	#SOURCE_VERT 	- Save index of vert of which was used as origin for point helper
+  *
+  *	#RAFT_MODE   	- Used on SUPPORTS and RAFTS - Differentiate types of objects
+  *
+  *	#BEAM_SUPPORTS	- Used on BEAMS - Array of supports pointers which beam connects E.G.: #( 1st_support, 2nd_pointer )
+  *
+  *
+  *
+  *
+  *
  */
 struct SupportManager_v
 (
@@ -184,22 +207,30 @@ struct SupportManager_v
 		format "\n"; print "SupportManager_v.createBeams()"
 		this.Options.init()
 
-		existing_beams = #()
-
-		beams_sources = #()
+        beams    = #()
+        supports = #()
 
 		_shapes = for obj in _objects where superClassOf obj.baseobject == shape collect obj
 
-		existing_beams = for obj in _objects where superClassOf obj.baseobject == shape collect obj
+		for _shape in _shapes do
+			if getUserPropVal _shape "beam_supports" != undefined then
+				append beams _shape
+			else
+				append supports _shape
 
-		shapes_for_beams = for obj in _objects where superClassOf obj.baseobject == shape collect obj
+		format "beams: %\n" beams
+		format "supports: %\n" supports
 
 
-		if shapes_for_beams.count > 0 then
-			beams_created = BeamGenerator.create (shapes_for_beams)
+		if supports.count > 0 then
+			beams_created = BeamGenerator.createBeams (supports)
 
-		else
-			messageBox "ERROR CREATE BEAMS\n\nNot any valid source object selected" title:"SupportManager.ms"  beep:false
+		if beams.count > 0 then
+			beams_updated = BeamGenerator.updateBeams (beams)
+
+
+		--else
+		--	messageBox "ERROR CREATE BEAMS\n\nNot any valid source object selected" title:"SupportManager.ms"  beep:false
 
 	),
 
