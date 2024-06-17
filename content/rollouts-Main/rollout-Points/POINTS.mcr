@@ -1,4 +1,6 @@
---filein( getFilenamePath(getSourceFileName()) + "/Lib/SupportManager/SupportManager.ms" )	--"./Lib/SupportManager/SupportManager.ms"
+
+--DEV IMPORT
+filein( getFilenamePath(getSourceFileName()) + "/../rollout-SUPPORTS/Lib/SupportManager/SupportManager.ms" )	--"./../rollout-SUPPORTS/Lib/SupportManager/SupportManager.ms"
 
 /*==============================================================================
 
@@ -13,7 +15,7 @@ macroscript	_print_generator_normal_mode
 category:	"_Export"
 buttontext:	"Second Point Direction"
 toolTip:	"Where support is connected to beam"
-icon:	"across:3|align:#LEFT|control:radiobuttons|items:#( 'NORMAL', 'DOWN' )|columns:3|offset:[ 4, 2]"
+icon:	"across:2|align:#LEFT|control:radiobuttons|items:#( 'NORMAL', 'DOWN' )|columns:3|offset:[ 4, 2]"
 (
 	--export_dir = execute ("@"+ "\""+EventFired.Roll.export_dir.text +"\"")
 
@@ -22,16 +24,16 @@ icon:	"across:3|align:#LEFT|control:radiobuttons|items:#( 'NORMAL', 'DOWN' )|col
 )
 
 
-/** CHECKBOX
- */
-macroscript	_print_platform_generator_normals_up
-category:	"_3D-Print"
-buttontext:	"Normal Limit"
-icon:	"across:3|control:checkbox|offset:[ 16, 14]|tooltip:TRUE: Use all verts\n\nFALSE: Use only verts which normal is pointing down or side"
-
-(
-	format "EventFired:	% \n" EventFired
-)
+--/** CHECKBOX
+-- */
+--macroscript	_print_platform_generator_normals_up
+--category:	"_3D-Print"
+--buttontext:	"Normal Limit"
+--icon:	"across:3|control:checkbox|offset:[ 16, 14]|tooltip:TRUE: Use all verts\n\nFALSE: Use only verts which normal is pointing down or side"
+--
+--(
+--	format "EventFired:	% \n" EventFired
+--)
 
 
 
@@ -41,7 +43,7 @@ macroscript	_print_platform_generator_normal_length
 category:	"_3D-Print"
 buttontext:	"Normal Length"
 tooltip:	"Length of first segment of platform facing to vertex normal"
-icon:	"across:3|control:spinner|offset:[ 0, 14]|fieldwidth:24|range:[ 1, 999, 3 ]"
+icon:	"across:2|control:spinner|offset:[ 0, 14]|fieldwidth:24|range:[ 1, 999, 3 ]"
 (
 	format "EventFired:	% \n" EventFired
 )
@@ -62,27 +64,27 @@ icon:	"across:3|control:spinner|offset:[ 0, 14]|fieldwidth:24|range:[ 1, 999, 3 
 		COTNROLS ROW 2
 
 ================================================================================*/
-
-/** CHECKBOX
- */
-macroscript	_print_platform_generator_normal_always_down
-category:	"_3D-Print"
-buttontext:	"Keep Down"
-icon:	"across:2|align:#CENTER|offset:[ 24, 8]|control:checkbox|tooltip:Keep secon helper point always lower then first.\n\nIt makes to part of support always pointing down printable."
-
-(
-	format "EventFired:	% \n" EventFired
-)
-/** SPINNER
-  */
-macroscript	_print_platform_generator_normal_always_down_limit
-category:	"_3D-Print"
-buttontext:	"Keep down Limit"
-tooltip:	"How much must be second point bellow first"
-icon:	"across:2|offset:[ 0, 8]|fieldwidth:24|control:spinner|type:#integer|range:[ 1, 99, 1 ]"
-(
-	format "EventFired:	% \n" EventFired
-)
+--
+--/** CHECKBOX
+-- */
+--macroscript	_print_platform_generator_normal_always_down
+--category:	"_3D-Print"
+--buttontext:	"Keep Down"
+--icon:	"across:2|align:#CENTER|offset:[ 24, 8]|control:checkbox|tooltip:Keep secon helper point always lower then first.\n\nIt makes to part of support always pointing down printable."
+--
+--(
+--	format "EventFired:	% \n" EventFired
+--)
+--/** SPINNER
+--  */
+--macroscript	_print_platform_generator_normal_always_down_limit
+--category:	"_3D-Print"
+--buttontext:	"Keep down Limit"
+--tooltip:	"How much must be second point bellow first"
+--icon:	"across:2|offset:[ 0, 8]|fieldwidth:24|control:spinner|type:#integer|range:[ 1, 99, 1 ]"
+--(
+--	format "EventFired:	% \n" EventFired
+--)
 
 
 /*==============================================================================
@@ -113,7 +115,8 @@ icon:	"across:3|offset:[ 16, 8 ]|height:32|width:128|align:#LEFT|tooltip:CTRL: R
 		--undo off
 		(
 			clearListener(); print("Cleared in:\n"+getSourceFileName())
-			--filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-viltools3\VilTools\rollouts-Tools\rollout-PRINT-3D\3-1-POINTS.mcr"
+			filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-MaxToPrint\content\rollouts-Main\rollout-POINTS\POINTS.mcr"
+
 			points_created = (getSupportManagerInstance(ROLLOUT_points)).generatePointHelpers( selection as Array ) reset_helpers: keyboard.controlPressed
 
 			--format "POINTS_CREATED: %\n" points_created

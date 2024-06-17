@@ -40,12 +40,17 @@ struct SupportGenerator_v
 			/* DELETE OLD SUPPORT (RESET) */
 			this._deleteSupportByHelper(  point_helper )
 
+			/* CREATE NEW SUPPORT */
 			support = SupportObject.generateSupport( point_helper ) --support_exists:(this._getSupport( point_helper ))
 
+			/* ADD TO LAYER OF POINT OBJECT */
+			point_helper.layer.addNode support
 
+			/* ADD TO GORUP OF POINT OBJECT */
 			this._addToGroup support point_helper
 
-			this._saveUserData ( point_helper ) (support)
+			/* SET DATA TO USER PROPS OF OBJECT */
+			this._saveSyncPointer ( point_helper ) (support)
 
 			support --return
 		)
@@ -81,9 +86,9 @@ struct SupportGenerator_v
 			delete support
 	),
 
-	/**
+	/** Save pointer for connection of point and support
 	 */
-	function _saveUserData point_helper support =
+	function _saveSyncPointer point_helper support =
 	(
 		--format "\n"; print "HelperObject_v.saveUserData()"
 		--Options.setProp support #pointer_sync (( Options.getProp point_helper #pointer_sync ) as IntegerPtr )

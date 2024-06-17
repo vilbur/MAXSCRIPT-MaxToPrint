@@ -14,37 +14,44 @@ struct ShapeKnotGetter_v
 	/* inhered */
 
 	/** Get vertex positions from spline
-
-
-
-			DOES NOT SUPPORT KNOTS NORMALS YET
-
-
+	  *
+	  *
+	  *
+	  * @return Dictionary KEYS: #VERTS|#POSITIONS|#COLORS|#NORMALS  VALUES:knot_ids|knots_positions|knots_colors|knots_normals
 	*/
 	function getVetexData =
 	(
 		format "\n"; print "PlatformGenerator_v._getVertexPositionsFromShape()"
 
-		knots_data = #( #{ }, #(), #(), #()   )
+		--knots_data = #( #{ }, #(), #(), #() )
+		knots_data = Dictionary() -- KEYS MUST BE COMPATIBLE WITH MeshDataGetter_v.verts_data
+
+		knots_data[#VERTS]	= #{}
+		knots_data[#POSITIONS]	= #()
+		knots_data[#NORMALS]	= #()
+		knots_data[#COLORS]	= Dictionary #STRING
+
+		knots_data[#COLORS][ source_obj.wirecolor as string ] = #{ 1..1000 }
+
 		source_shapes = this._copyAndCollapseSourceObject( this._getChildrenShape (source_obj) )
-		format "source_shapes: %\n" source_shapes
-		format "source_shapes.count: %\n" source_shapes.count
+		--format "source_shapes: %\n" source_shapes
+		--format "source_shapes.count: %\n" source_shapes.count
 		/* Get platform object for each pline vertex */
 		for spline_i = 1 to numSplines source_shapes[1] do
 			for knot_i = 1 to numKnots source_shapes[1] spline_i where this._isNthVertex (knot_i) do
 			(
 
 				/* add knot to generate */
-				append knots_data[1] (knots_data[1].numberset +1)
+				knots_data[#VERTS][ knots_data[#VERTS].numberset +1 ] = true
 
 				/* knot position  */
-				append knots_data[2] (getKnotPoint source_shapes[1] spline_i knot_i)
+				append knots_data[#POSITIONS] (getKnotPoint source_shapes[1] spline_i knot_i)
 
-				/* knot wirecolor  */
-				append knots_data[4] source_shapes[1].wirecolor
+				--/* knot wirecolor  */
+				--append knots_data[#COLORS] source_shapes[1].wirecolor
 
 				/* knot normal  */
-				append knots_data[3] [0,0, 1] -- PLACEHOLDER METHOD current
+				append knots_data[#NORMALS] [0,0, 1] -- PLACEHOLDER METHOD current
 
 
 				/* PLACEHOLDER METHOD FPR GETTING KNOT NORMAL BY DORECTION TO SECN SHAPE */

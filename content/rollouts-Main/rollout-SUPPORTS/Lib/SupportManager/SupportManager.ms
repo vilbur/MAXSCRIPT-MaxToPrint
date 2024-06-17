@@ -26,6 +26,7 @@ filein( getFilenamePath(getSourceFileName()) + "/HelperGenerator/HelperGenerator
 filein( getFilenamePath(getSourceFileName()) + "/SupportGenerator/SupportGenerator.ms" )	--"./SupportGenerator/SupportGenerator.ms"
 filein( getFilenamePath(getSourceFileName()) + "/BeamGenerator/BeamGenerator.ms" )	--"./BeamGenerator/BeamGenerator.ms"
 
+filein( getFilenamePath(getSourceFileName()) + "/MeshOverlapFinder/MeshOverlapFinder.ms" )	--"./MeshOverlapFinder/MeshOverlapFinder.ms"
 
 
 /** Support manager
@@ -204,6 +205,33 @@ struct SupportManager_v
 		new_pins = PinsGenerator.createPins(source_obj)
 	),
 
+
+	/** Find intersections
+	 */
+	function findIntersections source_objects =
+	(
+		format "\n"; print "SupportManager_v.findIntersections()"
+
+		local source_objects_valid = this.getSourceObjects(source_objects)
+
+		source_object_valid = source_objects_valid[1]
+
+		source_obj_pointer = this._getPointerOfSourceObject (source_object_valid)
+		format "source_obj_pointer: %\n" source_obj_pointer
+
+		all_supports_of_obj = this.getSupports pointer_sync:source_obj_pointer
+
+
+		format "source_object_valid: %\n" source_object_valid
+		format "all_supports_of_obj: %\n" all_supports_of_obj
+
+		MeshOverlapFinder = MeshOverlapFinder_v(source_object_valid)
+
+		MeshOverlapFinder.findOverlaps(all_supports_of_obj)
+
+
+	),
+
 	/*------------------------------------------------------------------------------
 
 		FIND OBEJCTS BY OBEJCTS OR IN SCENE
@@ -317,7 +345,8 @@ struct SupportManager_v
 		--format "\n"; print "SupportManager_v.getSupportsBySyncInter()"
 		--for _shape in shapes where Options.getProp _shape "pointer_sync" == pointer_sync as string collect _shape
 		if source_objects == unsupplied then
-			source_objects = shapes
+			--source_objects = shapes
+			source_objects = objects
 
 		if pointer_sync != unsupplied then
 			/* GET ALL SUPPORTS */

@@ -77,7 +77,7 @@ struct SupportObject_v
 		addNewSpline spline_shape
 
 		/*------------------------------------------------------------------------------
-			ADD KNOTS FROM TOP TO BOTTOM
+			ADD KNOTS BY POINTS FROM TOP TO BOTTOM
 		--------------------------------------------------------------------------------*/
 		for point_helper in helpers_chain do
 			addKnot spline_shape spline_index #corner #line point_helper.pos

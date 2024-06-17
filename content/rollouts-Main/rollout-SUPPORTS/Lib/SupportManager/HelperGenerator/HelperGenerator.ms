@@ -1,4 +1,8 @@
 /** Helper generator
+
+
+
+
  */
 struct HelperGenerator_v
 (
@@ -9,8 +13,13 @@ struct HelperGenerator_v
 	point_helpers,
 	verts_data,
 
+	/* DEPENDENCY
 
-	/* dependency */
+		"./../../../../../../Lib/MeshDataGetter/MeshDataGetter.ms"
+		"./../ShapeKnotGetter/ShapeKnotGetter.ms"
+		"./../HelperObject/HelperObject.ms"
+	*/
+
 	/* reference */
 	/* inhered */
 	Options,
@@ -33,7 +42,7 @@ struct HelperGenerator_v
 		format "\n"; print "HelperGenerator_v.generatePointHelpers()"
 		--format "source_obj	= % \n" source_obj
 		--format "point_helpers_of_object	= % \n" point_helpers_of_object
-		--format "RESET_HELPERS: %\n" reset_verts
+		format "RESET_HELPERS: %\n" reset_verts
 
 		--function getWireColor source_obj wirecolor = if wirecolor != white then wirecolor else source_obj.wirecolor
 		point_helpers_new = #()
@@ -55,7 +64,7 @@ struct HelperGenerator_v
 		verts_to_generate = if classOf reset_verts == BooleanClass then
 								this._getVertsToGenerateFromObjects (reset_verts)
 							else
-								reset_verts
+								reset_verts -- get only verts defined by user
 
 		format "VERTS_TO_GENERATE: %\n" verts_to_generate
 		format "verts_data[#VERTS]: %\n" verts_data[#VERTS]
@@ -79,13 +88,13 @@ struct HelperGenerator_v
 				--format "data_index: %\n" data_index
 
 				HelperObject = HelperObject_v \
-									Options:Options	\
-									source_obj:source_obj	\
-									vertex_index:vertex_index	\
-									pos:verts_data[#POSITIONS][data_index]	\
-									normal:verts_data[#NORMALS][data_index]	\
-									old_points:(this._getOldPointsChain(vertex_index))	\
-									wirecolor:(this._getWireColor(verts_data[#COLORS])(vertex_index))	\ --point_helper:point_helpers[verts_to_generate[i]] -- get point helepr by vertex number
+									Options:	Options	\
+									source_obj:	source_obj	\
+									vertex_index:	vertex_index	\
+									pos:	verts_data[#POSITIONS][data_index]	\
+									normal:	verts_data[#NORMALS][data_index]	\
+									old_points:	(this._getOldPointsChain(vertex_index))	\
+									wirecolor:	(this._getWireColor(verts_data[#COLORS])(vertex_index))	\ --point_helper:point_helpers[verts_to_generate[i]] -- get point helepr by vertex number
 
 
 
@@ -142,15 +151,18 @@ struct HelperGenerator_v
 	 */
 	function _getVertsToGenerateFromObjects reset_verts =
 	(
-		--format "\n"; print "HelperGenerator_v._getVertsToGenerateFromObjects()"
+		format "\n"; print "HelperGenerator_v._getVertsToGenerateFromObjects()"
+		format "reset_verts: %\n" reset_verts
+		format "verts_data: %\n" verts_data
+		format "verts_data[#VERTS]: %\n" verts_data[#VERTS]
 		--format "this.point_helpers: %\n" this.point_helpers
 		--format "this.point_helpers.keys: %\n" this.point_helpers.keys
 		function helperExists vertex_index = this.point_helpers[vertex_index] != undefined
 
 		/* FILTER EXISTING VERTS */
-		--if not reset_verts then
-		--	(for vertex_index in this.verts_data[#VERTS] where not helperExists(vertex_index) collect vertex_index) as BitArray  --return
-		--else
+		if not reset_verts then
+			(for vertex_index in this.verts_data[#VERTS] where not helperExists(vertex_index) collect vertex_index) as BitArray  --return
+		else
 			verts_data[#VERTS]  --return
 	),
 

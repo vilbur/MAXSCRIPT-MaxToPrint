@@ -1,5 +1,25 @@
 
+/**
+  *
+  */
+macroscript	print_tools_test_support_intersection
+category:	"_3D-Print-Support-Tools"
+buttontext:	"Intersect"
+tooltip:	"Find which support intesect source object"
+icon:	"across:5|height:32"
+(
+	on execute do
+		(
+			clearListener(); print("Cleared in:\n"+getSourceFileName())
+			filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-MaxToPrint\content\rollouts-Main\rollout-SUPPORTS\Lib\SupportManager\SupportManager.ms"
+			filein @"C:\Users\vilbur\AppData\Local\Autodesk\3dsMax\2023 - 64bit\ENU\scripts\MAXSCRIPT-MaxToPrint\content\rollouts-Main\rollout-SUPPORTS\SUPPORTTOOLS.mcr"
 
+
+			(getSupportManagerInstance(ROLLOUT_supports)).findIntersections( selection as Array )
+
+
+		)
+)
 
 
 
@@ -7,7 +27,7 @@
   *
   */
 macroscript	print_tools_connect_selected_poins
-category:	"_3D-Print-Platform-Tools"
+category:	"_3D-Print-Support-Tools"
 buttontext:	"Verts To Line"
 tooltip:	"Connect selected vers of Edit Poly object with line"
 icon:	"across:5|height:32"

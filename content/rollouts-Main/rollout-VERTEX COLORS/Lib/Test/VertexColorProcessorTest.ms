@@ -36,20 +36,32 @@ function createSourceMesh segments:8 add_modifiers:false =
 	CREATE TEST OBJECTS
 --------------------------------------------------------------------------------*/
 
---obj = if selection.count == 0 then
---(
---	--createSourceMesh()
+obj = if selection.count == 0 then
+(
+	--createSourceMesh()
 	createSourceMesh segments:16
---	--createSourceMesh segments:16 add_modifiers:true
---	--createSourceMesh segments:64
---	--createSourceMesh segments:128
---	--createSourceMesh segments:1024
---
---	--createSourceMesh segments:64 vertex_selection:#{1..32} vertex_color:red
---	--createSourceMesh segments:8 vertex_selection:#{1..8} vertex_color:red
---)
---else
---	selection[1]
+	--createSourceMesh segments:16 add_modifiers:true
+	--createSourceMesh segments:64
+	--createSourceMesh segments:128
+	--createSourceMesh segments:1024
+
+	--createSourceMesh segments:64 vertex_selection:#{1..32} vertex_color:red
+	--createSourceMesh segments:8 vertex_selection:#{1..8} vertex_color:red
+)
+else
+	selection[1]
+
+
+intersects
+
+
+
+
+/*------------------------------------------------------------------------------
+
+	RUN VERTEX COLROS METHODS
+
+--------------------------------------------------------------------------------*/
 
 
 ColorProcessor = VertexColorProcessor_v(obj)

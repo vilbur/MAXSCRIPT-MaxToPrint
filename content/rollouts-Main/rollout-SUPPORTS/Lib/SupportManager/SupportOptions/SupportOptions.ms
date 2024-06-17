@@ -9,10 +9,10 @@ struct SupportOptions_v
 
 	/* POINT GENERATOR OPTIONS */
 	use_normals	= true,
-	normal_limit	= false,
-	keep_down	= true,
+	----normal_limit	= false, -- obsolete
+	--keep_down	= true, -- obsolete
 	normal_length	= 3,
-	keep_down_limit	= 1,
+	----keep_down_limit	= 1, -- obsolete
 
 	second_point_direction	= 1,
 

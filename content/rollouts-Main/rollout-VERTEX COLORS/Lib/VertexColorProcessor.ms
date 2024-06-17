@@ -2,6 +2,7 @@
 
 filein( getFilenamePath(getSourceFileName()) + "/../../../../Lib/MeshDataGetters/VertexColors/VertexColors.ms" )	--"./../../../../Lib/MeshDataGetters/VertexColors/VertexColors.ms"
 
+
 /** Vertex color processor
  */
 struct VertexColorProcessor_v
@@ -59,7 +60,7 @@ struct VertexColorProcessor_v
 		--format "update_chache: % ms\n" (( timeStamp()) - start_update_chache)
 
 		--start_setVertColor = timeStamp()
-		polyop.setVertColor obj.baseobject 0 verts_base (clr)
+		polyop.setVertColor obj 0 verts_base (clr)
 		--format "setVertColor: % ms\n" (( timeStamp()) - start_setVertColor)
 	),
 
@@ -217,16 +218,28 @@ struct VertexColorProcessor_v
 	),
 	/** Test map verts
 	 */
-	function prepareObject =
+	function _prepareObject =
 	(
-		--format "\n"; print "VertexColorProcessor_v.prepareObject()"
+		--format "\n"; print "VertexColorProcessor_v._prepareObject()"
 		--format "TEST: %\n" ( polyop.getMapSupport obj 0)
 
-		if not polyop.getMapSupport obj 0 then
-		(
-			polyop.setMapSupport obj 0 true
 
-			subObjectLevel = 1
+		if obj != undefined or classOf obj.baseobject != Editable_Poly then
+		(
+			if not polyop.getMapSupport obj 0 then
+				polyop.setMapSupport obj 0 true
+
+			--subObjectLevel = 1
+			if classOf curr_mod != Editable_Poly then
+				this.obj = obj.baseobject
+
+			true --return
+		)
+		else
+		(
+			messageBox "Select Editable Poly Object" title:"VertexColorProcessor"
+
+			false --return
 		)
 
 		--verts_count	= polyop.getNumVerts obj.baseObject
@@ -253,13 +266,13 @@ struct VertexColorProcessor_v
 		if classof curr_mod != Editable_Poly then
 		(
 			verts_all	= #{1..( getNumVerts obj.mesh)} as Array
-			verts_all_base	= #{1..( polyop.getNumVerts obj.baseobject)} as Array
+			verts_all_base	= #{1..( polyop.getNumVerts obj)} as Array
 
 			verts_sel_pos = #()
 
 			verts_baseobject = #()
 
-			verts_pos_baseobjects = polyop.getVerts obj.baseobject verts_all_base node:obj
+			verts_pos_baseobjects = polyop.getVerts obj verts_all_base node:obj
 
 			if verts.count > 0 then
 			(
@@ -275,6 +288,7 @@ struct VertexColorProcessor_v
 		else
 			verts --return
 	),
+	
 	/** Select final selection
 	 */
 	function _selectVerts sel_bitarray =
@@ -300,7 +314,7 @@ struct VertexColorProcessor_v
 	(
 		--format "\n"; print "VertexColorProcessor_v._updateCache()"
 
-		pointer = (getHandleByAnim obj.baseobject) as string
+		pointer = (getHandleByAnim obj) as string
 
 		if (colors_cahce = VERTEX_COLORS_CACHE[pointer]) != undefined then
 		(
@@ -334,9 +348,9 @@ struct VertexColorProcessor_v
 		--format "1) --------------- VERTEXCOLOR\n"
 		curr_mod	= modPanel.getCurrentObject()
 
-		this.prepareObject()
+		if this._prepareObject() then
+			VertexColors	= VertexColors_v(obj)
 
-		VertexColors	= VertexColors_v(obj.baseobject)
 		--MeshVertToColorVertexConvert	= MeshVertToColorVertexConvertor_v(obj)
 
 		--VertexColors.MeshVertToColorVertexConvert = MeshVertToColorVertexConvert

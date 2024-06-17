@@ -36,7 +36,7 @@ struct HelperObject_v
 		--	format "isValidNode old_point: %\n" (isValidNode old_point)
 		----delete old_points
 
-		this._setPointsPositions (pos)
+		this._setSecondPOintPosition (pos)
 
 
 		for i = 1 to this.points_positions.count do
@@ -67,7 +67,7 @@ struct HelperObject_v
 
 			append points_created _point
 		)
-		--format "OLD_POINTS: %\n" OLD_POINTS.count
+
 		/* RELINK CHILDREN OF LAST POINTS */
 		if old_points.count > 0 and (old_point_last = old_points[old_points.count]).children.count > 0 then
 			old_points[old_points.count].children[1].parent = points_created[points_created.count]
@@ -84,12 +84,14 @@ struct HelperObject_v
 
 	private
 
-	/** Elaboate position of helper points
+	/** Find position of second point of line
+	  *
+	  * Direction of that point is along normal or straig down
 	  *
 	  */
-	function _setPointsPositions vert_pos =
+	function _setSecondPOintPosition vert_pos =
 	(
-		--format "\n"; print "HelperObject_v._setPointsPositions()"
+		--format "\n"; print "HelperObject_v._setSecondPOintPosition()"
 		--format "this.Options.keep_down: %\n" this.Options.keep_down
 		/** Set second point by normal of vertex
 		 */
@@ -97,19 +99,27 @@ struct HelperObject_v
 		(
 			--format "\n"; print "HelperObject_v.setSecondByNormal()"
 			--format "_normal: %\n" _normal
+			/** Get ray to ground
+			 */
+			function getRayToGround second_vert_pos = Ray second_vert_pos [0,0,-1]
+
 			local second_vert_pos = copy vert_pos
 
-			--second_vert_pos = second_vert_pos + normalize( _normal )
+			/* MOVE SECOND POINT ALONG NORMAL OF FIRST POINT */
+			second_vert_pos += this.Options.normal_length * _normal
 
-			second_vert_pos += this.Options.normal_length * normalize( _normal ) -- MOVE POSITION ALONG NORMAL
+			/* EXTEND SECOND POINT ALONG NORMAL IF INTERSECT WITH OBJECT ON ITS WAY TO TTHE GROUND */
+			while (intersection = intersectRay source_obj (getRayToGround(second_vert_pos))) != undefined do
+				second_vert_pos += this.Options.bar_width * _normal
+
+			/* MOVE SECOND POINT LITTLE MORE TO MAKE SURE THAT IT NOT COLLIDE WITH OBJECT */
+			second_vert_pos += this.Options.bar_width * _normal
+
 
 			/* KEEP SECOND POINT BELLOW FIRST OF GIVEN AMOUNT */
 			--if this.Options.keep_down and ( second_vert_pos.z - second_vert_pos.z ) < 0 then
 				--second_vert_pos.z = vert_pos.z - this.Options.keep_down_limit
 
-			--format "vert_pos: %\n" vert_pos
-			--format "second_vert_pos: %\n" second_vert_pos
-			--append this.points_positions second_vert_pos
 			second_vert_pos --return
 		)
 
@@ -126,15 +136,6 @@ struct HelperObject_v
 
 		local _normal = if this.normal != undefined then this.normal * source_obj.transform - source_obj.pos
 
-		/* RETRUN IF NORMAL NOT FIT
-
-			!!!! BUG - DOES NOT WORK WITH CHECBOX
-
-
-		*/
-		--if this.Options.normal_limit and _normal.z > 0 then
-			--return false
-
 
 		/* ADD FIRST POINT */
 		append this.points_positions (vert_pos )
@@ -142,7 +143,7 @@ struct HelperObject_v
 		/* ADD SECOND POINT */
 		second_point_pos = case this.Options.second_point_direction of
 		(
-			1: setSecondByNormal	(copy vert_pos)(_normal)
+			1: setSecondByNormal	(copy vert_pos)( normalize _normal)
 			2: setSecondDown	(copy vert_pos)
 		)
 
