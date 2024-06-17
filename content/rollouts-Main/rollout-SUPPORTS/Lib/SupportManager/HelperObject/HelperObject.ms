@@ -256,11 +256,11 @@ struct HelperObject_v
 	function _saveUserDataToPointHelper =
 	(
 		--format "\n"; print "HelperObject_v._saveUserDataToPointHelper()"
-		--Options.syncProp source_obj point_helper #source_object destination_key:#pointer_sync
+		--Options.syncProp source_obj point_helper #SUPPORTS_SOURCE destination_key:#pointer_sync
 
-		Options.setProp point_helper #pointer_sync  (( Options.getProp source_obj #source_object ) as IntegerPtr )
-		Options.setProp point_helper #this	  ( getHandleByAnim point_helper )
-		Options.setProp point_helper #source_vert	  ( vertex_index )
+		Options.setProp point_helper #POINTER_SYNC  (( Options.getProp source_obj #SUPPORTS_SOURCE ) as IntegerPtr )
+		Options.setProp point_helper #THIS	  ( getHandleByAnim point_helper )
+		Options.setProp point_helper #SOURCE_VERT	  ( vertex_index )
 	),
 
 	/** Shift wirecolor sligtly

@@ -26,7 +26,7 @@ filein( getFilenamePath(getSourceFileName()) + "/HelperGenerator/HelperGenerator
 filein( getFilenamePath(getSourceFileName()) + "/SupportGenerator/SupportGenerator.ms" )	--"./SupportGenerator/SupportGenerator.ms"
 filein( getFilenamePath(getSourceFileName()) + "/BeamGenerator/BeamGenerator.ms" )	--"./BeamGenerator/BeamGenerator.ms"
 
-filein( getFilenamePath(getSourceFileName()) + "/MeshOverlapFinder/MeshOverlapFinder.ms" )	--"./MeshOverlapFinder/MeshOverlapFinder.ms"
+--filein( getFilenamePath(getSourceFileName()) + "/MeshOverlapFinder/MeshOverlapFinder.ms" )	--"./MeshOverlapFinder/MeshOverlapFinder.ms"
 
 
 /** Support manager
@@ -179,12 +179,20 @@ struct SupportManager_v
 	  *
 	  * Connect any line with cross beams
 	 */
-	function createBeams source_objects =
+	function createBeams _objects =
 	(
 		format "\n"; print "SupportManager_v.createBeams()"
 		this.Options.init()
 
-		shapes_for_beams = for obj in source_objects where superClassOf obj.baseobject == shape collect obj
+		existing_beams = #()
+
+		beams_sources = #()
+
+		_shapes = for obj in _objects where superClassOf obj.baseobject == shape collect obj
+
+		existing_beams = for obj in _objects where superClassOf obj.baseobject == shape collect obj
+
+		shapes_for_beams = for obj in _objects where superClassOf obj.baseobject == shape collect obj
 
 
 		if shapes_for_beams.count > 0 then
@@ -403,7 +411,7 @@ struct SupportManager_v
 	function _getPointerOfSourceObject source_obj =
 	(
 		--format "\n"; print "SupportManager_v._getPointerOfSourceObject()"
-		Options.getProp source_obj #source_object as_string:true
+		Options.getProp source_obj #SUPPORTS_SOURCE as_string:true
 	),
 
 

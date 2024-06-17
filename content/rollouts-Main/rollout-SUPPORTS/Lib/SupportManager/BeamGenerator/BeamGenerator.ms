@@ -10,7 +10,7 @@ struct BeamGenerator_v
 
 	beams_created = #(),
 
-	cross_instance = false,
+	--cross_instance = false,  -- obsolete
 
 	/* dependency */
 	/* reference */
@@ -21,12 +21,12 @@ struct BeamGenerator_v
 	  *
 	  *
 	  */
-	function create _supports cross_instance:cross_instance =
+	function create _supports = --cross_instance:cross_instance =
 	(
 		format "\n"; print "BeamGenerator_v.create()"
-		format "this.Options.connect: %\n" this.Options.connect
-		format "this.Options.min_height: %\n" this.Options.min_height
-		format "this.Options.max_distance: %\n" this.Options.max_distance
+		--format "this.Options.connect: %\n" this.Options.connect
+		--format "this.Options.min_height: %\n" this.Options.min_height
+		--format "this.Options.max_distance: %\n" this.Options.max_distance
 		--format "_supports	= % \n" _supports
 		--format "_supports.count	= % \n" _supports.count
 

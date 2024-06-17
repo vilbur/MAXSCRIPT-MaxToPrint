@@ -5,13 +5,13 @@ struct SupportOptions_v
 	/* construct */
 	export_size = 1,
 
-	_DO_NOT_MODIFY_PROPERTIES = #( #display_units, #export_size, #use_nth_vertex , #chamfer_top, #connect, #second_point_direction ),
+	_DO_NOT_MODIFY_PROPERTIES = #( #DISPLAY_UNITS, #EXPORT_SIZE, #USE_NTH_VERTEX , #CHAMFER_TOP, #CONNECT, #SECOND_POINT_DIRECTION ),
 
 	/* POINT GENERATOR OPTIONS */
 	use_normals	= true,
+	normal_length	= 3,
 	----normal_limit	= false, -- obsolete
 	--keep_down	= true, -- obsolete
-	normal_length	= 3,
 	----keep_down_limit	= 1, -- obsolete
 
 	second_point_direction	= 1,
@@ -41,7 +41,6 @@ struct SupportOptions_v
 	--cross_section_min_height	= 10,	-- generate cross section only if platform is higher than this number
 
 
-
 	/* RAFT OPTIONS */
 	raft_width 	= 0.5,
 
@@ -63,13 +62,6 @@ struct SupportOptions_v
 
 	mat_ids	= Dictionary #( #TOP, 1 /* READ-ONLY */ ) #( #MIDDLE, 3 ) #( #BASE, 4 ) #( #BOTTOM, 2 /* READ-ONLY */ ) #( #CHMAFER, 5 ) #( #BEAM, 6 ), -- #top and #bottom are read-only and they are default by Edit Spline
 
-	propkeys = Dictionary	#( #source_object,	"pointer_sync_source" )	\
-		#( #source_vert,	"source_vert" )	\
-		#( #pointer_sync,	"pointer_sync" )	\
-		#( #this,	"this" )	\
-		#( #beam_supports,	"beam_supports" )	\
-		#( #raft_mode,	"raft_mode" ), -- keys used for node`s user data
-
 	/** Init
 	  *
 	  */
@@ -87,27 +79,27 @@ struct SupportOptions_v
 	 */
 	function setOptionValue prop_key val =
 	(
-		format "\n"; print "SupportOptions_v.setOptionValue()"
-		format "prop_key: %\n" prop_key
-		format "val: %\n" val
+		--format "\n"; print "SupportOptions_v.setOptionValue()"
+		--format "prop_key: %\n" prop_key
+		--format "val: %\n" val
 
 		setProperty this prop_key val
 	),
 
 	/** Get node prop data
 	 */
-	function getProp obj key_of_key as_string:false =
+	function getProp obj prop_key as_string:false =
 	(
 		--format "\n"; print "SupportOptions_v.getProp()"
-		getUserPropVal obj propkeys[key_of_key] asString:as_string --return
+		getUserPropVal obj (prop_key as string ) asString:as_string --return
 	),
 
 	/** Set node prop data
 	 */
-	function setProp obj key_of_key val =
+	function setProp obj prop_key val =
 	(
 		--format "\n"; print "SupportOptions_v.setProp()"
-		setUserPropVal obj propkeys[key_of_key] val --return
+		setUserPropVal obj (prop_key as string ) val --return
 	),
 
 	/** Set node prop data from node to node
@@ -118,7 +110,7 @@ struct SupportOptions_v
 		if destination_key == unsupplied then
 			destination_key = from_key
 
-		setUserPropVal to_object propkeys[from_key] ( getUserPropVal from_object propkeys[destination_key] )
+		setUserPropVal to_object (from_key as string ) ( getUserPropVal from_object (destination_key as string ) )
 	),
 
 	/** Get this pointer
