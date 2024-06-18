@@ -40,23 +40,24 @@ struct SupportObject_v
 	  *
 	  * @pram Node support_exists existing support for rebuid
 	 */
-	function rebuildSupport support =
+	function updateSupport support point_helper =
 	(
-		--format "\n"; print "SupportObject_v.rebuildSupport()"
-		--format "point_helper	= % \n" point_helper
-		line_updated = SplineShape()
+		format "\n"; print "SupportObject_v.updateSupport()"
+		format "support	= % \n" support
+		format "point_helper	= % \n" point_helper
+		--line_updated = SplineShape()
 
 		helpers_chain =  this._getPointsChain (point_helper)
 
 		deleteSpline support 1
 
-		this._createLineFromPoints(line_updated)(helpers_chain) _raft_mode:( Options.getProp support_exists #raft_mode ) -- raft mode by existing support|raft
+		this._createLineFromPoints(support)(helpers_chain) _raft_mode:( Options.getProp support_exists #raft_mode ) -- raft mode by existing support|raft
 
-		support.pos = line_updated.pos
+		--support.pos = line_updated.pos
 
-		support.baseobject = line_updated.baseobject
+		--support.baseobject = line_updated.baseobject
 
-		delete line_updated
+		--delete line_updated
 
 		support --return
 	),

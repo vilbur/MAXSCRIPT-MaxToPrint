@@ -27,7 +27,7 @@ filein( getFilenamePath(getSourceFileName()) + "/SupportGenerator/SupportGenerat
 filein( getFilenamePath(getSourceFileName()) + "/BeamGenerator/BeamGenerator.ms" )	--"./BeamGenerator/BeamGenerator.ms"
 
 --filein( getFilenamePath(getSourceFileName()) + "/MeshOverlapFinder/MeshOverlapFinder.ms" )	--"./MeshOverlapFinder/MeshOverlapFinder.ms"
-
+filein( getFilenamePath(getSourceFileName()) + "/SupportUpdater/SupportUpdater.ms" )	--"./SupportUpdater/SupportUpdater.ms"
 
 /** Support manager
   *
@@ -170,15 +170,19 @@ struct SupportManager_v
 		--format "\n"; print "SupportManager_v.createSupports()"
 		this.Options.init()
 
-        local new_supports = #()
+        new_supports    = #()
+        beams_to_update = #()
 
-		SupportGenerator.SupportObject.raft_mode = raft_mode
-		SupportModifiers.raft_mode = raft_mode
+        SupportModifiers.raft_mode               = raft_mode
+        SupportGenerator.SupportObject.raft_mode = raft_mode
+
+		all_beams = for obj in objects where superClassOf obj.baseobject == shape and getUserPropVal obj "beam_supports" != undefined collect obj
 
 		if (helpers_by_source_obj = this.getSourceHelpers(source_objects)).count > 0 then
-			 for source_obj_pointer in helpers_by_source_obj.keys do
+		(
+			/* GENERATE SUPPORTS FOR EACH SOURCE OBJECTS */
+			for source_obj_pointer in helpers_by_source_obj.keys do
 			(
-				/* GENERATE SUPPORTS PER SOURCE OBJECTS */
 				new_supports_of_obj =(SupportGenerator.generateSupports(helpers_by_source_obj[source_obj_pointer]))
 				--format "NEW_SUPPORTS_OF_OBJ: %\n" new_supports_of_obj
 
@@ -190,11 +194,22 @@ struct SupportManager_v
 
 				/* ADD MODIFIER INSTANCES */
 				SupportModifiers.addModifiers(all_supports_of_obj) -- SUPPORT OBJECT MUST BE SELECTED TO APPLY MODIFIERS
+
+				pointers_of_new_supports = for new_support in new_supports_of_obj collect getUserPropVal new_support "this"
+
+				/* GET BEAMS OF NEW SUPPORTS */
+				for beam in all_beams do
+					for pointer_of_supports in getUserPropVal beam "beam_supports" where findItem pointers_of_new_supports pointer_of_supports > 0 do
+						append beams_to_update beam
 			)
 
+			/* UPDATE BEAMS */
+			 BeamGenerator.updateBeams (beams_to_update)
+
+		)
 		else
 			messageBox "ERROR CREATE SUPPORTS \n\nNot any valid source object selected" title:"SupportManager.ms"  beep:false
-		format "NEW_SUPPORTS: %\n" new_supports
+
 		new_supports --return
 	),
 

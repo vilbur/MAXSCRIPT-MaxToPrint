@@ -68,7 +68,6 @@ struct BeamGenerator_v
 			if support_A != undefined and support_B != undefined then
 				this._createBeamsBetweenTwoSupports (support_A) (support_B) beam:beam
 		)
-
 	),
 
 	private

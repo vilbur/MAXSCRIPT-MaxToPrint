@@ -14,8 +14,7 @@ struct SupportGenerator_v
 	/* reference */
 	/* inhered */
 	Options,
-	SupportObject,
-	--SupportObject = SupportObject_v Options:Options,
+	SupportObject, -- --"./../SupportObject/SupportObject.ms"
 
 	/** Create supports
 	  *
@@ -38,19 +37,25 @@ struct SupportGenerator_v
 			point_helper = point_helpers[vertex_index]
 
 			/* DELETE OLD SUPPORT (RESET) */
-			this._deleteSupportByHelper(  point_helper )
+			--this._deleteSupportByHelper( point_helper )
 
-			/* CREATE NEW SUPPORT */
-			support = SupportObject.generateSupport( point_helper ) --support_exists:(this._getSupport( point_helper ))
+			if ( support = this._getSupportByHelper(point_helper) ) == undefined then
+			(
+				/* CREATE NEW SUPPORT */
+				support = SupportObject.generateSupport( point_helper ) --support_exists:(this._getSupport( point_helper ))
 
-			/* ADD TO LAYER OF POINT OBJECT */
-			point_helper.layer.addNode support
+				/* ADD TO LAYER OF POINT OBJECT */
+				point_helper.layer.addNode support
 
-			/* ADD TO GORUP OF POINT OBJECT */
-			this._addToGroup support point_helper
+				/* ADD TO GORUP OF POINT OBJECT */
+				this._addToGroup support point_helper
 
-			/* SET DATA TO USER PROPS OF OBJECT */
-			this._saveSyncPointer ( point_helper ) (support)
+				/* SET DATA TO USER PROPS OF OBJECT */
+				this._saveSyncPointer ( point_helper ) (support)
+
+			)
+			else
+				SupportObject.updateSupport( support ) ( point_helper )
 
 			support --return
 		)
